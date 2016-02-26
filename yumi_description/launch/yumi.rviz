@@ -13,6 +13,8 @@ Panels:
         - /RobotModel1/Links1/yumi_link_2_r1
         - /RobotModel1/Links1/yumi_link_3_r1
         - /RobotModel1/Links1/yumi_link_4_r1
+        - /RobotModel1/Links1/yumi_link_5_r1
+        - /RobotModel1/Links1/yumi_link_6_r1
       Splitter Ratio: 0.664207
     Tree Height: 410
   - Class: rviz/Selection
@@ -94,6 +96,16 @@ Visualization Manager:
           Show Axes: true
           Show Trail: false
           Value: true
+        yumi_link_5_r:
+          Alpha: 1
+          Show Axes: true
+          Show Trail: false
+          Value: true
+        yumi_link_6_r:
+          Alpha: 1
+          Show Axes: true
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -124,22 +136,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.29807
+      Distance: 1.46711
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.0527216
-        Y: -0.195461
-        Z: 0.210963
+        X: 0.119582
+        Y: -0.22084
+        Z: 0.155049
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.735398
+      Pitch: 0.800398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.570401
+      Yaw: 1.3354
     Saved: ~
 Window Geometry:
   Displays:
@@ -157,5 +169,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1366
-  X: 252
+  X: 232
   Y: 14

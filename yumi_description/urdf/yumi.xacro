@@ -204,6 +204,123 @@
       </collision>
     </link>
 
+   <!-- joint between link_4_r and link_5_r -->
+    <joint name="${name}_joint_5_r" type="revolute">
+      <parent link="${name}_link_4_r"/>
+      <child link="${name}_link_5_r"/>
+      <origin xyz="0.0405 0.16461 0.0" rpy="-1.5708 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-290 * PI / 180}" upper="${290 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
+           soft_upper_limit="${168 * M_PI / 180}"
+           k_position="${safety_controller_k_pos}"
+           k_velocity="${safety_controller_k_vel}"/> -->
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+   <link name="${name}_link_5_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_5.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_5.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+   <!-- joint between link_5_r and link_6_r -->
+    <joint name="${name}_joint_6_r" type="revolute">
+      <parent link="${name}_link_5_r"/>
+      <child link="${name}_link_6_r"/>
+      <origin xyz="-0.027 0 0.10039" rpy="1.5708 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-88 * PI / 180}" upper="${138 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
+           soft_upper_limit="${168 * M_PI / 180}"
+           k_position="${safety_controller_k_pos}"
+           k_velocity="${safety_controller_k_vel}"/> -->
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+   <link name="${name}_link_6_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_6.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_6.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+   <!-- joint between link_6_r and link_7_r -->
+    <joint name="${name}_joint_7_r" type="revolute">
+      <parent link="${name}_link_6_r"/>
+      <child link="${name}_link_7_r"/>
+      <origin xyz="0.027 0.029 0.0" rpy="-1.5708 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-229 * PI / 180}" upper="${229 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
+           soft_upper_limit="${168 * M_PI / 180}"
+           k_position="${safety_controller_k_pos}"
+           k_velocity="${safety_controller_k_vel}"/> -->
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+   <link name="${name}_link_7_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_7.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_7.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
     <!--Extensions -->
     <xacro:yumi_gazebo name="${name}" />
     <xacro:yumi_transmission name="${name}" hardware_interface="${hardware_interface}"/>
