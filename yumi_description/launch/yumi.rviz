@@ -8,13 +8,6 @@ Panels:
         - /Status1
         - /RobotModel1
         - /RobotModel1/Links1
-        - /RobotModel1/Links1/yumi_body1
-        - /RobotModel1/Links1/yumi_link_1_r1
-        - /RobotModel1/Links1/yumi_link_2_r1
-        - /RobotModel1/Links1/yumi_link_3_r1
-        - /RobotModel1/Links1/yumi_link_4_r1
-        - /RobotModel1/Links1/yumi_link_5_r1
-        - /RobotModel1/Links1/yumi_link_6_r1
       Splitter Ratio: 0.664207
     Tree Height: 410
   - Class: rviz/Selection
@@ -67,6 +60,36 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        gripper_l_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_l_finger_l:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_l_finger_r:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_r_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_r_finger_l:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_r_finger_r:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         world:
           Alpha: 1
           Show Axes: false
@@ -76,34 +99,74 @@ Visualization Manager:
           Show Axes: true
           Show Trail: false
           Value: true
+        yumi_link_1_l:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         yumi_link_1_r:
           Alpha: 1
-          Show Axes: true
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_2_l:
+          Alpha: 1
+          Show Axes: false
           Show Trail: false
           Value: true
         yumi_link_2_r:
           Alpha: 1
-          Show Axes: true
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_3_l:
+          Alpha: 1
+          Show Axes: false
           Show Trail: false
           Value: true
         yumi_link_3_r:
           Alpha: 1
-          Show Axes: true
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_4_l:
+          Alpha: 1
+          Show Axes: false
           Show Trail: false
           Value: true
         yumi_link_4_r:
           Alpha: 1
-          Show Axes: true
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_5_l:
+          Alpha: 1
+          Show Axes: false
           Show Trail: false
           Value: true
         yumi_link_5_r:
           Alpha: 1
-          Show Axes: true
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_6_l:
+          Alpha: 1
+          Show Axes: false
           Show Trail: false
           Value: true
         yumi_link_6_r:
           Alpha: 1
-          Show Axes: true
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_7_l:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        yumi_link_7_r:
+          Alpha: 1
+          Show Axes: false
           Show Trail: false
           Value: true
       Name: RobotModel
@@ -136,22 +199,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.46711
+      Distance: 2.20628
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.119582
-        Y: -0.22084
-        Z: 0.155049
+        X: -0.0972422
+        Y: 0.132537
+        Z: 0.540248
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.800398
+      Pitch: 0.199798
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.3354
+      Yaw: 0.575391
     Saved: ~
 Window Geometry:
   Displays:
@@ -169,5 +232,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1366
-  X: 232
+  X: 304
   Y: 14
