@@ -11,7 +11,5 @@
   <author email="robert.krug@oru.se">Robert Krug</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
-  <export>
-  </export>
+  <exec_depend>xacro</exec_depend>
 </package>
