@@ -1,0 +1,24 @@
+<package>
+  <name>yumi_support</name>
+  <version>0.0.1</version>
+  <description>
+   <p>
+    RAPID code and launch files for the abb driver for yumi
+   </p>
+   <p>
+     This is a modified driver from the ROS-Industrial abb driver. Main changes are for handling the 
+     two arms of YuMi in a reasonable manner.
+     The orriginal package is part of the ROS-Industrial program and contains nodes 
+     for interfacing with ABB industrial robot controllers.
+   </p>
+  </description>
+  <author email="todor.stoyanov@oru.se">Todor Stoyanov</author>
+  <maintainer email="todor.stoyanov@oru.se">Todor Stoyanov</maintainer>
+  <license>BSD</license>
+
+  <url type="repository">https://github.com/rktg/yumi</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>abb_driver</run_depend>
+</package>

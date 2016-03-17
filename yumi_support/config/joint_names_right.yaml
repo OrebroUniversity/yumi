@@ -1,0 +1,8 @@
+controller_joint_names: 
+  - yumi_joint_1_r
+  - yumi_joint_2_r
+  - yumi_joint_3_r
+  - yumi_joint_4_r
+  - yumi_joint_5_r
+  - yumi_joint_6_r
+  - yumi_joint_7_r
