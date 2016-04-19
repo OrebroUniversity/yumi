@@ -36,42 +36,53 @@
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="gripper_l_base" link2="gripper_l_finger_l" reason="Adjacent" />
     <disable_collisions link1="gripper_l_base" link2="gripper_l_finger_r" reason="Adjacent" />
+    <disable_collisions link1="gripper_l_base" link2="yumi_link_3_l" reason="Never" />
+    <disable_collisions link1="gripper_l_base" link2="yumi_link_4_l" reason="Never" />
     <disable_collisions link1="gripper_l_base" link2="yumi_link_6_l" reason="Never" />
     <disable_collisions link1="gripper_l_base" link2="yumi_link_7_l" reason="Adjacent" />
     <disable_collisions link1="gripper_l_finger_l" link2="gripper_l_finger_r" reason="Default" />
+    <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_3_l" reason="Never" />
+    <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_4_l" reason="Never" />
     <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_5_l" reason="Never" />
     <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_6_l" reason="Never" />
     <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_7_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_r" link2="yumi_link_5_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_r" link2="yumi_link_6_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_r" link2="yumi_link_7_l" reason="Never" />
     <disable_collisions link1="gripper_r_base" link2="gripper_r_finger_l" reason="Adjacent" />
     <disable_collisions link1="gripper_r_base" link2="gripper_r_finger_r" reason="Adjacent" />
-    <disable_collisions link1="gripper_r_base" link2="yumi_link_5_l" reason="Default" />
-    <disable_collisions link1="gripper_r_base" link2="yumi_link_6_l" reason="Default" />
+    <disable_collisions link1="gripper_r_base" link2="yumi_link_3_r" reason="Never" />
+    <disable_collisions link1="gripper_r_base" link2="yumi_link_4_r" reason="Never" />
     <disable_collisions link1="gripper_r_base" link2="yumi_link_6_r" reason="Never" />
     <disable_collisions link1="gripper_r_base" link2="yumi_link_7_r" reason="Adjacent" />
     <disable_collisions link1="gripper_r_finger_l" link2="gripper_r_finger_r" reason="Default" />
-    <disable_collisions link1="gripper_r_finger_l" link2="yumi_link_5_r" reason="Never" />
-    <disable_collisions link1="gripper_r_finger_l" link2="yumi_link_6_r" reason="Never" />
-    <disable_collisions link1="gripper_r_finger_l" link2="yumi_link_7_r" reason="Never" />
+    <disable_collisions link1="gripper_r_finger_r" link2="yumi_link_3_r" reason="Never" />
+    <disable_collisions link1="gripper_r_finger_r" link2="yumi_link_4_r" reason="Never" />
     <disable_collisions link1="gripper_r_finger_r" link2="yumi_link_5_r" reason="Never" />
     <disable_collisions link1="gripper_r_finger_r" link2="yumi_link_6_r" reason="Never" />
     <disable_collisions link1="gripper_r_finger_r" link2="yumi_link_7_r" reason="Never" />
     <disable_collisions link1="yumi_body" link2="yumi_link_1_l" reason="Adjacent" />
     <disable_collisions link1="yumi_body" link2="yumi_link_1_r" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_1_l" link2="yumi_link_1_r" reason="Never" />
     <disable_collisions link1="yumi_link_1_l" link2="yumi_link_2_l" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_1_l" link2="yumi_link_3_l" reason="Never" />
     <disable_collisions link1="yumi_link_1_r" link2="yumi_link_2_r" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_1_r" link2="yumi_link_3_r" reason="Never" />
     <disable_collisions link1="yumi_link_2_l" link2="yumi_link_3_l" reason="Adjacent" />
     <disable_collisions link1="yumi_link_2_r" link2="yumi_link_3_r" reason="Adjacent" />
     <disable_collisions link1="yumi_link_3_l" link2="yumi_link_4_l" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_3_l" link2="yumi_link_5_l" reason="Never" />
+    <disable_collisions link1="yumi_link_3_l" link2="yumi_link_6_l" reason="Never" />
+    <disable_collisions link1="yumi_link_3_l" link2="yumi_link_7_l" reason="Never" />
     <disable_collisions link1="yumi_link_3_r" link2="yumi_link_4_r" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_3_r" link2="yumi_link_5_r" reason="Never" />
+    <disable_collisions link1="yumi_link_3_r" link2="yumi_link_6_r" reason="Never" />
+    <disable_collisions link1="yumi_link_3_r" link2="yumi_link_7_r" reason="Never" />
     <disable_collisions link1="yumi_link_4_l" link2="yumi_link_5_l" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_4_l" link2="yumi_link_6_l" reason="Never" />
+    <disable_collisions link1="yumi_link_4_l" link2="yumi_link_7_l" reason="Never" />
     <disable_collisions link1="yumi_link_4_r" link2="yumi_link_5_r" reason="Adjacent" />
+    <disable_collisions link1="yumi_link_4_r" link2="yumi_link_6_r" reason="Never" />
+    <disable_collisions link1="yumi_link_4_r" link2="yumi_link_7_r" reason="Never" />
     <disable_collisions link1="yumi_link_5_l" link2="yumi_link_6_l" reason="Adjacent" />
-    <disable_collisions link1="yumi_link_5_l" link2="yumi_link_7_l" reason="Never" />
     <disable_collisions link1="yumi_link_5_r" link2="yumi_link_6_r" reason="Adjacent" />
-    <disable_collisions link1="yumi_link_5_r" link2="yumi_link_7_r" reason="Never" />
     <disable_collisions link1="yumi_link_6_l" link2="yumi_link_7_l" reason="Adjacent" />
     <disable_collisions link1="yumi_link_6_r" link2="yumi_link_7_r" reason="Adjacent" />
 </robot>
