@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   transmission_interface
   urdf
+  gazebo_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,8 +113,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf
-#  DEPENDS system_lib
+  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf gazebo_ros
+  DEPENDS gazebo
 )
 
 ###########
@@ -151,6 +152,25 @@ add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 target_link_libraries(yumi_hw_ifce_node
    ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
+
+
+## SIMULATION
+# lwr hw sim gazebo plugin 
+find_package(gazebo REQUIRED)
+include_directories(${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
+add_library(yumi_hw_gazebo_plugin  src/yumi_hw_gazebo.cpp
+#include/${PROJECT_NAME}/lwr_hw_gazebo.hpp
+	)
+add_dependencies(yumi_hw_gazebo_plugin
+	    ${PROJECT_NAME}
+	)
+target_link_libraries(yumi_hw_gazebo_plugin
+	    ${PROJECT_NAME}
+	    ${catkin_LIBRARIES}
+	    ${GAZEBO_LIBRARIES}
+	)
+
 
 #############
 ## Install ##
