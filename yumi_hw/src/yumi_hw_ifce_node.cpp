@@ -11,20 +11,13 @@
 #include <std_msgs/Bool.h>
 
 // the lwr hw fri interface
-#include "lwr_hw/lwr_hw_fri.hpp"
+#include "yumi_hw/yumi_hw_rapid.h"
 
 bool g_quit = false;
 
 void quitRequested(int sig)
 {
   g_quit = true;
-}
-
-bool isStopPressed = false;
-bool wasStopHandled = true;
-void eStopCB(const std_msgs::BoolConstPtr& e_stop_msg)
-{
-  isStopPressed = e_stop_msg->data;
 }
 
 // Get the URDF XML from the parameter server
@@ -62,7 +55,7 @@ std::string getURDF(ros::NodeHandle &model_nh_, std::string param_name)
 int main( int argc, char** argv )
 {
   // initialize ROS
-  ros::init(argc, argv, "lwr_hw_interface", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "yumi_hw_interface", ros::init_options::NoSigintHandler);
 
   // ros spinner
   ros::AsyncSpinner spinner(1);
@@ -74,31 +67,26 @@ int main( int argc, char** argv )
   signal(SIGHUP, quitRequested);
 
   // create a node
-  ros::NodeHandle lwr_nh;
+  ros::NodeHandle yumi_nh;
 
   // get params or give default values
   int port;
   std::string hintToRemoteHost;
   std::string name;
-  lwr_nh.param("port", port, 49939);
-  lwr_nh.param("ip", hintToRemoteHost, std::string("192.168.0.10") );
-  lwr_nh.param("name", name, std::string("lwr"));
-
-  // advertise the e-stop topic
-  ros::Subscriber estop_sub = lwr_nh.subscribe(lwr_nh.resolveName("emergency_stop"), 1, eStopCB);
+  //yumi_nh.param("port", port, 49939);
+  yumi_nh.param("ip", hintToRemoteHost, std::string("192.168.125.1") );
+  yumi_nh.param("name", name, std::string("yumi"));
 
   // get the general robot description, the lwr class will take care of parsing what's useful to itself
-  std::string urdf_string = getURDF(lwr_nh, "/robot_description");
+  std::string urdf_string = getURDF(yumi_nh, "/robot_description");
 
-  // construct and start the real lwr
-  lwr_hw::LWRHWFRI lwr_robot;
-  lwr_robot.create(name, urdf_string);
-  lwr_robot.setPort(port);
-  lwr_robot.setIP(hintToRemoteHost);
-
-  if(!lwr_robot.init())
+  YumiHWRapid yumi_robot;
+  yumi_robot.create(name, urdf_string);
+  yumi_robot.setup(hintToRemoteHost);
+  
+  if(!yumi_robot.init())
   {
-    ROS_FATAL_NAMED("lwr_hw","Could not initialize robot real interface");
+    ROS_FATAL_NAMED("yumi_hw","Could not initialize robot real interface");
     return -1;
   }
 
@@ -107,11 +95,11 @@ int main( int argc, char** argv )
   ros::Time last(ts.tv_sec, ts.tv_nsec), now(ts.tv_sec, ts.tv_nsec);
   ros::Duration period(1.0);
 
-  float sampling_time = lwr_robot.getSampleTime();
+  float sampling_time = yumi_robot.getSampleTime();
   ROS_INFO("Sampling time on robot: %f", sampling_time);
 
   //the controller manager
-  controller_manager::ControllerManager manager(&lwr_robot, lwr_nh);
+  controller_manager::ControllerManager manager(&yumi_robot, yumi_nh);
 
   // run as fast as possible
   while( !g_quit )
@@ -131,35 +119,15 @@ int main( int argc, char** argv )
     }
 
     // read the state from the lwr
-    lwr_robot.read(now, period);
-
-    // Compute the controller commands
-    bool resetControllers;
-    if(!wasStopHandled && !resetControllers)
-    {
-      ROS_WARN("E-STOP HAS BEEN PRESSED: Controllers will be restarted, but the robot won't move until you release the E-Stop");
-      ROS_WARN("HOW TO RELEASE E-STOP: rostopic pub -r 10 /NAMESPACE/emergency_stop std_msgs/Bool 'data: false'");
-      resetControllers = true;
-      wasStopHandled = true;
-    }
-
-    if( isStopPressed )
-    {
-      wasStopHandled = false;
-    }
-    else
-    {
-      resetControllers = false;
-      wasStopHandled = true;
-    }    
+    yumi_robot.read(now, period);
 
     // update the controllers
-    manager.update(now, period, resetControllers);
+    manager.update(now, period);
 
     // write the command to the lwr
-    lwr_robot.write(now, period);
+    yumi_robot.write(now, period);
 
-    ros::Duration(sampling_time).sleep();
+   // ros::Duration(sampling_time).sleep();
   }
 
   std::cerr<<"Stopping spinner..."<<std::endl;

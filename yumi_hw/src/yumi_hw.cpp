@@ -404,3 +404,11 @@ void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start
     }
 }
 
+void YumiHW::enforceLimits(ros::Duration period)
+{
+    vj_sat_interface_.enforceLimits(period);
+    vj_limits_interface_.enforceLimits(period);
+    pj_sat_interface_.enforceLimits(period);
+    pj_limits_interface_.enforceLimits(period);
+}
+

@@ -3,10 +3,15 @@
 
 #include "yumi_hw/yumi_hw.h"
 #include <boost/thread/mutex.hpp>
+#include <boost/thread.hpp>
 
 #include <ros/ros.h>
 #include "simple_message/message_handler.h"
+#include "simple_message/message_manager.h"
 #include "simple_message/messages/joint_message.h"
+#include "simple_message/smpl_msg_connection.h"
+#include "simple_message/socket/tcp_socket.h"
+#include "simple_message/socket/tcp_client.h"
 
 #define N_YUMI_JOINTS 14
 
@@ -18,26 +23,34 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
     
     private:
 	float joint_positions[N_YUMI_JOINTS];
+	float joint_command[N_YUMI_JOINTS];
+	bool first_iteration;
 	boost::mutex data_buffer_mutex;
 
     public:
-	void getJointStates(float &jnts[N_YUMI_JOINTS]) {
+	bool getJointStates(float (&jnts)[N_YUMI_JOINTS]) {
 	    data_buffer_mutex.lock();
-	    for(int i=0; i<N_YUMI_JOINTS; i++) {
-		jnts[i] = joint_positions[i];
-	    }
+	    memcpy(&jnts,&joint_positions,N_YUMI_JOINTS*sizeof(float));
 	    data_buffer_mutex.unlock();
 	}
-	bool init(SmplMsgConnection* connection)
+
+	bool setJointCommands(float (&jnts)[N_YUMI_JOINTS]) {
+	    data_buffer_mutex.lock();
+	    memcpy(&joint_command,&jnts,N_YUMI_JOINTS*sizeof(float));
+	    data_buffer_mutex.unlock();
+	}
+
+	bool init(industrial::smpl_msg_connection::SmplMsgConnection* connection)
 	{
-	    return init((int)StandardMsgTypes::JOINT, connection);
+	    first_iteration = true;
+	    return init((int)industrial::simple_message::StandardMsgTypes::JOINT, connection);
 	}
 
 
     protected:
-	bool internalCB(SimpleMessage& in)
+	bool internalCB(industrial::simple_message::SimpleMessage& in)
 	{
-	    JointMessage joint_msg;
+	    industrial::joint_message::JointMessage joint_msg;
 	    bool rtn = true;
 
 	    if (!joint_msg.init(in))
@@ -62,15 +75,20 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 	    data_buffer_mutex.unlock();
 
 	    // Reply back to the controller if the sender requested it.
-	    if (CommTypes::SERVICE_REQUEST == joint_msg.getMessageType())
+	    if (industrial::simple_message::CommTypes::SERVICE_REQUEST == joint_msg.getMessageType())
 	    {
-		SimpleMessage reply;
-		joint_msg.toReply(reply, rtn ? ReplyTypes::SUCCESS : ReplyTypes::FAILURE);
+		industrial::simple_message::SimpleMessage reply;
+		joint_msg.toReply(reply, rtn ? industrial::simple_message::ReplyTypes::SUCCESS : industrial::simple_message::ReplyTypes::FAILURE);
 		this->getConnection()->sendMsg(reply);
 	    }
 
-	    //TODO: if first call back, then mirror state to command
-
+	    //if first call back, then mirror state to command
+	    if(first_iteration) {
+		data_buffer_mutex.lock();
+		memcpy(&joint_command,&joint_positions,N_YUMI_JOINTS*sizeof(float));
+		data_buffer_mutex.unlock();
+		first_iteration = false;	
+	    }
 	    //TODO: format trajectory request message
 
 	    //TODO: send back on conncetion 
@@ -84,57 +102,77 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
   */
 class YumiRapidInterface {
     private:
-	boost::shared_ptr<std::thread> RapidCommThread_;
+	boost::thread RapidCommThread_;
+	
+	///industrial connection
+	industrial::tcp_client::TcpClient default_tcp_connection_; //?
+	//industrial::tcp_client::RobotStatusRelayHandler default_robot_status_handler_; //?
+
+	industrial::smpl_msg_connection::SmplMsgConnection* connection_;
+	industrial::message_manager::MessageManager manager_;
+	YumiJointStateHandler js_handler;
+
 	bool stopComm_;
 
-	void RapidCommThreadCallback()
+	virtual void RapidCommThreadCallback()
 	{
-	    bool isFirstRun = true;
-	    stopComm_ = false;
-
-	    //TODO: initialize connection 
-	    //TODO: initialize message manager
-	    //TODO: initialize message handler
-	    //TODO: register handler to manager
-	    //TODO: while ok, do stuff
-
 	    while(!stopComm_) {
-
-#if 0
-		data_buffer_mutex.lock();
-		//here update read out values
-		memcpy(readJntPosition, device_->getMsrMsrJntPosition(), 7*sizeof(float));
-		memcpy(readJntEffort, device_->getMsrJntTrq(), 7*sizeof(float));
-		device_->getCurrentCmdJntPosition(last_comm);
-		//TODO? signal to main loop to do a control step?
-		//here update new commands
-		memcpy(locJntPosition, newJntPosition, 7*sizeof(float));
-		memcpy(locJntStiff, newJntStiff, 7*sizeof(float));
-		memcpy(locJntDamp, newJntDamp, 7*sizeof(float));
-		memcpy(locJntAddTorque, newJntAddTorque, 7*sizeof(float));
-
-		//first iteration, copy current positions to commands
-		if(isFirstRun) {
-		    memcpy(locJntPosition, readJntPosition, 7*sizeof(float));
-		    isFirstRun=false;
-		}
-		data_buffer_mutex.unlock();
-#endif
+		manager_.spinOnce();
 	    }
 	    return;
 	}
+
     public:
 	YumiRapidInterface() { 
-	    RapidCommThread_.reset( new std::thread( &YumiRapidInterface::RapidCommThreadCallback,this ) );
+	    this->connection_ = NULL;
+	    stopComm_ = true;
 	}
+
 	~YumiRapidInterface() { 
-	    stopComm_ = true; 
-	    RapidCommThread_.get()->join();
+	    stopThreads();
 	}
-	//TODO
-	void stopThreads();
-	void getCurrentJountStates(float &joints[N_YUMI_JOINTS]) const;
-	void setJointTargets(const float &joints[N_YUMI_JOINTS]);
+	
+	void stopThreads() {
+	    stopComm_ = true;
+	    RapidCommThread_.join();
+	}
+
+	void startThreads() {
+	    if(!stopComm_) {
+		boost::thread(boost::bind(&YumiRapidInterface::RapidCommThreadCallback,this ));
+	    }
+	}
+
+	void getCurrentJointStates(float (&joints)[N_YUMI_JOINTS]) {
+	    js_handler.getJointStates(joints);	    
+	}
+
+	void setJointTargets(float (&joints)[N_YUMI_JOINTS]) {
+	    js_handler.setJointCommands(joints);
+	}
+
+
+	bool init(std::string ip = "", int port = industrial::simple_socket::StandardSocketPorts::STATE) {
+	    //initialize connection 
+	    char* ip_addr = strdup(ip.c_str());  // connection.init() requires "char*", not "const char*"
+	    ROS_INFO("Robot state connecting to IP address: '%s:%d'", ip_addr, port);
+	    default_tcp_connection_.init(ip_addr, port);
+	    free(ip_addr);
+
+	    connection_ = &default_tcp_connection_;
+	    connection_->makeConnect();
+
+	    //initialize message manager
+	    manager_.init(connection_);
+
+	    //initialize message handler
+	    js_handler.init(connection_);
+
+	    //register handler to manager
+	    manager_.add(&js_handler,false);
+
+	    stopComm_ = false;
+	}
   
 };
 
@@ -142,23 +180,47 @@ class YumiHWRapid : public YumiHW
 {
 
 public:
-  YumiHWRapid() : YumiHW() {}
+  YumiHWRapid() : YumiHW() {
+      isInited = false;
+      isSetup = false;
+  }
   
   ~YumiHWRapid() { 
+      robot_interface.stopThreads();
   }
 
   float getSampleTime(){return sampling_rate_;};
+	
+  void setup(std::string ip_ = "", int port_ = industrial::simple_socket::StandardSocketPorts::STATE) {
+      ip = ip_;
+      port = port_;
+      isSetup = true;
+  }
 
   // Init, read, and write, with FRI hooks
-  bool init(std::string robot_ip)
+  bool init()
   {
+    if (isInited) return false;
+    if(!isSetup) {
+	ROS_ERROR("IP and port of controller are not set up!");
+	return false;
+    }
+
+    robot_interface.init(ip,port);
+    robot_interface.startThreads();
+    isInited = true;
+
     return true;
   }
 
   ///copies the last received joint state out to the controller manager
   void read(ros::Time time, ros::Duration period)
   {
+    if(!isInited) return;  
+
     data_buffer_mutex.lock();
+    robot_interface.getCurrentJointStates(readJntPosition);
+
     for (int j = 0; j < n_joints_; j++)
     {
       joint_position_prev_[j] = joint_position_[j];
@@ -173,6 +235,7 @@ public:
   ///caches the most recent joint commands into the robot interface
   void write(ros::Time time, ros::Duration period)
   {
+    if(!isInited) return;  
     enforceLimits(period);
 
     data_buffer_mutex.lock();
@@ -196,6 +259,8 @@ public:
       default: 
 	break;
     }
+
+    robot_interface.setJointTargets(newJntPosition);
     data_buffer_mutex.unlock();
     return;
   }
@@ -203,13 +268,13 @@ public:
 private:
 
   ///
-  YumiJointStateStreamer robot_interface; 
+  YumiRapidInterface robot_interface; 
   ///
   float last_comm[N_YUMI_JOINTS];
   ///
   std::string hintToRemoteHost_;
   ///
-  bool ip_set_ = false;
+  bool isInited, isSetup;
   ///
   float sampling_rate_;
   ///
@@ -218,6 +283,9 @@ private:
   float newJntPosition[N_YUMI_JOINTS];
   ///data buffers
   float readJntPosition[N_YUMI_JOINTS];
+
+  std::string ip;
+  int port;
     
 
 };

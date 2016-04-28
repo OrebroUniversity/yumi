@@ -18,11 +18,16 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   transmission_interface
   urdf
-  gazebo_ros
+  simple_message
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system thread)
+
+# The definition is copied from the CMakeList for the simple_message package.
+add_definitions(-DROS=1)           #build using ROS libraries
+add_definitions(-DLINUXSOCKETS=1)  #build using LINUX SOCKETS libraries
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -113,8 +118,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf gazebo_ros
-  DEPENDS gazebo
+  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message
+#  DEPENDS gazebo
 )
 
 ###########
@@ -132,7 +137,6 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/yumi_hw.cpp
-  src/yumi_hw_gazebo.cpp
   src/yumi_hw_rapid.cpp
 )
 
@@ -149,27 +153,8 @@ add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 # add_dependencies(yumi_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(yumi_hw_ifce_node
-   ${catkin_LIBRARIES} ${PROJECT_NAME}
-)
-
-
-## SIMULATION
-# lwr hw sim gazebo plugin 
-find_package(gazebo REQUIRED)
-include_directories(${GAZEBO_INCLUDE_DIRS})
-link_directories(${GAZEBO_LIBRARY_DIRS})
-add_library(yumi_hw_gazebo_plugin  src/yumi_hw_gazebo.cpp
-#include/${PROJECT_NAME}/lwr_hw_gazebo.hpp
-	)
-add_dependencies(yumi_hw_gazebo_plugin
-	    ${PROJECT_NAME}
-	)
-target_link_libraries(yumi_hw_gazebo_plugin
-	    ${PROJECT_NAME}
-	    ${catkin_LIBRARIES}
-	    ${GAZEBO_LIBRARIES}
-	)
+target_link_libraries( ${PROJECT_NAME} ${catkin_LIBRARIES} )
+target_link_libraries( yumi_hw_ifce_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
 
 
 #############
