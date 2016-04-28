@@ -50,6 +50,7 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
     protected:
 	bool internalCB(industrial::simple_message::SimpleMessage& in)
 	{
+	    ROS_INFO("Received a message");
 	    industrial::joint_message::JointMessage joint_msg;
 	    bool rtn = true;
 
@@ -59,24 +60,30 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 		return false;
 	    }
 
+	    ROS_INFO("Message parsed");
 	    industrial::shared_types::shared_real joint_value_from_msg;
 
 	    data_buffer_mutex.lock();
 	    for(int i=0; i<N_YUMI_JOINTS; i++) {
+		std::cout<<i<<":";
 		if (joint_msg.getJoints().getJoint(i, joint_value_from_msg))
 		{
 		    joint_positions[i] = joint_value_from_msg;
+		    std::cout<<joint_positions[i];
 		}
 		else
 		{
+		    std::cout<<"X";
 		    rtn = false;
 		}
 	    }
+	    std::cout<<"\n";
 	    data_buffer_mutex.unlock();
 
 	    // Reply back to the controller if the sender requested it.
 	    if (industrial::simple_message::CommTypes::SERVICE_REQUEST == joint_msg.getMessageType())
 	    {
+		ROS_INFO("Reply requested, sending");
 		industrial::simple_message::SimpleMessage reply;
 		joint_msg.toReply(reply, rtn ? industrial::simple_message::ReplyTypes::SUCCESS : industrial::simple_message::ReplyTypes::FAILURE);
 		this->getConnection()->sendMsg(reply);
@@ -84,6 +91,7 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 
 	    //if first call back, then mirror state to command
 	    if(first_iteration) {
+		ROS_INFO("Mirroring to command");
 		data_buffer_mutex.lock();
 		memcpy(&joint_command,&joint_positions,N_YUMI_JOINTS*sizeof(float));
 		data_buffer_mutex.unlock();
@@ -92,6 +100,8 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 	    //TODO: format trajectory request message
 
 	    //TODO: send back on conncetion 
+
+	    ROS_INFO("Done processing");
 	    return rtn;
 	}
 
@@ -183,6 +193,7 @@ public:
   YumiHWRapid() : YumiHW() {
       isInited = false;
       isSetup = false;
+      sampling_rate_ = 0.1;
   }
   
   ~YumiHWRapid() { 
@@ -218,6 +229,7 @@ public:
   {
     if(!isInited) return;  
 
+    //ROS_INFO("reading joints");
     data_buffer_mutex.lock();
     robot_interface.getCurrentJointStates(readJntPosition);
 
@@ -229,6 +241,8 @@ public:
       joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j]-joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.2); //exponential smoothing
     }
     data_buffer_mutex.unlock();
+    //ROS_INFO("read joints");
+
     return;
   }
 
@@ -238,6 +252,7 @@ public:
     if(!isInited) return;  
     enforceLimits(period);
 
+    //ROS_INFO("writing joints");
     data_buffer_mutex.lock();
     switch (getControlStrategy())
     {
@@ -262,6 +277,8 @@ public:
 
     robot_interface.setJointTargets(newJntPosition);
     data_buffer_mutex.unlock();
+    //ROS_INFO("wrote joints");
+
     return;
   }
 

@@ -57,17 +57,13 @@ int main( int argc, char** argv )
   // initialize ROS
   ros::init(argc, argv, "yumi_hw_interface", ros::init_options::NoSigintHandler);
 
-  // ros spinner
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
   // custom signal handlers
   signal(SIGTERM, quitRequested);
   signal(SIGINT, quitRequested);
   signal(SIGHUP, quitRequested);
 
   // create a node
-  ros::NodeHandle yumi_nh;
+  ros::NodeHandle yumi_nh ("~");
 
   // get params or give default values
   int port;
@@ -99,7 +95,11 @@ int main( int argc, char** argv )
   ROS_INFO("Sampling time on robot: %f", sampling_time);
 
   //the controller manager
-  controller_manager::ControllerManager manager(&yumi_robot, yumi_nh);
+  controller_manager::ControllerManager manager(&yumi_robot);
+
+  // ros spinner
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
 
   // run as fast as possible
   while( !g_quit )
@@ -127,7 +127,8 @@ int main( int argc, char** argv )
     // write the command to the lwr
     yumi_robot.write(now, period);
 
-   // ros::Duration(sampling_time).sleep();
+    std::cout<<"Period is "<<period.toSec()<<std::endl;
+    ros::Duration(sampling_time).sleep();
   }
 
   std::cerr<<"Stopping spinner..."<<std::endl;
