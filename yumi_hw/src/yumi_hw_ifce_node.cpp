@@ -8,7 +8,6 @@
 // ROS headers
 #include <ros/ros.h>
 #include <controller_manager/controller_manager.h>
-#include <std_msgs/Bool.h>
 
 // the lwr hw fri interface
 #include "yumi_hw/yumi_hw_rapid.h"
@@ -57,6 +56,10 @@ int main( int argc, char** argv )
   // initialize ROS
   ros::init(argc, argv, "yumi_hw_interface", ros::init_options::NoSigintHandler);
 
+  // ros spinner
+  ros::AsyncSpinner spinner(4);
+  spinner.start();
+
   // custom signal handlers
   signal(SIGTERM, quitRequested);
   signal(SIGINT, quitRequested);
@@ -97,10 +100,6 @@ int main( int argc, char** argv )
   //the controller manager
   controller_manager::ControllerManager manager(&yumi_robot);
 
-  // ros spinner
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
   // run as fast as possible
   while( !g_quit )
   {
@@ -120,22 +119,19 @@ int main( int argc, char** argv )
 
     // read the state from the lwr
     yumi_robot.read(now, period);
-
+    
     // update the controllers
     manager.update(now, period);
 
     // write the command to the lwr
     yumi_robot.write(now, period);
-
-    std::cout<<"Period is "<<period.toSec()<<std::endl;
-    ros::Duration(sampling_time).sleep();
+    
+    //std::cout<<"Period is "<<period.toSec()<<std::endl;
+    //ros::Duration(sampling_time).sleep();
   }
 
   std::cerr<<"Stopping spinner..."<<std::endl;
   spinner.stop();
-
-  //std::cerr<<"Stopping LWR..."<<std::endl;
-  //lwr_robot.stopFRI();
 
   std::cerr<<"Bye!"<<std::endl;
 

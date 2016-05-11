@@ -4,8 +4,8 @@
 <arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
 <!--arg name="port" default="49939"/-->
 <arg name="ip" default="192.168.1.1"/>
-<arg name="controllers" default="joint_state_controller joint_trajectory_pos_controller"/>
-<arg name="hardware_interface" default="PositionJointInterface"/>
+<arg name="controllers" default="joint_state_controller joint_trajectory_vel_controller"/>
+<arg name="hardware_interface" default="VelocityJointInterface"/>
 
 <!-- the urdf/sdf parameter -->
 <param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/>

@@ -1,16 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-	<arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
-	<!--arg name="port" default="49939"/-->
-	<arg name="ip" default="192.168.1.1"/>
-
-	<!-- addresses /-->
-	<param name="name" value="$(arg name)"/>
-	<!--param name="port" value="$(arg port)"/-->
-	<param name="ip" value="$(arg ip)"/>
-	
 	<!-- the real hardware interface /-->
-	<node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_node" respawn="false" launch-prefix="xterm -e gdb --args"/>
+	<node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_simple" respawn="false" launch-prefix="xterm -e gdb --args"/>
 
 </launch>

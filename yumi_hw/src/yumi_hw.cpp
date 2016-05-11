@@ -133,7 +133,7 @@ void YumiHW::registerInterfaces(const urdf::Model *const urdf_model,
 
 	//No control in effort space at the moment TODO
 	// Decide what kind of command interface this actuator/joint has
-/*	hardware_interface::JointHandle joint_handle_effort;
+	/*	hardware_interface::JointHandle joint_handle_effort;
 	joint_handle_effort = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
 		&joint_effort_command_[j]);
 	effort_interface_.registerHandle(joint_handle_effort); */
