@@ -1,0 +1,259 @@
+task_definitions: 
+##############  JOINT LIMIT AVOIDANCE ###############
+       - t_type: 4 #joint limit avoidance
+         priority: 1
+         name: lbr_iiwa_joint_1_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05 #safety margin
+         di: 0.4  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_1
+              geometries: 
+                - g_type: 7 #joint limit
+                  g_data: [1.4835, 2.9671, -2.9671] #dq_max, upper joint limit, lower joint limit
+   
+       - t_type: 4
+         priority: 1
+         name: lbr_iiwa_joint_2_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05
+         di: 0.4
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_2
+              geometries: 
+                - g_type: 7
+                  g_data: [1.4835, 2.0944, -2.0944] 
+         
+       - t_type: 4
+         priority: 1
+         name: lbr_iiwa_joint_3_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05
+         di: 0.4
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_3
+              geometries: 
+                - g_type: 7
+                  g_data: [1.7453, 2.9671, -2.9671] 
+
+       - t_type: 4
+         priority: 1
+         name: lbr_iiwa_joint_4_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05
+         di: 0.4
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_4
+              geometries: 
+                - g_type: 7
+                  g_data: [1.3090, 2.0944, -2.0944] 
+
+       - t_type: 4
+         priority: 1
+         name: lbr_iiwa_joint_5_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05
+         di: 0.4
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_5
+              geometries: 
+                - g_type: 7
+                  g_data: [2.2689, 2.9671, -2.9671] 
+
+       - t_type: 4
+         priority: 1
+         name: lbr_iiwa_joint_6_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05
+         di: 0.4
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_6
+              geometries: 
+                - g_type: 7
+                  g_data: [2.2689, 2.0944, -2.0944] 
+
+       - t_type: 4
+         priority: 1
+         name: lbr_iiwa_joint_7_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.05
+         di: 0.4
+         dynamics: 
+           d_type: 1
+           d_data: [-10.0]
+         t_links:
+            - link_frame: lbr_iiwa_link_7
+              geometries: 
+                - g_type: 7
+                  g_data: [2.2689, 3.0543, -3.0543] 
+
+#       - t_type: 4
+#         priority: 1
+#         name: velvet_fingers_joint_1_avoidance
+#         is_equality_task: 0
+#         task_frame: world
+#         ds: 0.035
+#         di: 0.18
+#         dynamics: 
+#           d_type: 1
+#           d_data: [-1.0]
+#         t_links:
+#            - link_frame: velvet_fingers_right
+#              geometries: 
+#                - g_type: 7
+#                  g_data: [1.0, 1.5708, 0.0] 
+
+##############  OBSTACLE AVOIDANCE ###############
+       - t_type: 1 #projection
+         priority: 1
+         name: lbr_iiwa_link_3_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.025  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-0.01]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.17] 
+            - link_frame: lbr_iiwa_link_3
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [0.0, 0.0, 0.0, 0.075] 
+
+       - t_type: 1 #projection
+         priority: 1
+         name: lbr_iiwa_link_4_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.025  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-0.01]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.17] 
+            - link_frame: lbr_iiwa_link_4
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [0.0, 0.0, 0.0, 0.12] 
+
+       - t_type: 1 #projection
+         priority: 1
+         name: lbr_iiwa_link_5_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.025  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-0.01]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.17] 
+            - link_frame: lbr_iiwa_link_5
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [0.0, 0.0, 0.0, 0.075] 
+
+       - t_type: 1 #projection
+         priority: 1
+         name: lbr_iiwa_link_6_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.025  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-0.01]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.17] 
+            - link_frame: lbr_iiwa_link_6
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [0.0, 0.0, 0.0, 0.1] 
+
+       - t_type: 1 #projection
+         priority: 1
+         name: velvet_fingers_palm_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.025  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-0.01]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.17] 
+            - link_frame: velvet_fingers_palm
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [0.04, 0.0, 0.025, 0.11] 
+
+       - t_type: 1 #projection
+         priority: 1
+         name: velvet_fingers_points_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.01 #safety margin
+         di: 0.03  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-2.0]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.17] 
+            - link_frame: velvet_fingers_palm
+              geometries: 
+                - g_type: 1 #point
+                  g_data: [0.265, 0.0, -0.0675] 
+                - g_type: 1 #point
+                  g_data: [0.075, 0.15, -0.0675] 
+                - g_type: 1 #point
+                  g_data: [0.075, -0.15, -0.0675]   
+
+ 
+
+
+
