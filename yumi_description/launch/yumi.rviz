@@ -61,6 +61,36 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        gripper_l_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_l_finger_l:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_l_finger_r:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_r_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_r_finger_l:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gripper_r_finger_r:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         world:
           Alpha: 1
           Show Axes: false
@@ -178,22 +208,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.40648
+      Distance: 0.455823
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.00264392
-        Y: -0.193038
-        Z: -0.448217
+        X: -0.089545
+        Y: -0.457471
+        Z: 0.190258
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.319798
+      Pitch: 0.369799
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.99358
+      Yaw: 4.9704
     Saved: ~
 Window Geometry:
   Displays:
@@ -211,5 +241,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1006
-  X: 664
+  X: 654
   Y: 14

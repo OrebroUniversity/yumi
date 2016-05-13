@@ -14,7 +14,9 @@
   </include>
 
   <!-- the urdf/sdf parameter -->
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/>
+  <!--param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/-->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
+
 
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model yumi"  respawn="false" output="screen" />
 
@@ -28,14 +30,14 @@
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 
+ <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
+ <rosparam file="$(find demo_grasping)/hqp_tasks/task_definitions.yaml" command="load" ns="/yumi"/>
+
   <!-- Show in Rviz   -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
   <!-- Launch RQT for control tuning -->
   <!-- <node name="apple_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen"/> -->
-
- <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
- <!--rosparam file="$(find demo_palletizing)/hqp_tasks/task_definitions.yaml" command="load" ns="/apple"/-->
 
 </launch>
 

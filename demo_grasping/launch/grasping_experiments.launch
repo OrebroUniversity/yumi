@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- LAUNCH INTERFACE -->
+  <!--include file="$(find can_finder)/launch/can_finder.launch"/-->
+  <!--include file="$(find velvet_interface_node)/launch/velvet_node.launch"/-->
+  <!--include file="$(find experiment_console)/launch/asus_frames.launch"/-->
+  <!--include file="$(find grasp_planner)/launch/grasp_planner_online.launch"/-->
+
+  <!-- set the parameters for the real interface -->
+  <arg name="lwr_powered" default="true"/>
+  <arg name="port" default="49938"/>
+  <arg name="ip" default="192.168.0.20"/>
+  <arg name="file" default="$(find single_lwr_robot)/config/980241-FRI-Driver.init"/>
+
+  <arg name="controllers" default="joint_trajectory_controller"/>
+  <arg name="stopped_controllers" default="lwr_velvet_hqp_vel_controller cartesian_impedance_controller"/>
+
+  <!-- set some ros tools -->
+  <arg name="use_rviz" default="true"/>
+
+  <!-- hardware interface for the Velvet gripper -->
+  <arg name="hardware_interface" value="VelocityJointInterface" />
+
+  <!-- LAUNCH IMPLEMENTATION -->
+
+  <!-- the urdf/sdf parameter -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find lwr_velvet_description)/urdf/lwr_velvet.urdf.xacro' prefix:=$(arg hardware_interface)" />	
+
+  <!-- joint and robot state publishers of the full robot description -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <rosparam param="source_list">[/lwr/joint_states]</rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <group if="$(arg use_rviz)">
+     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grasping_experiments)/launch/lwr_velvet.rviz"/>
+  </group>
+
+  <!-- load robotHW configurations to rosparam server -->
+	<rosparam command="load" file="$(find single_lwr_robot)/config/hw_interface.yaml"/>
+
+  <!-- load all controller configurations to rosparam server -->
+  <rosparam file="$(find lwr_velvet_description)/config/controllers.yaml" command="load" ns="/lwr"  />
+  <rosparam file="$(find velvet_fingers_control)/config/velvet_fingers_control.yaml" command="load" ns="/lwr"  />
+
+  <!-- real robot and controllers -->
+  <group ns="lwr">
+    <group if="$(arg lwr_powered)">
+
+      <include file="$(find lwr_hw)/launch/lwr_hw.launch">
+	<arg name="port" value="$(arg port)"/>
+	<arg name="ip" value="$(arg ip)"/>
+	<arg name="file_with_path" value="$(arg file)"/>
+	<!-- this name MUST match the name you give to the arm in the URDF instance -->
+	<!-- to minimize errors, you could pass it as a xacro parameter -->
+	<arg name="name" value="lwr"/>
+      </include>
+    </group>
+
+    <!-- spawn only desired controllers in current namespace -->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="joint_state_controller $(arg controllers)"/>
+    <node name="controller_stopper" pkg="controller_manager" type="spawner" args="--stopped $(arg stopped_controllers)" />
+  </group>
+
+  <!--launch the grasping_experiments node -->
+  <node name="grasping_experiments" pkg="grasping_experiments" type="grasping_experiments" respawn="false" output="screen" >
+     <param name="with_gazebo" type="bool" value="false"/>
+     
+     <!-- prototype grasp frame and pose -->
+     <param name="grasp_req_frame" value="world"/>
+     <param name="grasp_req_radius" value="0.065"/>
+     <param name="grasp_req_height" value="0.20"/>
+     <param name="grasp_req_px" value="-0.14"/>
+     <param name="grasp_req_py" value="0.71"/>
+     <param name="grasp_req_pz" value="0.10"/>
+     <param name="grasp_req_ox" value="0"/>
+     <param name="grasp_req_oy" value="0"/>
+     <param name="grasp_req_oz" value="0"/>
+     <param name="grasp_req_ow" value="1"/>
+     <remap from="/get_grasp_interval" to="/gplanner/plan_grasp"/>
+     
+     <param name="bag_path" type="string" value="$(find grasping_experiments)/data"/>
+     <remap from="/task_status_array" to="/lwr/lwr_velvet_hqp_vel_controller/task_status_array"/>
+     <remap from="/set_tasks" to="/lwr/lwr_velvet_hqp_vel_controller/set_tasks"/>
+     <remap from="/remove_tasks" to="/lwr/lwr_velvet_hqp_vel_controller/remove_tasks"/>
+     <remap from="/load_tasks" to="/lwr/lwr_velvet_hqp_vel_controller/load_tasks"/>
+     <remap from="/activate_hqp_control" to="/lwr/lwr_velvet_hqp_vel_controller/activate_hqp_control"/>
+     <remap from="/reset_hqp_control" to="/lwr/lwr_velvet_hqp_vel_controller/reset_hqp_control"/>
+     <remap from="/visualize_task_geometries" to="/lwr/lwr_velvet_hqp_vel_controller/visualize_task_geometries"/>
+     <remap from="/set_physics_properties" to="/gazebo/set_physics_properties"/>
+     <remap from="/joint_states" to="/lwr/joint_states"/>
+     <remap from="/switch_controller" to="/lwr/controller_manager/switch_controller"/>
+     <remap from="/result_cloud" to="/find_beer/result_cloud"/>
+     <remap from="/velvet_grasp" to="/velvet_node/velvet_grasp"/>
+     <remap from="/velvet_pos" to="/velvet_node/gripper_pos"/>
+     <remap from="/reset_map" to="/gplanner/clear_map"/>
+
+  </node>
+
+ <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
+ <rosparam file="$(find grasping_experiments)/hqp_tasks/task_definitions.yaml" command="load" ns="/lwr"/>
+
+
+</launch>

@@ -19,6 +19,7 @@
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>ros_control</run_depend>
   <run_depend>ros_controllers</run_depend>
+  <run_depend>velvet_fingers_control</run_depend> <!-- needed for the gazebo mimic plugin -->
 
   <export>
   </export>

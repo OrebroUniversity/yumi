@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- LAUNCH INTERFACE -->
+ <arg name="use_rviz" default="true"/>
+
+  <arg name="controllers" default="lwr_velvet_hqp_vel_controller"/>
+  <arg name="stopped_controllers" default="joint_trajectory_controller cartesian_impedance_controller"/>
+
+  <!-- LAUNCH IMPLEMENTATION -->
+
+  <!--Load the URDF and launch Gazebo-->
+  <include file="$(find lwr_velvet_gazebo)/launch/lwr_velvet_world.launch">
+    <arg name="hardware_interface" value="VelocityJointInterface" />
+  </include>
+
+  <!-- joint and robot state publishers of the full robot description -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <rosparam param="source_list">[/lwr/joint_states]</rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <group if="$(arg use_rviz)">
+     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grasping_experiments)/launch/lwr_velvet.rviz"/>
+  </group>
+
+
+  <!-- load all controller configurations to rosparam server -->
+  <rosparam file="$(find lwr_velvet_description)/config/gazebo_controllers.yaml" command="load" ns="/lwr"  />
+  <rosparam file="$(find velvet_fingers_control)/config/velvet_fingers_control.yaml" command="load" ns="/lwr"  />
+
+  <!-- Controllers -->
+  <group ns="lwr">
+    <!-- spawn only desired controllers in current namespace -->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="joint_state_controller $(arg controllers)"/>
+    <!--node name="controller_stopper" pkg="controller_manager" type="spawner" args="- -stopped $(arg stopped_controllers)" /-->
+  </group>
+
+  <!-- launch the grasping_experiments node -->
+  <node name="grasping_experiments" pkg="grasping_experiments" type="grasping_experiments" respawn="false" output="screen" >
+     <param name="with_gazebo" type="bool" value="true"/>
+     <param name="bag_path" type="string" value="$(find grasping_experiments)/data"/>
+
+     <!-- prototype grasp frame and pose -->
+     <param name="grasp_req_frame" value="world"/>
+     <param name="grasp_req_radius" value="0.05"/>
+     <param name="grasp_req_height" value="0.15"/>
+     <param name="grasp_req_px" value="-0.04"/>
+     <param name="grasp_req_py" value="0.68"/>
+     <param name="grasp_req_pz" value="0.07"/>
+     <param name="grasp_req_ox" value="0"/>
+     <param name="grasp_req_oy" value="0"/>
+     <param name="grasp_req_oz" value="0"/>
+     <param name="grasp_req_ow" value="1"/>
+     
+     <remap from="/get_grasp_interval" to="/gplanner/plan_grasp"/>
+     <remap from="/task_status_array" to="/lwr/lwr_velvet_hqp_vel_controller/task_status_array"/>
+     <remap from="/set_tasks" to="/lwr/lwr_velvet_hqp_vel_controller/set_tasks"/>
+     <remap from="/remove_tasks" to="/lwr/lwr_velvet_hqp_vel_controller/remove_tasks"/>
+     <remap from="/load_tasks" to="/lwr/lwr_velvet_hqp_vel_controller/load_tasks"/>
+     <remap from="/activate_hqp_control" to="/lwr/lwr_velvet_hqp_vel_controller/activate_hqp_control"/>
+     <remap from="/reset_hqp_control" to="/lwr/lwr_velvet_hqp_vel_controller/reset_hqp_control"/>
+     <remap from="/visualize_task_geometries" to="/lwr/lwr_velvet_hqp_vel_controller/visualize_task_geometries"/>
+     <remap from="/set_physics_properties" to="/gazebo/set_physics_properties"/>
+     <remap from="/joint_states" to="/lwr/joint_states"/>
+     <remap from="/switch_controller" to="/lwr/controller_manager/switch_controller"/>
+     <remap from="/reset_map" to="/gplanner/clear_map"/>
+
+  </node>
+
+ <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
+ <rosparam file="$(find grasping_experiments)/hqp_tasks/task_definitions.yaml" command="load" ns="/lwr"/>
+
+
+  <!-- Launch RQT for control tuning 
+       <node name="lwr_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false"
+       output="screen" args="-perspective-file $(find lwr_control)/launch/lwr_forward_pos_control.perspective"/-->
+
+</launch>

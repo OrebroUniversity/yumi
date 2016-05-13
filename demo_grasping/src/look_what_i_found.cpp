@@ -18,28 +18,28 @@ namespace demo_grasping
 	return false;
       }
 
-    if(!with_gazebo_)
-      {
-	if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
-	  {
-	    safeShutdown();
-	    return false;
-	  }
-      }
+    // if(!with_gazebo_)
+    //   {
+	// if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
+	//   {
+	//     safeShutdown();
+	//     return false;
+	//   }
+    //  }
 
-    if(!with_gazebo_)
-      {
-	//VELVET POSE
-	velvet_interface_node::VelvetToPos poscall;
+    // if(!with_gazebo_)
+    //   {
+	// //VELVET POSE
+	// velvet_interface_node::VelvetToPos poscall;
 
-	poscall.request.angle = 0.3;
-	if(!velvet_pos_clt_.call(poscall))
-	  {
-	    ROS_ERROR("could not call velvet to pos");
-	    ROS_BREAK();
-	  }
+	// poscall.request.angle = 0.3;
+	// if(!velvet_pos_clt_.call(poscall))
+	//   {
+	//     ROS_ERROR("could not call velvet to pos");
+	//     ROS_BREAK();
+	//   }
 
-      }
+    // }
 
     {//MANIPULATOR GIMME BEER CONFIGURATION
       ROS_INFO("Trying to put the manipulator in gimme beer configuration.");
@@ -79,26 +79,26 @@ namespace demo_grasping
     if(!with_gazebo_)
       {
 
-	deactivateHQPControl();
-	//VELVET GRASP_
-	velvet_interface_node::SmartGrasp graspcall;
-	graspcall.request.current_threshold_contact = 20;
-	graspcall.request.current_threshold_final = 35;
-	graspcall.request.max_belt_travel_mm = 90;
-	graspcall.request.phalange_delta_rad = 0.02;
-	graspcall.request.gripper_closed_thresh = 1.5;
-	graspcall.request.check_phalanges = true;
+	// deactivateHQPControl();
+	// //VELVET GRASP_
+	// velvet_interface_node::SmartGrasp graspcall;
+	// graspcall.request.current_threshold_contact = 20;
+	// graspcall.request.current_threshold_final = 35;
+	// graspcall.request.max_belt_travel_mm = 90;
+	// graspcall.request.phalange_delta_rad = 0.02;
+	// graspcall.request.gripper_closed_thresh = 1.5;
+	// graspcall.request.check_phalanges = true;
 
-	if(!velvet_grasp_clt_.call(graspcall)) {
-	  ROS_ERROR("could not call grasping");
-	  ROS_BREAK();
-	}
-	if(!graspcall.response.success)
-	  ROS_ERROR("Grasp failed!");
-	else
-	  {
-	    ROS_INFO("Grasp aquired.");
-	  }
+	// if(!velvet_grasp_clt_.call(graspcall)) {
+	//   ROS_ERROR("could not call grasping");
+	//   ROS_BREAK();
+	// }
+	// if(!graspcall.response.success)
+	//   ROS_ERROR("Grasp failed!");
+	// else
+	//   {
+	//     ROS_INFO("Grasp aquired.");
+	//   }
 
       }
 

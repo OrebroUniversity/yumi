@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   hqp_controllers_msgs
   gazebo_msgs
   roscpp
+  rosbag
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,7 +51,9 @@ find_package(Eigen REQUIRED)
 catkin_package(
      CATKIN_DEPENDS
      roscpp
+     rosbag
      hqp_controllers_msgs
+     controller_manager_msgs
      gazebo_msgs
      INCLUDE_DIRS include ${EIGEN_INCLUDE_DIRS}
 )
@@ -92,7 +95,7 @@ catkin_package(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES demo_palletizing
+#  LIBRARIES demo_grasping
 #  CATKIN_DEPENDS hqp_controllers_msgs roscpp
 #  DEPENDS system_lib
 )
@@ -108,8 +111,8 @@ include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 ## Declare a cpp library
-# add_library(demo_palletizing
-#   src/${PROJECT_NAME}/demo_palletizing.cpp
+# add_library(demo_grasping
+#   src/${PROJECT_NAME}/demo_grasping.cpp
 # )
 
 ## Declare a cpp executable
@@ -120,7 +123,7 @@ add_executable(demo_grasping src/demo_grasping.cpp
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(demo_palletizing_node demo_palletizing_generate_messages_cpp)
+# add_dependencies(demo_grasping_node demo_grasping_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(demo_grasping ${catkin_LIBRARIES})
@@ -140,7 +143,7 @@ target_link_libraries(demo_grasping ${catkin_LIBRARIES})
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS demo_palletizing demo_palletizing_node
+# install(TARGETS demo_grasping demo_grasping_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -165,7 +168,7 @@ target_link_libraries(demo_grasping ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_demo_palletizing.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_demo_grasping.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

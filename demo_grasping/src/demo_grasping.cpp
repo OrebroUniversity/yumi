@@ -26,7 +26,17 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
     //get params
     nh_.param<bool>("with_gazebo", with_gazebo_,false);
     if(with_gazebo_)
-        ROS_INFO("Demo grasping running in Gazebo.");
+        ROS_INFO("Grasping experiments running in Gazebo.");
+
+
+    if(!nh_.getParam("bag_path", bag_path_))
+      ROS_WARN("Could not find bag path on the parameter server!");
+
+
+    write_jnts_=false;
+    write_img_=false;
+    write_tf_=false;
+    write_cluster_=false;
 
     //initialize variables
     task_status_changed_ = false;
@@ -35,10 +45,16 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
     //register general callbacks
     start_demo_srv_ = nh_.advertiseService("start_demo", &DemoGrasping::startDemo, this);
     gimme_beer_srv_ = nh_.advertiseService("gimme_beer", &DemoGrasping::gimmeBeer, this);
+    approach_beer_srv_ = nh_.advertiseService("approach_beer", &DemoGrasping::approachBeer, this);
+    extract_beer_srv_ = nh_.advertiseService("extract_beer", &DemoGrasping::extractBeer, this);
     lets_dance_srv_ = nh_.advertiseService("lets_dance", &DemoGrasping::letsDance, this);
+    //    exp_outcome_srv_ = nh_.advertiseService("experiment_outcome", &DemoGrasping::expOutcome, this);
     look_what_i_found_srv_ = nh_.advertiseService("look_what_i_found", &DemoGrasping::lookWhatIFound, this);
     task_status_sub_ = n_.subscribe("task_status_array", 1, &DemoGrasping::taskStatusCallback, this);
     joint_state_sub_ = n_.subscribe("joint_states", 1, &DemoGrasping::jointStateCallback, this);
+    img_sub_ = n_.subscribe("/camera/rgb/image_raw", 1, &DemoGrasping::imgCallback, this);
+    cluster_sub_ = n_.subscribe("/gplanner/fused_pc", 1, &DemoGrasping::clusterCallback, this);
+    tf_sub_ = n_.subscribe("tf", 1, &DemoGrasping::tfCallback, this);
     set_tasks_clt_ = n_.serviceClient<hqp_controllers_msgs::SetTasks>("set_tasks");
     remove_tasks_clt_ = n_.serviceClient<hqp_controllers_msgs::RemoveTasks>("remove_tasks");
     activate_hqp_control_clt_ = n_.serviceClient<hqp_controllers_msgs::ActivateHQPControl>("activate_hqp_control");
@@ -46,26 +62,56 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
     set_gazebo_physics_clt_ = n_.serviceClient<gazebo_msgs::SetPhysicsProperties>("set_physics_properties");
     load_tasks_clt_ = n_.serviceClient<hqp_controllers_msgs::LoadTasks>("load_tasks");
     reset_hqp_control_clt_ = n_.serviceClient<std_srvs::Empty>("reset_hqp_control");
+    
+    task_feedback_pub_ = n_.advertise<hqp_controllers_msgs::Task> ("task_feedback",10);
+    
+    //hardcode graciously the frame, pose and bbox of object
+    nh_.param<std::string>("grasp_req_frame", grasp_plan_request.request.header.frame_id , "world");
+    double px,py,pz, ox,oy,oz,ow, object_radius, object_height;
+    nh_.param<double>("grasp_req_radius", object_radius , 0);
+    nh_.param<double>("grasp_req_height", object_height , 0);
+    nh_.param<double>("grasp_req_px",px, 0);
+    nh_.param<double>("grasp_req_py",py, 0);
+    nh_.param<double>("grasp_req_pz",pz, 0);
+    nh_.param<double>("grasp_req_ox",ox, 0);
+    nh_.param<double>("grasp_req_oy",oy, 0);
+    nh_.param<double>("grasp_req_oz",oz, 0);
+    nh_.param<double>("grasp_req_ow",ow, 0);
+
+    grasp_plan_request.request.object_radius = object_radius;
+    grasp_plan_request.request.object_height = object_height;
+    grasp_plan_request.request.objectPose.position.x = px;
+    grasp_plan_request.request.objectPose.position.y = py;
+    grasp_plan_request.request.objectPose.position.z = pz;
+    grasp_plan_request.request.objectPose.orientation.x = ox;
+    grasp_plan_request.request.objectPose.orientation.y = oy;
+    grasp_plan_request.request.objectPose.orientation.z = oz;
+    grasp_plan_request.request.objectPose.orientation.w = ow;
+
+
+    switch_controller_clt_ = n_.serviceClient<controller_manager_msgs::SwitchController>("switch_controller");
 
     if(!with_gazebo_)
     {
-        get_grasp_interval_clt_ = n_.serviceClient<hqp_controllers_msgs::FindCanTask>("get_grasp_interval");
-        velvet_pos_clt_ = n_.serviceClient<velvet_interface_node::VelvetToPos>("velvet_pos");
-        velvet_grasp_clt_ = n_.serviceClient<velvet_interface_node::SmartGrasp>("velvet_grasp");
-        set_stiffness_clt_ = n_.serviceClient<lbr_fri::SetStiffness>("set_stiffness");
-        next_truck_task_clt_ = n_.serviceClient<std_srvs::Empty>("execute_truck_task");
+    // get_grasp_interval_clt_ = n_.serviceClient<grasp_planner::PlanGrasp>("get_grasp_interval");
+
+        // velvet_pos_clt_ = n_.serviceClient<velvet_interface_node::VelvetToPos>("velvet_pos");
+        // velvet_grasp_clt_ = n_.serviceClient<velvet_interface_node::SmartGrasp>("velvet_grasp");
+      //	reset_map_clt_ = n_.serviceClient<std_srvs::Empty>("reset_map");
+        //set_stiffness_clt_ = n_.serviceClient<lbr_fri::SetStiffness>("set_stiffness");
+        //next_truck_task_clt_ = n_.serviceClient<std_srvs::Empty>("execute_truck_task");
 	
-	get_grasp_interval_clt_.waitForExistence();
-        velvet_pos_clt_.waitForExistence();
-        velvet_grasp_clt_.waitForExistence();
-        set_stiffness_clt_.waitForExistence();
-        next_truck_task_clt_.waitForExistence();
+        // velvet_pos_clt_.waitForExistence();
+        // velvet_grasp_clt_.waitForExistence();
+	//        reset_map_clt_.waitForExistence();
+        //set_stiffness_clt_.waitForExistence();
+        //next_truck_task_clt_.waitForExistence();
+    // get_grasp_interval_clt_.waitForExistence();
     }
     else
     {
         //if gazebo is used, set the simulated gravity to zero in order to prevent gazebo's joint drifting glitch
         set_gazebo_physics_clt_.waitForExistence();
-
         gazebo_msgs::SetPhysicsProperties properties;
         properties.request.time_step = 0.001;
         properties.request.max_update_rate = 1000;
@@ -121,49 +167,68 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
 #endif
 
     sensing_config_ = std::vector<double>(n_jnts);
-    sensing_config_[0] = 1.274;
-    sensing_config_[1] = -1.85;
-    sensing_config_[2] = -0.367;
-    sensing_config_[3] = -1.885;
-    sensing_config_[4] = -0.122;
-    sensing_config_[5] = 0.91;
-    sensing_config_[6] = -1.483;
+    sensing_config_[0] = -0.25;
+    sensing_config_[1] = -1.0;
+    sensing_config_[2] = 0.89;
+    sensing_config_[3] = 0.93;
+    sensing_config_[4] = -2.73;
+    sensing_config_[5] = 1.91;
+    sensing_config_[6] = 1.42;
+   
+    sensing_config2_ = std::vector<double>(n_jnts);
+    sensing_config2_[0] = 0.195;
+    sensing_config2_[1] = -0.81;
+    sensing_config2_[2] = 0.916;
+    sensing_config2_[3] = 0.67;
+    sensing_config2_[4] = -2.86;
+    sensing_config2_[5] = 1.96;
+    sensing_config2_[6] = 1.42;
+
+    sensing_config3_ = std::vector<double>(n_jnts);
+    sensing_config3_[0] = 0.458;
+    sensing_config3_[1] = -1.259;
+    sensing_config3_[2] = 0.833;
+    sensing_config3_[3] = 0.612;
+    sensing_config3_[4] = -2.88;
+    sensing_config3_[5] = 1.82;
+    sensing_config3_[6] = 1.22;
+
+#if 0
+    sensing_config_ = std::vector<double>(n_jnts);
+    sensing_config_[0] = 2.13;
+    sensing_config_[1] = 0.93;
+    sensing_config_[2] = 0.43;
+    sensing_config_[3] = 1.41;
+    sensing_config_[4] = -0.34;
+    sensing_config_[5] = -1.8;
+    sensing_config_[6] = -1.55;
+#endif
 #ifdef HQP_GRIPPER_JOINT
     sensing_config_[7] = 0.1;
 #endif
 
     gimme_beer_config_ = std::vector<double>(n_jnts);
-    gimme_beer_config_[0] = 0.14;
-    gimme_beer_config_[1] = -1.46;
-    gimme_beer_config_[2] = -0.87;
-    gimme_beer_config_[3] = -0.82;
-    gimme_beer_config_[4] = 0.02;
-    gimme_beer_config_[5] = 0.57;
-    gimme_beer_config_[6] = -0.001;
+    gimme_beer_config_[0] = 2.13;
+    gimme_beer_config_[1] = 0.93;
+    gimme_beer_config_[2] = 0.43;
+    gimme_beer_config_[3] = 1.41;
+    gimme_beer_config_[4] = -0.34;
+    gimme_beer_config_[5] = -1.8;
+    gimme_beer_config_[6] = -1.55;
 #ifdef HQP_GRIPPER_JOINT
     gimme_beer_config_[7] = 0.1;
 #endif
 
-    look_beer_config_ = std::vector<double>(n_jnts);
-    look_beer_config_[0] = -1.57;
-    look_beer_config_[1] = -0.81;
-    look_beer_config_[2] = 1.57;
-    look_beer_config_[3] = 1.2;
-    look_beer_config_[4] = 0.0;
-    look_beer_config_[5] = 1.2;
-    look_beer_config_[6] = 0.0;
-#ifdef HQP_GRIPPER_JOINT
-    look_beer_config_[7] = 0.1;
-#endif
-
     //DEFAULT GRASP
-    grasp_.obj_frame_ = "citi_truck_base"; //object frame
-    grasp_.e_frame_ = "velvet_fingers_palm"; //endeffector frame
+    grasp_.obj_frame_ = "world"; //object frame
+    grasp_.e_frame_ = "gripper_r_base"; //endeffector frame
     grasp_.e_.setZero(); //endeffector point expressed in the endeffector frame
+    grasp_.isSphereGrasp = false;
+    grasp_.isDefaultGrasp = true;
 
 #ifdef PILE_GRASPING
-    grasp_.a_(0) = 1.0; grasp_.a_(1) = 0.0; grasp_.a_(2) = 0.0;
-    grasp_.p_(0) = 0.75; grasp_.p_(1) = -0.8; grasp_.p_(2) = 0.26;
+    grasp_.a_(0) = 0.0; grasp_.a_(1) = -1.0; grasp_.a_(2) = 0.0;
+    grasp_.p_(0) = -0.75; grasp_.p_(1) = 0.3; grasp_.p_(2) = 1.065;
 #else
     grasp_.v_(0) = 0.0; grasp_.v_(1) = 0.0; grasp_.v_(2) = 1.0; //cylinder normal
     grasp_.p_(0) = 0.9; grasp_.p_(1) = -0.9; grasp_.p_(2) = 0.16; //reference point on the cylinder axis
@@ -174,8 +239,8 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
 
     //PLACEMENT ZONES
     PlaceInterval place;
-    place.place_frame_ = "citi_truck_base";
-    place.e_frame_ = "velvet_fingers_palm";
+    place.place_frame_ = "world";
+    place.e_frame_ = "gripper_r_base";
     place.e_(0) = 0.16; place.e_(1) = 0.0; place.e_(2) = 0.0;
     place.v_(0) = 0.0; place.v_(1) = 0.0; place.v_(2) = 1.0;
     place.p_(0) = 0.75; place.p_(1) = 0.2; place.p_(2) = 0.16;
@@ -196,27 +261,27 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
     //place_zones_.push_back(place);
 }
 //-----------------------------------------------------------------
-bool DemoGrasping::setCartesianStiffness(double sx, double sy, double sz, double sa, double sb, double sc)
-{
-    if(!with_gazebo_)
-    {
-        lbr_fri::SetStiffness cart_stiffness;
+// bool DemoGrasping::setCartesianStiffness(double sx, double sy, double sz, double sa, double sb, double sc)
+// {
+//     if(!with_gazebo_)
+//     {
+//         lbr_fri::SetStiffness cart_stiffness;
 
-        cart_stiffness.request.sx = sx;
-        cart_stiffness.request.sy = sy;
-        cart_stiffness.request.sz = sz;
-        cart_stiffness.request.sa = sa;
-        cart_stiffness.request.sb = sb;
-        cart_stiffness.request.sc = sc;
-        if(!set_stiffness_clt_.call(cart_stiffness))
-        {
-            ROS_ERROR("Could not set the cartesian stiffness!");
-            return false;
-        }
-    }
+//         cart_stiffness.request.sx = sx;
+//         cart_stiffness.request.sy = sy;
+//         cart_stiffness.request.sz = sz;
+//         cart_stiffness.request.sa = sa;
+//         cart_stiffness.request.sb = sb;
+//         cart_stiffness.request.sc = sc;
+//         if(!set_stiffness_clt_.call(cart_stiffness))
+//         {
+//             ROS_ERROR("Could not set the cartesian stiffness!");
+//             return false;
+//         }
+//     }
 
-    return true;
-}
+//     return true;
+// }
 //-----------------------------------------------------------------
 void DemoGrasping::activateHQPControl()
 {
@@ -242,60 +307,113 @@ void DemoGrasping::safeShutdown()
     ROS_BREAK(); //I must break you ... ros::shutdown() doesn't seem to do the job
 }
 //-----------------------------------------------------------------
+void DemoGrasping::safeReset()
+{
+    deactivateHQPControl();
+    resetState();
+    std_srvs::Empty srv;
+    reset_hqp_control_clt_.call(srv);
+    pers_task_vis_ids_.clear();
+}
+//-----------------------------------------------------------------
 bool DemoGrasping::getGraspInterval()
 {
     //get the grasp intervall
     get_grasp_interval_clt_.waitForExistence();
-    hqp_controllers_msgs::FindCanTask grasp;
-    get_grasp_interval_clt_.call(grasp);
+    
+    get_grasp_interval_clt_.call(grasp_plan_request);
 
-    if(!grasp.response.success)
+    if(!grasp_plan_request.response.success)
         return false;
 
+    grasp_.isDefaultGrasp = false;
 #ifdef PILE_GRASPING
-    ROS_ASSERT(grasp.response.CanTask.size()==2);
+    ROS_ASSERT(grasp.response.constraints.size()==2);
     std::vector<double> data;
     grasp_.obj_frame_ = grasp.response.reference_frame;
 
-    ROS_ASSERT(grasp.response.CanTask[0].g_type == hqp_controllers_msgs::TaskGeometry::POINT);
-    data = grasp.response.CanTask[0].g_data;
+    ROS_ASSERT(grasp.response.constraints[0].g_type == hqp_controllers_msgs::TaskGeometry::POINT);
+    data = grasp.response.constraints[0].g_data;
     grasp_.p_(0) = data[0]; grasp_.p_(1) = data[1]; grasp_.p_(2) = data[2];
 
-    ROS_ASSERT(grasp.response.CanTask[1].g_type == hqp_controllers_msgs::TaskGeometry::LINE);
-    data = grasp.response.CanTask[1].g_data;
+    ROS_ASSERT(grasp.response.constraints[1].g_type == hqp_controllers_msgs::TaskGeometry::LINE);
+    data = grasp.response.constraints[1].g_data;
     grasp_.a_(0) = data[3]; grasp_.a_(1) = data[4]; grasp_.a_(2) = data[5];
 #else
-    ROS_ASSERT(grasp.response.CanTask.size()==4);
+    ROS_ASSERT(grasp_plan_request.response.constraints.size()==6);
     std::vector<double> data;
-    grasp_.obj_frame_ = grasp.response.reference_frame;
+    grasp_.obj_frame_ = grasp_plan_request.response.frame_id;
 
     //BOTTOM PLANE
-    ROS_ASSERT(grasp.response.CanTask[0].g_type == hqp_controllers_msgs::TaskGeometry::PLANE);
-    data = grasp.response.CanTask[0].g_data;
+    ROS_ASSERT(grasp_plan_request.response.constraints[0].g_type == hqp_controllers_msgs::TaskGeometry::PLANE);
+    data = grasp_plan_request.response.constraints[0].g_data;
     ROS_ASSERT(data.size() == 4);
     grasp_.n1_(0) = data[0];  grasp_.n1_(1) = data[1]; grasp_.n1_(2) = data[2];
     grasp_.d1_ = data[3];
 
     //TOP PLANE
-    ROS_ASSERT(grasp.response.CanTask[1].g_type == hqp_controllers_msgs::TaskGeometry::PLANE);
-    data = grasp.response.CanTask[1].g_data;
+    ROS_ASSERT(grasp_plan_request.response.constraints[1].g_type == hqp_controllers_msgs::TaskGeometry::PLANE);
+    data = grasp_plan_request.response.constraints[1].g_data;
     ROS_ASSERT(data.size() == 4);
     grasp_.n2_(0) = data[0];  grasp_.n2_(1) = data[1]; grasp_.n2_(2) = data[2];
     grasp_.d2_ = data[3];
 
-    //INNER GRASP CYLINDER
-    ROS_ASSERT(grasp.response.CanTask[2].g_type == hqp_controllers_msgs::TaskGeometry::CYLINDER);
-    data = grasp.response.CanTask[2].g_data;
-    ROS_ASSERT(data.size() == 7);
-    grasp_.p_(0) = data[0];  grasp_.p_(1) = data[1]; grasp_.p_(2) = data[2];
-    grasp_.v_(0) = data[3];  grasp_.v_(1) = data[4]; grasp_.v_(2) = data[5];
-    grasp_.r1_ = data[6];
+    //LEFT PLANE
+    ROS_ASSERT(grasp_plan_request.response.constraints[2].g_type == hqp_controllers_msgs::TaskGeometry::PLANE);
+    data = grasp_plan_request.response.constraints[2].g_data;
+    ROS_ASSERT(data.size() == 4);
+    grasp_.n3_(0) = data[0];  grasp_.n3_(1) = data[1]; grasp_.n3_(2) = data[2];
+    grasp_.d3_ = data[3];
 
-    //OUTER GRASP CYLINDER
-    ROS_ASSERT(grasp.response.CanTask[3].g_type == hqp_controllers_msgs::TaskGeometry::CYLINDER);
-    data = grasp.response.CanTask[3].g_data;
-    ROS_ASSERT(data.size() == 7);
-    grasp_.r2_ = data[6];
+    //RIGHT PLANE
+    ROS_ASSERT(grasp_plan_request.response.constraints[3].g_type == hqp_controllers_msgs::TaskGeometry::PLANE);
+    data = grasp_plan_request.response.constraints[3].g_data;
+    ROS_ASSERT(data.size() == 4);
+    grasp_.n4_(0) = data[0];  grasp_.n4_(1) = data[1]; grasp_.n4_(2) = data[2];
+    grasp_.d4_ = data[3];
+
+    //INNER GRASP CYLINDER
+    ROS_ASSERT(grasp_plan_request.response.constraints[4].g_type == hqp_controllers_msgs::TaskGeometry::CYLINDER || 
+	    grasp_plan_request.response.constraints[4].g_type == hqp_controllers_msgs::TaskGeometry::SPHERE );
+    
+    grasp_.isSphereGrasp =  grasp_plan_request.response.constraints[4].g_type == hqp_controllers_msgs::TaskGeometry::SPHERE;
+
+    data = grasp_plan_request.response.constraints[4].g_data;
+    if(!grasp_.isSphereGrasp) {
+	ROS_ASSERT(data.size() == 7);
+	grasp_.p_(0) = data[0];  grasp_.p_(1) = data[1]; grasp_.p_(2) = data[2];
+	grasp_.v_(0) = data[3];  grasp_.v_(1) = data[4]; grasp_.v_(2) = data[5];
+	grasp_.r1_ = data[6];
+
+	//OUTER GRASP CYLINDER
+	ROS_ASSERT(grasp_plan_request.response.constraints[5].g_type == hqp_controllers_msgs::TaskGeometry::CYLINDER);
+	data = grasp_plan_request.response.constraints[5].g_data;
+	ROS_ASSERT(data.size() == 7);
+	grasp_.r2_ = data[6];
+    } else {
+	
+	ROS_ASSERT(data.size() == 4);
+	grasp_.p_(0) = data[0];  grasp_.p_(1) = data[1]; grasp_.p_(2) = data[2];
+	grasp_.r1_ = data[3];
+
+	//OUTER GRASP CYLINDER
+	ROS_ASSERT(grasp_plan_request.response.constraints[5].g_type == hqp_controllers_msgs::TaskGeometry::SPHERE);
+	data = grasp_plan_request.response.constraints[5].g_data;
+	ROS_ASSERT(data.size() == 4);
+	grasp_.r2_ = data[3];
+
+    }
+
+    //set the angle to the max opening allowed
+    grasp_.angle = grasp_plan_request.response.max_oa;
+    //if we are too open, add a little safety margin
+    if(grasp_.angle < MIN_OPENING) grasp_.angle = MIN_OPENING;
+    //make sure we are never closed more than the allowed angle
+    if(grasp_.angle > grasp_plan_request.response.min_oa-OPENING_SAFETY_MARGIN) grasp_.angle = grasp_plan_request.response.min_oa-OPENING_SAFETY_MARGIN;
+    //if we are too open, add a little safety margin
+    if(grasp_.angle < MIN_OPENING) grasp_.angle = MIN_OPENING;
+   
+    ROS_INFO("GRIPPER WILL GO TO %f",grasp_.angle);
 
     //Plane normals need to point in opposit directions to give a closed interval
     ROS_ASSERT((grasp_.n1_.transpose() * grasp_.n2_)  <= 0.0);
@@ -377,9 +495,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "lbr_iiwa_link_4_above_horizontal_plane (joint configuration)";
+    task.name = "lwr_link_4_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -390,7 +508,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -399,7 +517,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(0.12);
-    t_link.link_frame = "lbr_iiwa_link_4";
+    t_link.link_frame = "lwr_link_4";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -411,9 +529,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "lbr_iiwa_link_5_above_horizontal_plane (joint configuration)";
+    task.name = "lwr_link_5_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -424,7 +542,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -433,7 +551,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(0.075);
-    t_link.link_frame = "lbr_iiwa_link_5";
+    t_link.link_frame = "lwr_link_5";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -445,9 +563,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "lbr_iiwa_link_6_above_horizontal_plane (joint configuration)";
+    task.name = "lwr_link_6_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -458,7 +576,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -467,7 +585,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(0.1);
-    t_link.link_frame = "lbr_iiwa_link_6";
+    t_link.link_frame = "lwr_link_6";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -479,9 +597,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "velvet_fingers_palm_above_horizontal_plane (joint configuration)";
+    task.name = "gripper_r_base_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -492,7 +610,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -501,7 +619,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.04); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0.025);
     t_geom.g_data.push_back(0.11);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -515,7 +633,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     task.priority = 2;
     task.name = "point_behind_vertical_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -526,7 +644,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(-1); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(-grasp_.p_(0));
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -534,12 +652,11 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_data.clear();
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
     t_geom.g_data.push_back(0.265); t_geom.g_data.push_back(0); t_geom.g_data.push_back(-0.0675);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
     tasks_.request.tasks.push_back(task);
-#endif
 
       //PALM ABOVE HORIZONTAL PLANE
     task.t_links.clear();
@@ -547,9 +664,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "velvet_fingers_palm_above_horizontal_plane (joint configuration)";
+    task.name = "gripper_r_base_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -560,7 +677,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -569,7 +686,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.04); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0.025);
     t_geom.g_data.push_back(0.11);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -583,7 +700,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     task.priority = 2;
     task.name = "right_finger_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -594,7 +711,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(0.2);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -603,7 +720,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.11); t_geom.g_data.push_back(-0.02);
     t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -615,9 +732,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "velvet_fingers_palm_above_horizontal_plane (joint configuration)";
+    task.name = "gripper_r_base_above_horizontal_plane (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -628,7 +745,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
     t_geom.g_data.push_back(0.2);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -637,7 +754,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.02);
     t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -651,7 +768,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     task.priority = 2;
     task.name = "right_finger_avoid_beer (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.5;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -662,7 +779,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.11); t_geom.g_data.push_back(-0.02);
     t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -671,7 +788,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
     t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -685,7 +802,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     task.priority = 2;
     task.name = "right_finger_avoid_beer (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.5;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -696,7 +813,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.02);
     t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -705,7 +822,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
     t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -717,9 +834,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "lbr_iiwa_link_4_avoid_beer (joint configuration)";
+    task.name = "lwr_link_4_avoid_beer (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.5;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -730,7 +847,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(0.12);
-    t_link.link_frame = "lbr_iiwa_link_4";
+    t_link.link_frame = "lwr_link_4";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -739,7 +856,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
     t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -751,9 +868,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "lbr_iiwa_link_5_avoid_beer (joint configuration)";
+    task.name = "lwr_link_5_avoid_beer (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.5;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -764,7 +881,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(0.075);
-    t_link.link_frame = "lbr_iiwa_link_5";
+    t_link.link_frame = "lwr_link_5";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -773,7 +890,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
     t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -785,9 +902,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "lbr_iiwa_link_6_avoid_beer (joint configuration)";
+    task.name = "lwr_link_6_avoid_beer (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.5;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -798,7 +915,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
     t_geom.g_data.push_back(0.1);
-    t_link.link_frame = "lbr_iiwa_link_6";
+    t_link.link_frame = "lwr_link_6";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -807,7 +924,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
     t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -819,9 +936,9 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     task.t_type = hqp_controllers_msgs::Task::PROJECTION;
     task.priority = 2;
-    task.name = "velvet_fingers_palm_avoid_beer (joint configuration)";
+    task.name = "gripper_r_base_avoid_beer (joint configuration)";
     task.is_equality_task = false;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 0.5;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -832,7 +949,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(0.04); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0.025);
     t_geom.g_data.push_back(0.11);
-    t_link.link_frame = "velvet_fingers_palm";
+    t_link.link_frame = "gripper_r_base";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -841,12 +958,12 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
     t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
     t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
     tasks_.request.tasks.push_back(task);
-
+#endif
 
     //SET JOINT VALUES
     t_link.geometries.resize(1);
@@ -857,7 +974,7 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     task.priority = 3;
     task.name = "joint_setpoints";
     task.is_equality_task = true;
-    task.task_frame = "citi_truck_base";
+    task.task_frame = "world";
     task.ds = 0.0;
     task.di = 1;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
@@ -866,45 +983,39 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     t_geom.g_data[0] = joints[0];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_1";
+    t_link.link_frame = "lwr_1_link";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[1];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_2";
+    t_link.link_frame = "lwr_2_link";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[2];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_3";
+    t_link.link_frame = "lwr_3_link";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[3];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_4";
+    t_link.link_frame = "lwr_4_link";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[4];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_5";
+    t_link.link_frame = "lwr_5_link";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[5];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_6";
+    t_link.link_frame = "lwr_6_link";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[6];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lbr_iiwa_link_7";
+    t_link.link_frame = "lwr_7_link";
     task.t_links.push_back(t_link);
 
-#ifdef HQP_GRIPPER_JOINT
-    t_geom.g_data[0] = joints[7];
-    t_link.geometries[0] = t_geom;
-    t_link.link_frame = "velvet_fingers_right";
-    task.t_links.push_back(t_link);
-#endif
 
     tasks_.request.tasks.push_back(task);
 
@@ -993,7 +1104,7 @@ bool DemoGrasping::setObjectPlace(PlaceInterval const& place)
     t_geom.g_data.push_back(place.p_(0)); t_geom.g_data.push_back(place.p_(1)); t_geom.g_data.push_back(place.p_(2));
     t_geom.g_data.push_back(place.v_(0)); t_geom.g_data.push_back(place.v_(1)); t_geom.g_data.push_back(place.v_(2));
     t_geom.g_data.push_back(place.r_);
-    t_link.link_frame = "citi_truck_base";
+    t_link.link_frame = "world";
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
@@ -1094,6 +1205,106 @@ bool DemoGrasping::setObjectExtract()
     hqp_controllers_msgs::TaskGeometry t_geom;
 
 
+    //UPPER GRASP INTERVAL PLANE
+    task.t_links.clear();
+    task.dynamics.d_data.clear();
+
+    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
+    task.priority = 2;
+    task.is_equality_task = false;
+    task.task_frame = grasp_.obj_frame_;
+    task.ds = 0.0;
+    task.di = 0.05;
+    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+    task.dynamics.d_data.push_back(DYNAMICS_GAIN);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
+    t_geom.g_data.push_back(grasp_.n2_(0)); t_geom.g_data.push_back(grasp_.n2_(1)); t_geom.g_data.push_back(grasp_.n2_(2));
+    t_geom.g_data.push_back(grasp_.d2_+EXTRACT_OFFSET);
+    t_link.link_frame = grasp_.obj_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
+    t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
+    t_link.link_frame = grasp_.e_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    tasks_.request.tasks.push_back(task);
+    
+    //COPLANAR LINES CONSTRAINT
+    task.t_links.clear();
+    task.dynamics.d_data.clear();
+
+    task.t_type = hqp_controllers_msgs::Task::COPLANAR;
+    task.priority = 2;
+    task.is_equality_task = false;
+    task.task_frame = grasp_.obj_frame_;
+    task.ds = 0.0;
+    task.di = 0.05;
+    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+    task.dynamics.d_data.push_back(2 * DYNAMICS_GAIN);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
+    t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
+    t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
+    t_link.link_frame = grasp_.obj_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
+    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+    t_geom.g_data.push_back(1); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+    t_geom.g_data.push_back(ALIGNMENT_ANGLE);
+    t_link.link_frame = grasp_.e_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    tasks_.request.tasks.push_back(task);
+
+    //CONE CONSTRAINT
+    task.t_links.clear();
+    task.dynamics.d_data.clear();
+
+    task.t_type = hqp_controllers_msgs::Task::PARALLEL;
+    task.priority = 2;
+    task.is_equality_task = false;
+    task.task_frame = grasp_.obj_frame_;
+    task.ds = 0.0;
+    task.di = 0.05;
+    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+    task.dynamics.d_data.push_back(4 * DYNAMICS_GAIN);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
+    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
+    t_geom.g_data.push_back(ALIGNMENT_ANGLE);
+    t_link.link_frame = grasp_.obj_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
+    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
+    t_link.link_frame = grasp_.e_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    tasks_.request.tasks.push_back(task);
+#if 0
     //EE ON ATTACK POINT
     task.t_links.clear();
     task.dynamics.d_data.clear();
@@ -1106,7 +1317,7 @@ bool DemoGrasping::setObjectExtract()
     task.ds = 0.0;
     task.di = 1;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 1);
+    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 0.5);
 
     t_link.geometries.clear();
     t_geom.g_data.clear();
@@ -1199,6 +1410,7 @@ bool DemoGrasping::setObjectExtract()
     task.t_links.push_back(t_link);
 
     tasks_.request.tasks.push_back(task);
+#endif
 
     //send the filled task message to the controller
     if(!sendStateTasks())
@@ -1215,7 +1427,6 @@ bool DemoGrasping::setObjectExtract()
 
     if(!visualizeStateTasks(ids))
         return false;
-
     return true;
 }
 //-----------------------------------------------------------------
@@ -1349,14 +1560,17 @@ bool DemoGrasping::setGripperExtract(PlaceInterval const& place)
 //-----------------------------------------------------------------
 bool DemoGrasping::setGraspApproach()
 {
+    if(grasp_.isDefaultGrasp)
+	return false; 
+
     hqp_controllers_msgs::Task task;
     hqp_controllers_msgs::TaskLink t_link;
     hqp_controllers_msgs::TaskGeometry t_geom;
 
 #ifdef PILE_GRASPING
-    ROS_ASSERT(grasp_.p_(0) >= 0.0);
-    ROS_ASSERT(grasp_.p_(2) >= 0.23);
-    ROS_ASSERT(grasp_.a_(0) >= 0.0);
+    ROS_ASSERT(grasp_.p_(0) <= 0.0);
+    ROS_ASSERT(grasp_.p_(2) >= 1.06);
+    ROS_ASSERT(grasp_.a_(1) < 0.0);
 
     //EE ON HORIZONTAL PLANE
     task.t_links.clear();
@@ -1403,7 +1617,7 @@ bool DemoGrasping::setGraspApproach()
     task.ds = 0.0;
     task.di = 1;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3/2);
+    task.dynamics.d_data.push_back(DYNAMICS_GAIN); // * 3/2);
 
     t_link.geometries.clear();
     t_geom.g_data.clear();
@@ -1514,7 +1728,7 @@ bool DemoGrasping::setGraspApproach()
     task.ds = 0.0;
     task.di = 0.02;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 5);
+    task.dynamics.d_data.push_back(DYNAMICS_GAIN );
 
     t_link.geometries.clear();
     t_geom.g_data.clear();
@@ -1546,7 +1760,7 @@ bool DemoGrasping::setGraspApproach()
     task.ds = 0.0;
     task.di = 0.05;
     task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN);
+    task.dynamics.d_data.push_back(2*DYNAMICS_GAIN);
 
     t_link.geometries.clear();
     t_geom.g_data.clear();
@@ -1566,8 +1780,8 @@ bool DemoGrasping::setGraspApproach()
     task.t_links.push_back(t_link);
 
     tasks_.request.tasks.push_back(task);
-
-    //INNER CONSTRAINT CYLINDER
+   
+    //LEFT GRASP INTERVAL PLANE
     task.t_links.clear();
     task.dynamics.d_data.clear();
 
@@ -1582,10 +1796,9 @@ bool DemoGrasping::setGraspApproach()
 
     t_link.geometries.clear();
     t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CYLINDER;
-    t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
-    t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
-    t_geom.g_data.push_back(grasp_.r1_);
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
+    t_geom.g_data.push_back(grasp_.n3_(0)); t_geom.g_data.push_back(grasp_.n3_(1)); t_geom.g_data.push_back(grasp_.n3_(2));
+    t_geom.g_data.push_back(grasp_.d3_);
     t_link.link_frame = grasp_.obj_frame_;
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
@@ -1600,7 +1813,7 @@ bool DemoGrasping::setGraspApproach()
 
     tasks_.request.tasks.push_back(task);
 
-    //OUTER CONSTRAINT CYLINDER
+    //RIGHT GRASP INTERVAL PLANE
     task.t_links.clear();
     task.dynamics.d_data.clear();
 
@@ -1615,92 +1828,232 @@ bool DemoGrasping::setGraspApproach()
 
     t_link.geometries.clear();
     t_geom.g_data.clear();
+    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
+    t_geom.g_data.push_back(grasp_.n4_(0)); t_geom.g_data.push_back(grasp_.n4_(1)); t_geom.g_data.push_back(grasp_.n4_(2));
+    t_geom.g_data.push_back(grasp_.d4_);
+    t_link.link_frame = grasp_.obj_frame_;
+    t_link.geometries.push_back(t_geom);
+    task.t_links.push_back(t_link);
+
+    t_link.geometries.clear();
+    t_geom.g_data.clear();
     t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
     t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
     t_link.link_frame = grasp_.e_frame_;
     t_link.geometries.push_back(t_geom);
     task.t_links.push_back(t_link);
 
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CYLINDER;
-    t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
-    t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
-    t_geom.g_data.push_back(grasp_.r2_);
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
     tasks_.request.tasks.push_back(task);
 
-    //COPLANAR LINES CONSTRAINT
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
+    if(!grasp_.isSphereGrasp) {
+	//INNER CONSTRAINT CYLINDER
+	task.t_links.clear();
+	task.dynamics.d_data.clear();
 
-    task.t_type = hqp_controllers_msgs::Task::COPLANAR;
-    task.priority = 2;
-    task.is_equality_task = false;
-    task.task_frame = grasp_.obj_frame_;
-    task.ds = 0.0;
-    task.di = 0.05;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(2 * DYNAMICS_GAIN);
+	task.t_type = hqp_controllers_msgs::Task::PROJECTION;
+	task.priority = 2;
+	task.is_equality_task = false;
+	task.task_frame = grasp_.obj_frame_;
+	task.ds = 0.0;
+	task.di = 0.05;
+	task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+	task.dynamics.d_data.push_back(DYNAMICS_GAIN);
 
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
-    t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
-    t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CYLINDER;
+	t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
+	t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
+	t_geom.g_data.push_back(grasp_.r1_);
+	t_link.link_frame = grasp_.obj_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
 
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(1); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(ALIGNMENT_ANGLE);
-    t_link.link_frame = grasp_.e_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
+	t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
+	t_link.link_frame = grasp_.e_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
 
-    tasks_.request.tasks.push_back(task);
+	tasks_.request.tasks.push_back(task);
 
-    //CONE CONSTRAINT
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
+	//OUTER CONSTRAINT CYLINDER
+	task.t_links.clear();
+	task.dynamics.d_data.clear();
 
-    task.t_type = hqp_controllers_msgs::Task::PARALLEL;
-    task.priority = 2;
-    task.is_equality_task = false;
-    task.task_frame = grasp_.obj_frame_;
-    task.ds = 0.0;
-    task.di = 0.05;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(4 * DYNAMICS_GAIN);
+	task.t_type = hqp_controllers_msgs::Task::PROJECTION;
+	task.priority = 2;
+	task.is_equality_task = false;
+	task.task_frame = grasp_.obj_frame_;
+	task.ds = 0.0;
+	task.di = 0.05;
+	task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+	task.dynamics.d_data.push_back(DYNAMICS_GAIN);
 
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(ALIGNMENT_ANGLE);
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
+	t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
+	t_link.link_frame = grasp_.e_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
 
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_link.link_frame = grasp_.e_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CYLINDER;
+	t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
+	t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
+	t_geom.g_data.push_back(grasp_.r2_);
+	t_link.link_frame = grasp_.obj_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
 
-    tasks_.request.tasks.push_back(task);
+	tasks_.request.tasks.push_back(task);
+
+	//COPLANAR LINES CONSTRAINT
+	task.t_links.clear();
+	task.dynamics.d_data.clear();
+
+	task.t_type = hqp_controllers_msgs::Task::COPLANAR;
+	task.priority = 2;
+	task.is_equality_task = false;
+	task.task_frame = grasp_.obj_frame_;
+	task.ds = 0.0;
+	task.di = 0.05;
+	task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+	task.dynamics.d_data.push_back(2 * DYNAMICS_GAIN);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
+	t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
+	t_geom.g_data.push_back(grasp_.v_(0)); t_geom.g_data.push_back(grasp_.v_(1)); t_geom.g_data.push_back(grasp_.v_(2));
+	t_link.link_frame = grasp_.obj_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
+	t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+	t_geom.g_data.push_back(1); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+	t_geom.g_data.push_back(ALIGNMENT_ANGLE);
+	t_link.link_frame = grasp_.e_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	tasks_.request.tasks.push_back(task);
+
+	//CONE CONSTRAINT
+	task.t_links.clear();
+	task.dynamics.d_data.clear();
+
+	task.t_type = hqp_controllers_msgs::Task::PARALLEL;
+	task.priority = 2;
+	task.is_equality_task = false;
+	task.task_frame = grasp_.obj_frame_;
+	task.ds = 0.0;
+	task.di = 0.05;
+	task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+	task.dynamics.d_data.push_back(4 * DYNAMICS_GAIN);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
+	t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+	t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
+	t_geom.g_data.push_back(ALIGNMENT_ANGLE);
+	t_link.link_frame = grasp_.obj_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
+	t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
+	t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
+	t_link.link_frame = grasp_.e_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	tasks_.request.tasks.push_back(task);
+    }
+    else 
+    {
+	//INNER SPHERE CYLINDER
+	task.t_links.clear();
+	task.dynamics.d_data.clear();
+
+	task.t_type = hqp_controllers_msgs::Task::PROJECTION;
+	task.priority = 2;
+	task.is_equality_task = false;
+	task.task_frame = grasp_.obj_frame_;
+	task.ds = 0.0;
+	task.di = 0.05;
+	task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+	task.dynamics.d_data.push_back(DYNAMICS_GAIN);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
+	t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
+	t_geom.g_data.push_back(grasp_.r1_);
+	t_link.link_frame = grasp_.obj_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
+	t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
+	t_link.link_frame = grasp_.e_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	tasks_.request.tasks.push_back(task);
+
+	//OUTER CONSTRAINT CYLINDER
+	task.t_links.clear();
+	task.dynamics.d_data.clear();
+
+	task.t_type = hqp_controllers_msgs::Task::PROJECTION;
+	task.priority = 2;
+	task.is_equality_task = false;
+	task.task_frame = grasp_.obj_frame_;
+	task.ds = 0.0;
+	task.di = 0.05;
+	task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
+	task.dynamics.d_data.push_back(DYNAMICS_GAIN);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
+	t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
+	t_link.link_frame = grasp_.e_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	t_link.geometries.clear();
+	t_geom.g_data.clear();
+	t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
+	t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
+	t_geom.g_data.push_back(grasp_.r2_);
+	t_link.link_frame = grasp_.obj_frame_;
+	t_link.geometries.push_back(t_geom);
+	task.t_links.push_back(t_link);
+
+	tasks_.request.tasks.push_back(task);
+
+	//TODO: add gripper alignment constraints
+    }
+#if 0 
 #endif
+#endif
+    for(int xx=0; xx<tasks_.request.tasks.size(); xx++) {
+	task_feedback_pub_.publish(tasks_.request.tasks[xx]);
+    }
 
     //send the filled task message to the controller
     if(!sendStateTasks())
@@ -1841,134 +2194,55 @@ void DemoGrasping::taskStatusCallback( const hqp_controllers_msgs::TaskStatusArr
 
 }
 //-----------------------------------------------------------------
-void DemoGrasping::jointStateCallback( const sensor_msgs::JointStatePtr& msg)
-{
+  void DemoGrasping::jointStateCallback( const sensor_msgs::JointStatePtr& msg)
+  {
     boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
     if(!lock) return;
 
-    static sensor_msgs::JointState prev_state = *msg;
-
-
-
-    //    static struct timeval t_stag;
-    //    struct timeval t;
-    //    gettimeofday(&t,0);
-    //    static bool stagnation_flag = false;
-
-    //    if(!stagnation_flag)
-    //        t_stag = t;
-
-    //    stagnation_flag = false;
-    //    // double curr = t.tv_sec + 0.000001*t.tv_usec;
-    //    // double stag = t_stag.tv_sec + 0.000001*t_stag.tv_usec;
-
-    //    // std::cerr<<"t: "<<curr<<std::endl;
-    //    // std::cerr<<"t_stag: "<<stag<<std::endl;
-
-    //    // std::cerr<<"monitored tasks: ";
-    //    // for(unsigned int i=0; i<monitored_tasks_.size(); i++)
-    //    //   std::cerr<<monitored_tasks_[i]<<" ";
-
-    //    // std::cerr<<std::endl;
-    //    // std::cerr<<"received tasks: ";
-    //    // std::vector<hqp_controllers_msgs::TaskStatus>::const_iterator status_it2;
-    //    // for(status_it2 = msg->statuses.begin(); status_it2!=msg->statuses.end(); ++status_it2)
-    //    // 	std::cerr<<status_it2->id<<" "<<status_it2->name<<" "<<std::endl;
-
-    //    // std::cerr<<std::endl;
-
-    //    Eigen::VectorXd t_prog(monitored_tasks_.size());
-
-    //    //form the maximum norm over all errors
-
-    //    for(unsigned int i=0; i<monitored_tasks_.size(); i++)
-    //    {
-    //        //try to find the monitored task id in the given task status message
-    //        std::vector<hqp_controllers_msgs::TaskStatus>::const_iterator status_it;
-    //        for(status_it = msg->statuses.begin(); status_it!=msg->statuses.end(); ++status_it)
-    //            if(monitored_tasks_[i] == status_it->id)
-    //            {
-    //                t_prog(i)=status_it->progress;
-    //                break;
-    //            }
-
-    //        if(status_it==msg->statuses.end())
-    //        {
-    //            ROS_WARN("No status feedback for monitored task id %d!", monitored_tasks_[i]);
-    //            return; //just so we don't give a false positive task success
-    //        }
-
-    //    }
-
-    //    double e = 0.0;
-    //    double e_diff = INFINITY;
-
-
-    //    if(monitored_tasks_.size() > 0)
-    //    {
-    //        //task error
-    //        e = t_prog.cwiseAbs().maxCoeff();
-
-    //        //find the task progress difference between iterations
-    //        if(t_prog_prev_.size() > 0)
-    //            e_diff = (t_prog - t_prog_prev_).cwiseAbs().maxCoeff();
-
-    //        //std::cerr<<"t_prog: "<<t_prog.transpose()<<"e: "<<e<<std::endl;
-    //        //std::cerr<<"t_prog_prev_: "<<t_prog_prev_.transpose()<<"e_diff: "<<e_diff<<std::endl;
-    //        t_prog_prev_ = t_prog;
-    //    }
-    //    //  std::cout<<" t - t_stag: "<<t.tv_sec - t_stag.tv_sec + 0.000001 * (t.tv_usec - t_stag.tv_usec)<<" task_timeout_tol_: "<<task_timeout_tol_<<std::endl;
-    //    //std::cout<<"e_diff: "<<e_diff<<" e_diff_tol_: "<<task_diff_tol_<<std::endl;
-
-    //    if(e <= task_error_tol_)
-    //    {
-    //        std::cerr<<std::endl<<"STATE CHANGE:"<<std::endl<<"monitored tasks: ";
-    //        for(unsigned int i=0; i<monitored_tasks_.size(); i++)
-    //            std::cerr<<monitored_tasks_[i]<<" ";
-
-    //        std::cerr<<std::endl<<"task statuses: "<<std::endl;
-    //        for( std::vector<hqp_controllers_msgs::TaskStatus>::iterator it = msg->statuses.begin(); it!=msg->statuses.end(); ++it)
-    //            std::cerr<<"id: "<<it->id<<" name: "<<it->name<<" progress: "<<it->progress<<std::endl;
-
-    //        std::cerr<<"e: "<<e<<std::endl<<std::endl;
-
-    //        // ROS_INFO("Task status switch!");
-    //        task_status_changed_ = true;
-    //        task_success_ = true;
-    //        cond_.notify_one();
-    //    }
-    //    else if(e_diff <= task_diff_tol_) //(task progresses ain't changing no more)
-    //    {
-    //        stagnation_flag = true;
-    //        std::cerr<<"task progress stagnating since:"<<t.tv_sec - t_stag.tv_sec + 0.000001 * (t.tv_usec - t_stag.tv_usec)<<" s, e_diff is: "<<e_diff<<std::endl;
-    //        if((t.tv_sec - t_stag.tv_sec + 0.000001 * (t.tv_usec - t_stag.tv_usec)) > task_timeout_tol_ )
-    //        {
-    //            task_status_changed_ = true;
-    //            task_success_ = true;
-    //            ROS_WARN("Task execution timeout!");
-    //            std::cerr<<"monitored tasks: ";
-    //            for(unsigned int i=0; i<monitored_tasks_.size(); i++)
-    //                std::cerr<<monitored_tasks_[i]<<" ";
-
-    //            std::cerr<<std::endl<<"task statuses: "<<std::endl;
-    //            for( std::vector<hqp_controllers_msgs::TaskStatus>::iterator it = msg->statuses.begin(); it!=msg->statuses.end(); ++it)
-    //                std::cerr<<"id: "<<it->id<<" name: "<<it->name<<" progress: "<<it->progress<<std::endl;
-
-    //            std::cerr<<"e: "<<e<<std::endl<<std::endl;
-    //            //std::cerr<<"t: "<<"t - t_stag: "<<t.tv_sec - t_stag.tv_sec + 0.000001 * (t.tv_usec - t_stag.tv_usec)<<" task_timeout_tol_: "<<task_timeout_tol_<<std::endl;
-    //            //std::cerr<<"e_diff: "<<e_diff<<" e_diff_tol_: "<<task_diff_tol_<<std::endl<<std::endl;
-
-    //            stagnation_flag = false;
-    //            cond_.notify_one();
-    //        }
-    //    }
-
-    prev_state = *msg;
-
-}
+    if(write_jnts_)
+	bag_.write("joint_states", ros::Time::now(), *msg);
+                  
+  }
 //-----------------------------------------------------------------
-bool DemoGrasping::loadPersistentTasks()
-{
+  void DemoGrasping::imgCallback( const sensor_msgs::ImagePtr& msg)
+  {
+    boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
+    if(!lock) return;
+
+    if(write_img_)
+	bag_.write("rgb_image_raw", ros::Time::now(), *msg);
+    write_img_ = false;
+                  
+  }
+//-----------------------------------------------------------------
+  void DemoGrasping::tfCallback( const tf2_msgs::TFMessagePtr& msg)
+  {
+    boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
+    if(!lock) return;
+
+    if(write_tf_)
+	bag_.write("tf", ros::Time::now(), *msg);
+
+    //one-shot writing
+    write_tf_ =false;
+                  
+  }
+//-----------------------------------------------------------------
+  void DemoGrasping::clusterCallback( const sensor_msgs::PointCloud2Ptr& msg)
+  {
+    boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
+    if(!lock) return;
+
+    if(write_cluster_)
+	bag_.write("result_cloud", ros::Time::now(), *msg);
+
+    //one-shot writing
+    write_cluster_ =false;
+                  
+  }
+  //-----------------------------------------------------------------
+  bool DemoGrasping::loadPersistentTasks()
+  {
     hqp_controllers_msgs::LoadTasks persistent_tasks;
     persistent_tasks.request.task_definitions = "task_definitions";
     if(!load_tasks_clt_.call(persistent_tasks))
@@ -1987,13 +2261,6 @@ bool DemoGrasping::loadPersistentTasks()
 bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res )
 {
     std_srvs::Empty srv;
-    //PICK EMPTY PALLET
-    ROS_INFO("Picking up empty pallet");
-    next_truck_task_clt_.call(srv);
-    //MOVE TO UNLOADING POSE
-    ROS_INFO("Moving to unloading pose");
-    next_truck_task_clt_.call(srv);
-
 
 #if 0
 #endif
@@ -2011,15 +2278,15 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
 
     if(!with_gazebo_)
     {
-        //VELVET INITIAL POSE
-        velvet_interface_node::VelvetToPos poscall;
-        poscall.request.angle = 0.3;
+        // //VELVET INITIAL POSE
+        // velvet_interface_node::VelvetToPos poscall;
+        // poscall.request.angle = 0.3;
 
-        if(!velvet_pos_clt_.call(poscall))
-        {
-            ROS_ERROR("could not call velvet to pos");
-            ROS_BREAK();
-        }
+        // if(!velvet_pos_clt_.call(poscall))
+        // {
+        //     ROS_ERROR("could not call velvet to pos");
+        //     ROS_BREAK();
+        // }
     }
 
     for(unsigned int i=0; i<place_zones_.size(); i++)
@@ -2039,11 +2306,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
                     safeShutdown();
                     return false;
                 }
-                if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
-                {
-                    safeShutdown();
-                    return false;
-                }
+                // if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
+                // {
+                //     safeShutdown();
+                //     return false;
+                // }
 
                 if(!setJointConfiguration(sensing_config_))
                 {
@@ -2085,11 +2352,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
 #if 0
 #endif
 
-                if(!setCartesianStiffness(1000, 1000, 100, 100, 100, 100))
-                {
-                    safeShutdown();
-                    return false;
-                }
+                // if(!setCartesianStiffness(1000, 1000, 100, 100, 100, 100))
+                // {
+                //     safeShutdown();
+                //     return false;
+                // }
 
                 if(!setGraspApproach())
                 {
@@ -2116,37 +2383,35 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
 
             if(!with_gazebo_)
             {
-                //SET GRASP STIFFNESS
-                if(!setCartesianStiffness(1000, 50, 30, 100, 100, 10))
-                {
-                    safeShutdown();
-                    return false;
-                }
+                // //SET GRASP STIFFNESS
+                // if(!setCartesianStiffness(1000, 50, 30, 100, 100, 10))
+                // {
+                //     safeShutdown();
+                //     return false;
+                // }
 
-                deactivateHQPControl();
-                //VELVET GRASP_
-                velvet_interface_node::SmartGrasp graspcall;
-                graspcall.request.current_threshold_contact = 20;
-                graspcall.request.current_threshold_final = 35;
-                graspcall.request.max_belt_travel_mm = 90;
-                graspcall.request.phalange_delta_rad = 0.02;
-                graspcall.request.gripper_closed_thresh = 1.5;
-                graspcall.request.check_phalanges = true;
+                // deactivateHQPControl();
+                // //VELVET GRASP_
+                // velvet_interface_node::SmartGrasp graspcall;
+                // graspcall.request.current_threshold_contact = 20;
+                // graspcall.request.current_threshold_final = 35;
+                // graspcall.request.max_belt_travel_mm = 90;
+                // graspcall.request.phalange_delta_rad = 0.02;
+                // graspcall.request.gripper_closed_thresh = 1.5;
+                // graspcall.request.check_phalanges = true;
 
-                if(!velvet_grasp_clt_.call(graspcall)) {
-                    ROS_ERROR("could not call grasping");
-                    ROS_BREAK();
-                }
-                if(!graspcall.response.success)
-                    ROS_ERROR("Grasp failed!");
-                else
-                {
-                    grasp_success = true;
-                    ROS_INFO("Grasp aquired.");
-                }
-#if 0
-		grasp_success = true; //RRRRRRRRREEEEEEEEEEEMMMMMMMMMOOOOOOVVVVVVEEEEEEEE!!!!!!!!!!
-#endif
+                // if(!velvet_grasp_clt_.call(graspcall)) {
+                //     ROS_ERROR("could not call grasping");
+                //     ROS_BREAK();
+                // }
+                // if(!graspcall.response.success)
+                //     ROS_ERROR("Grasp failed!");
+                // else
+                // {
+                //     grasp_success = true;
+                //     ROS_INFO("Grasp aquired.");
+                // }
+
             }
             else
                 grasp_success = true;
@@ -2164,11 +2429,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
                 safeShutdown();
                 return false;
             }
-            if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
-            {
-                safeShutdown();
-                return false;
-            }
+            // if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
+            // {
+            //     safeShutdown();
+            //     return false;
+            // }
             if(!setObjectExtract())
             {
                 ROS_ERROR("Could not set the object extract!");
@@ -2204,11 +2469,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
                 safeShutdown();
                 return false;
             }
-            if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
-            {
-                safeShutdown();
-                return false;
-            }
+            // if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
+            // {
+            //     safeShutdown();
+            //     return false;
+            // }
 
             if(!setJointConfiguration(place_zones_[i].joints_))
             {
@@ -2243,11 +2508,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
                 safeShutdown();
                 return false;
             }
-            if(!setCartesianStiffness(100, 1000, 1000, 100, 100, 100))
-            {
-                safeShutdown();
-                return false;
-            }
+            // if(!setCartesianStiffness(100, 1000, 1000, 100, 100, 100))
+            // {
+            //     safeShutdown();
+            //     return false;
+            // }
 
             if(!setObjectPlace(place_zones_[i]))
             {
@@ -2273,14 +2538,14 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
 
         if(!with_gazebo_)
         {
-            velvet_interface_node::VelvetToPos poscall2;
-            poscall2.request.angle = 0.2;
+            // velvet_interface_node::VelvetToPos poscall2;
+            // poscall2.request.angle = 0.2;
 
-            if(!velvet_pos_clt_.call(poscall2))
-            {
-                ROS_ERROR("could not call velvet to pos");
-                ROS_BREAK();
-            }
+            // if(!velvet_pos_clt_.call(poscall2))
+            // {
+            //     ROS_ERROR("could not call velvet to pos");
+            //     ROS_BREAK();
+            // }
         }
 
         {//GRIPPER EXTRACT
@@ -2295,11 +2560,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
                 safeShutdown();
                 return false;
             }
-            if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
-            {
-                safeShutdown();
-                return false;
-            }
+            // if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
+            // {
+            //     safeShutdown();
+            //     return false;
+            // }
 
             if(!setGripperExtract(place_zones_[i]))
             {
@@ -2337,11 +2602,11 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
             safeShutdown();
             return false;
         }
-        if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
-        {
-            safeShutdown();
-            return false;
-        }
+        // if(!setCartesianStiffness(1000, 1000, 1000, 100, 100, 100))
+        // {
+        //     safeShutdown();
+        //     return false;
+        // }
 
         if(!setJointConfiguration(transfer_config_))
         {
@@ -2368,13 +2633,7 @@ bool DemoGrasping::startDemo(std_srvs::Empty::Request  &req, std_srvs::Empty::Re
     resetState();
     reset_hqp_control_clt_.call(srv);
     pers_task_vis_ids_.clear();
-    //MOVE TO DROP OFF
-    ROS_INFO("Moving to drop-off pose");
-    next_truck_task_clt_.call(srv);
 
-    //MOVE HOME 
-    ROS_INFO("Moving back home");
-    next_truck_task_clt_.call(srv);
 
 #if 0
 #endif
@@ -2396,9 +2655,9 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "demo_grasping");
 
-    demo_grasping::DemoGrasping demo;
+    demo_grasping::DemoGrasping experiments;
 
-    ROS_INFO("Demo grasping node ready");
+    ROS_INFO("Grasping experiments node ready");
     ros::AsyncSpinner spinner(4); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();

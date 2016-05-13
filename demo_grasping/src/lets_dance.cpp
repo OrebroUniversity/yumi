@@ -18,37 +18,37 @@ namespace demo_grasping
 	return false;
       }
 
-    if(!with_gazebo_)
-      {
-	if(!setCartesianStiffness(800, 800, 800, 100, 100, 100))
-	  {
-	    safeShutdown();
-	    return false;
-	  }
-      }
+    // if(!with_gazebo_)
+    //   {
+    // 	if(!setCartesianStiffness(800, 800, 800, 100, 100, 100))
+    // 	  {
+    // 	    safeShutdown();
+    // 	    return false;
+    // 	  }
+    //   }
 
-    for (unsigned int i=0; i<3; i++)
-      {
+    // for (unsigned int i=0; i<3; i++)
+    //   {
 
-	if(!with_gazebo_)
-	  {
-	    //VELVET POSE
-	    velvet_interface_node::VelvetToPos poscall;
+    // 	if(!with_gazebo_)
+    // 	  {
+	    // //VELVET POSE
+	    // velvet_interface_node::VelvetToPos poscall;
 
-	    poscall.request.angle = 0.1;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 0.1;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 
-	    poscall.request.angle = 1.45;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
-	  }
+	    // poscall.request.angle = 1.45;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
+    //	  }
 
 	{//MANIPULATOR GIMME BEER CONFIGURATION
 	  ROS_INFO("Trying to put the manipulator in gimme beer configuration.");
@@ -87,22 +87,22 @@ namespace demo_grasping
 
 	if(!with_gazebo_)
 	  {
-	    //VELVET POSE
-	    velvet_interface_node::VelvetToPos poscall;
+	    // //VELVET POSE
+	    // velvet_interface_node::VelvetToPos poscall;
 
-	    poscall.request.angle = 0.1;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 0.1;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 
-	    poscall.request.angle = 1.45;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 1.45;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 	  }
 
 	{//MANIPULATOR TRANSFER CONFIGURATION
@@ -143,22 +143,22 @@ namespace demo_grasping
 
 	if(!with_gazebo_)
 	  {
-	    //VELVET POSE
-	    velvet_interface_node::VelvetToPos poscall;
+	    // //VELVET POSE
+	    // velvet_interface_node::VelvetToPos poscall;
 
-	    poscall.request.angle = 0.1;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 0.1;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 
-	    poscall.request.angle = 1.45;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 1.45;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 	  }
 #if 0
 	{//MANIPULATOR SENSING CONFIGURATION
@@ -198,22 +198,22 @@ namespace demo_grasping
 
 	if(!with_gazebo_)
 	  {
-	    //VELVET POSE
-	    velvet_interface_node::VelvetToPos poscall;
+	    // //VELVET POSE
+	    // velvet_interface_node::VelvetToPos poscall;
 
-	    poscall.request.angle = 0.1;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 0.1;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 
-	    poscall.request.angle = 1.45;
-	    if(!velvet_pos_clt_.call(poscall))
-	      {
-		ROS_ERROR("could not call velvet to pos");
-		ROS_BREAK();
-	      }
+	    // poscall.request.angle = 1.45;
+	    // if(!velvet_pos_clt_.call(poscall))
+	    //   {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    //   }
 	  }
 #endif
 
@@ -252,7 +252,7 @@ namespace demo_grasping
 	  ROS_INFO("Manipulator look beer configuration tasks executed successfully.");
 	}
 
-      }
+ 
 
     deactivateHQPControl();
     resetState();
