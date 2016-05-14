@@ -3,13 +3,18 @@
 
 <arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
 <!--arg name="port" default="49939"/-->
-<arg name="ip" default="192.168.1.1"/>
-<arg name="controllers" default="joint_state_controller yumi_joint_1_l_forward_vel_controller"/>
-<arg name="stopped_controllers" default="yumi_group_vel_controller joint_trajectory_vel_controller"/>
+<!--arg name="ip" default="192.168.1.1"/--> <!--when talking to a virtual controller -->
+<arg name="ip" default="192.168.125.1"/> <!--when talking to the real robot controller -->
+<arg name="controllers" default="joint_state_controller hqp_vel_controller"/>
+<arg name="stopped_controllers" default="joint_trajectory_vel_controller yumi_joint_1_l_forward_vel_controller"/>
 <arg name="hardware_interface" default="VelocityJointInterface"/>
 
-<!-- the urdf/sdf parameter -->
-<param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/>
+<!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
+ <rosparam file="$(find demo_grasping)/hqp_tasks/task_definitions.yaml" command="load" ns="/yumi"/>
+
+ <!-- the urdf/sdf parameter -->
+<!--param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/-->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
 
 <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     <remap from="/joint_states" to="/yumi/joint_states" />
@@ -29,6 +34,7 @@
     <!--param name="port" value="$(arg port)"/-->
     <param name="ip" value="$(arg ip)"/>
 </node>
+ 
 
 </launch>
 

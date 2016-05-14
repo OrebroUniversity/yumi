@@ -71,5 +71,5 @@ hqp_vel_controller:
 #per-joint velocity control
 yumi_joint_1_l_forward_vel_controller:
   type: velocity_controllers/JointVelocityController
-  joint: yumi_joint_1_l
+  joint: yumi_joint_6_r
 
