@@ -104,18 +104,19 @@ int main( int argc, char** argv )
   while( !g_quit )
   {
     // get the time / period
-    if (!clock_gettime(CLOCK_MONOTONIC, &ts))
-    {
-      now.sec = ts.tv_sec;
-      now.nsec = ts.tv_nsec;
+    //if (!clock_gettime(CLOCK_MONOTONIC, &ts))
+    //{
+      now = ros::Time::now();	
+      //now.sec = ts.tv_sec;
+      //now.nsec = ts.tv_nsec;
       period = now - last;
       last = now;
-    } 
-    else
-    {
-      ROS_FATAL("Failed to poll realtime clock!");
-      break;
-    }
+    //} 
+    //else
+    //{
+    //  ROS_FATAL("Failed to poll realtime clock!");
+    //  break;
+    //}
 
     // read the state from the lwr
     yumi_robot.read(now, period);

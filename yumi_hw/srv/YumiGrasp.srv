@@ -1,0 +1,5 @@
+uint16 LEFT_GRIPPER=1
+uint16 RIGHT_GRIPPER=2
+
+uint16 gripper_id
+---

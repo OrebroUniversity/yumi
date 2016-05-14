@@ -1,4 +1,4 @@
-MODULE ROS_common(SYSMODULE)
+MODULE GripperMotion_right
 
 ! Software License Agreement (BSD License)
 !
@@ -29,13 +29,41 @@ MODULE ROS_common(SYSMODULE)
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-PERS bool ROS_joint_target_left_lock := FALSE;
-PERS bool ROS_new_joint_target_left := FALSE;       ! can safely READ, but should use lock to WRITE
+PROC main()
+    VAR num grasp_force;
+    
+    Hand_JogOutward;
+    WaitTime 4;
+    Hand_JogInward;
+    WaitTime 4;
+    Hand_DoCalibrate;
+    Hand_Initialize \maxSpd:=20, \holdForce:=5;
+    Hand_MoveTo(10);
+    
+    WHILE true DO
+        ! Check for an updated setpoint. 
+        WaitTestAndSet ROS_gripper_right_lock;
+        IF (ROS_new_gripper_right) THEN          ! a new setpoint is available
+            grasp_force := next_grasp_target.right;    
+        ENDIF
+        current_gripper_right := Hand_GetActualPos();
+        ROS_new_gripper_right := FALSE;
+        ROS_gripper_right_lock := FALSE;        ! release data-lock
+        
+        !gripper target received
+        IF(grasp_force > 0 ) THEN
+            TPWrite "Grasping with right";
+            Hand_GripInward \holdForce:=grasp_force;
+        ELSEIF (grasp_force < 0 ) THEN
+            Hand_GripOutward \holdForce:=-grasp_force;
+        ELSE
+            !do nothing
+        ENDIF
+        WaitTime 0.1;
+    ENDWHILE
+ERROR
+    ErrWrite \W, "Gripper Motion Error", "Error executing motion.  Aborting trajectory.";
+ENDPROC
 
-PERS bool ROS_joint_target_right_lock := FALSE;
-PERS bool ROS_new_joint_target_right := FALSE;       ! can safely READ, but should use lock to WRITE
 
-PERS ROS_msg_joint_data next_joint_target;
-
-PERS num cycle_time := 0.02; 
 ENDMODULE

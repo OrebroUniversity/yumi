@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   transmission_interface
   urdf
   simple_message
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -70,11 +71,10 @@ add_definitions(-DLINUXSOCKETS=1)  #build using LINUX SOCKETS libraries
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  YumiGrasp.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -83,11 +83,11 @@ add_definitions(-DLINUXSOCKETS=1)  #build using LINUX SOCKETS libraries
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -151,6 +151,8 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 
+add_executable(yumi_gripper_node src/yumi_gripper_node.cpp)
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(yumi_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -158,6 +160,7 @@ add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries( ${PROJECT_NAME} ${catkin_LIBRARIES} )
 target_link_libraries( yumi_hw_ifce_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
+target_link_libraries( yumi_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
 
 
 #############
