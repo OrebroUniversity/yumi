@@ -119,10 +119,10 @@ task_definitions:
          is_equality_task: 0
          task_frame: world
          ds: 0.0 #safety margin
-         di: 0.02 #influence zone
+         di: 0.1 #influence zone
          dynamics: 
            d_type: 1
-           d_data: [-0.1]
+           d_data: [-2.0]
          t_links:
             - link_frame: world
               geometries: 
@@ -139,10 +139,10 @@ task_definitions:
          is_equality_task: 0
          task_frame: world
          ds: 0.0 #safety margin
-         di: 0.02  #influence zone
+         di: 0.1  #influence zone
          dynamics: 
            d_type: 1
-           d_data: [-0.1]
+           d_data: [-2.0]
          t_links:
             - link_frame: world
               geometries: 
@@ -159,7 +159,7 @@ task_definitions:
          is_equality_task: 0
          task_frame: world
          ds: 0.0 #safety margin
-         di: 0.02  #influence zone
+         di: 0.1  #influence zone
          dynamics: 
            d_type: 1
            d_data: [-2.0]
