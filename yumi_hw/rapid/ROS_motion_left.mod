@@ -81,7 +81,7 @@ PROC main()
             !calculate next target from desired velocity
             now := ClkRead(clk, \HighRes);
             local_cycle_time := now - prev;
-            target := compute_target(prev_target,local_target.joints_left,local_cycle_time);
+            target := compute_target(prev_target,local_target.joints_left,cycle_time);
             prev_target := target;
         ENDIF
                 

@@ -28,7 +28,7 @@ MODULE ROS_motion_right
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST zonedata DEFAULT_CORNER_DIST := fine;
+LOCAL CONST zonedata DEFAULT_CORNER_DIST := z10;
 LOCAL VAR ROS_msg_joint_data local_target;
 LOCAL VAR intnum intr_new_target;
 
@@ -81,14 +81,14 @@ PROC main()
             !calculate next target from desired velocity
             now := ClkRead(clk, \HighRes);
             local_cycle_time := now - prev;
-            target := compute_target(prev_target,local_target.joints_right,local_cycle_time);
+            target := compute_target(prev_target,local_target.joints_right,cycle_time);
             prev_target := target;
         ENDIF
                 
         !check if we are too close to the target
         IF (NOT is_near(target,0.0001)) THEN
             !no, so we can move with a smoothing zone
-            stop_mode:=DEFAULT_CORNER_DIST;                     
+            stop_mode:= DEFAULT_CORNER_DIST;                     
         ELSE
             !yes, we have to move with stoping
             stop_mode:=fine;        
