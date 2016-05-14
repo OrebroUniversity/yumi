@@ -479,7 +479,7 @@ bool DemoGrasping::sendStateTasks()
 bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 {
 #ifdef HQP_GRIPPER_JOINT
-    ROS_ASSERT(joints.size() == 8);//7 joints for the lbr iiwa + 1 velvet fingers joint
+    ROS_ASSERT(joints.size() == 8);//7 joints for the yumi arm + 1 actuated gripper joint
 #else
     ROS_ASSERT(joints.size() == 7);
 #endif
@@ -487,483 +487,6 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
     hqp_controllers_msgs::Task task;
     hqp_controllers_msgs::TaskLink t_link;
     hqp_controllers_msgs::TaskGeometry t_geom;
-
-#if 0
-    //LINK 4 ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "lwr_link_4_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0.12);
-    t_link.link_frame = "lwr_link_4";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //LINK 5 ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "lwr_link_5_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0.075);
-    t_link.link_frame = "lwr_link_5";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //LINK 6 ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "lwr_link_6_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0.1);
-    t_link.link_frame = "lwr_link_6";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //PALM ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "gripper_r_base_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.04); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0.025);
-    t_geom.g_data.push_back(0.11);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-  //POINT BEHIND VERTICAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "point_behind_vertical_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(-1); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(-grasp_.p_(0));
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
-    t_geom.g_data.push_back(0.265); t_geom.g_data.push_back(0); t_geom.g_data.push_back(-0.0675);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-      //PALM ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "gripper_r_base_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN * 3);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(SAFETY_HEIGHT);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.04); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0.025);
-    t_geom.g_data.push_back(0.11);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-      //RIGHT FINGER ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "right_finger_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN );
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(0.2);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.11); t_geom.g_data.push_back(-0.02);
-    t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-     //LEFT FINGER ABOVE HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "gripper_r_base_above_horizontal_plane (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.02;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN );
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(0.2);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.02);
-    t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-   //RIGHT FINGER BEER AVOIDANCE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "right_finger_avoid_beer (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.5;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 0.5);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.11); t_geom.g_data.push_back(-0.02);
-    t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
-    t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-   //LEFT FINGER BEER AVOIDANCE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "right_finger_avoid_beer (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.5;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 0.5);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(0.11); t_geom.g_data.push_back(-0.02);
-    t_geom.g_data.push_back(0.06);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
-    t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-   //LINK 4 BEER AVOIDANCE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "lwr_link_4_avoid_beer (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.5;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 0.5);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0.12);
-    t_link.link_frame = "lwr_link_4";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
-    t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //LINK 5 BEER AVOIDANCE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "lwr_link_5_avoid_beer (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.5;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 0.5);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0.075);
-    t_link.link_frame = "lwr_link_5";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
-    t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //LINK 6 BEER AVOIDANCE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "lwr_link_6_avoid_beer (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.5;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 0.5);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0.1);
-    t_link.link_frame = "lwr_link_6";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
-    t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //PALM BEER AVOIDANCE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "gripper_r_base_avoid_beer (joint configuration)";
-    task.is_equality_task = false;
-    task.task_frame = "world";
-    task.ds = 0.0;
-    task.di = 0.5;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN / 0.5);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(0.04); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0.025);
-    t_geom.g_data.push_back(0.11);
-    t_link.link_frame = "gripper_r_base";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::SPHERE;
-    t_geom.g_data.push_back(grasp_.p_(0)+BEER_RADIUS); t_geom.g_data.push_back(-0.9); t_geom.g_data.push_back(BEER_HEIGHT);
-    t_geom.g_data.push_back(BEER_RADIUS);
-    t_link.link_frame = "world";
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-#endif
 
     //SET JOINT VALUES
     t_link.geometries.resize(1);
@@ -983,37 +506,37 @@ bool DemoGrasping::setJointConfiguration(std::vector<double> const& joints)
 
     t_geom.g_data[0] = joints[0];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_1_link";
+    t_link.link_frame = "yumi_link_1_r";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[1];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_2_link";
+    t_link.link_frame = "yumi_link_2_r";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[2];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_3_link";
+    t_link.link_frame = "yumi_link_3_r";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[3];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_4_link";
+    t_link.link_frame = "yumi_link_4_r";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[4];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_5_link";
+    t_link.link_frame = "yumi_link_5_r";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[5];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_6_link";
+    t_link.link_frame = "yumi_link_6_r";
     task.t_links.push_back(t_link);
 
     t_geom.g_data[0] = joints[6];
     t_link.geometries[0] = t_geom;
-    t_link.link_frame = "lwr_7_link";
+    t_link.link_frame = "yumi_link_7_r";
     task.t_links.push_back(t_link);
 
 
@@ -1560,160 +1083,20 @@ bool DemoGrasping::setGripperExtract(PlaceInterval const& place)
 //-----------------------------------------------------------------
 bool DemoGrasping::setGraspApproach()
 {
-    if(grasp_.isDefaultGrasp)
-	return false; 
+  if(!with_gazebo_)
+    {
+      if(grasp_.isDefaultGrasp)
+	{
+	  ROS_WARN("Grasp is default grasp!");
+	  return false; 
+	}
+    }
 
     hqp_controllers_msgs::Task task;
     hqp_controllers_msgs::TaskLink t_link;
     hqp_controllers_msgs::TaskGeometry t_geom;
 
-#ifdef PILE_GRASPING
-    ROS_ASSERT(grasp_.p_(0) <= 0.0);
-    ROS_ASSERT(grasp_.p_(2) >= 1.06);
-    ROS_ASSERT(grasp_.a_(1) < 0.0);
 
-    //EE ON HORIZONTAL PLANE
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "ee_on_horizontal_plane";
-    task.is_equality_task = true;
-    task.task_frame = grasp_.obj_frame_;
-    task.ds = 0.0;
-    task.di = 1;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::PLANE;
-    t_geom.g_data.push_back(0.0); t_geom.g_data.push_back(0.0); t_geom.g_data.push_back(1.0);
-    t_geom.g_data.push_back(grasp_.p_(2));
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
-    t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
-    t_link.link_frame = grasp_.e_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //CONSTRAINT CYLINDER
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PROJECTION;
-    task.priority = 2;
-    task.name = "ee_in_constraint_cylinder";
-    task.is_equality_task = false;
-    task.task_frame = grasp_.obj_frame_;
-    task.ds = 0.0;
-    task.di = 1;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN); // * 3/2);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::POINT;
-    t_geom.g_data.push_back(grasp_.e_(0)); t_geom.g_data.push_back(grasp_.e_(1)); t_geom.g_data.push_back(grasp_.e_(2));
-    t_link.link_frame = grasp_.e_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CYLINDER;
-    t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(0.16);
-    t_geom.g_data.push_back(0.0); t_geom.g_data.push_back(0.0); t_geom.g_data.push_back(1.0);
-    t_geom.g_data.push_back(0.005);
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //GRIPPER APPROACH AXIS ALIGNMENT
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-
-    task.t_type = hqp_controllers_msgs::Task::PARALLEL;
-    task.priority = 2;
-    task.name = "gripper_approach_axis_alignment";
-    task.is_equality_task = false;
-    task.task_frame = grasp_.obj_frame_;
-    task.ds = 0.0;
-    task.di = 0.05;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
-    t_geom.g_data.push_back(grasp_.p_(0)); t_geom.g_data.push_back(grasp_.p_(1)); t_geom.g_data.push_back(grasp_.p_(2));
-    //project the approach vector on the x/y plane
-    Eigen::Vector3d a;
-    a.setZero();
-    a(0) = grasp_.a_(0); a(1) = grasp_.a_(1);
-    a.normalize();
-    t_geom.g_data.push_back(a(0)); t_geom.g_data.push_back(a(1)); t_geom.g_data.push_back(a(2));
-    t_geom.g_data.push_back(ALIGNMENT_ANGLE);
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(1); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_link.link_frame = grasp_.e_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-    //GRIPPER VERTICAL AXIS ALIGNMENT
-    task.t_links.clear();
-    task.dynamics.d_data.clear();
-    task.name = "gripper_vertical_axis_alignment";
-    task.t_type = hqp_controllers_msgs::Task::PARALLEL;
-    task.priority = 2;
-    task.is_equality_task = false;
-    task.task_frame = grasp_.obj_frame_;
-    task.ds = 0.0;
-    task.di = 1;
-    task.dynamics.d_type = hqp_controllers_msgs::TaskDynamics::LINEAR_DYNAMICS;
-    task.dynamics.d_data.push_back(DYNAMICS_GAIN);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::CONE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_geom.g_data.push_back(ALIGNMENT_ANGLE);
-    t_link.link_frame = grasp_.obj_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    t_link.geometries.clear();
-    t_geom.g_data.clear();
-    t_geom.g_type = hqp_controllers_msgs::TaskGeometry::LINE;
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(0);
-    t_geom.g_data.push_back(0); t_geom.g_data.push_back(0); t_geom.g_data.push_back(1);
-    t_link.link_frame = grasp_.e_frame_;
-    t_link.geometries.push_back(t_geom);
-    task.t_links.push_back(t_link);
-
-    tasks_.request.tasks.push_back(task);
-
-#else
     ROS_ASSERT(grasp_.r1_ <= grasp_.r2_);
     ROS_ASSERT(grasp_.n1_.transpose() * grasp_.n2_ < 0.0);
 
@@ -2048,9 +1431,7 @@ bool DemoGrasping::setGraspApproach()
 
 	//TODO: add gripper alignment constraints
     }
-#if 0 
-#endif
-#endif
+
     for(int xx=0; xx<tasks_.request.tasks.size(); xx++) {
 	task_feedback_pub_.publish(tasks_.request.tasks[xx]);
     }
@@ -2199,8 +1580,8 @@ void DemoGrasping::taskStatusCallback( const hqp_controllers_msgs::TaskStatusArr
     boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
     if(!lock) return;
 
-    if(write_jnts_)
-	bag_.write("joint_states", ros::Time::now(), *msg);
+    // if(write_jnts_)
+    // 	bag_.write("joint_states", ros::Time::now(), *msg);
                   
   }
 //-----------------------------------------------------------------
@@ -2209,9 +1590,9 @@ void DemoGrasping::taskStatusCallback( const hqp_controllers_msgs::TaskStatusArr
     boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
     if(!lock) return;
 
-    if(write_img_)
-	bag_.write("rgb_image_raw", ros::Time::now(), *msg);
-    write_img_ = false;
+    // if(write_img_)
+    // 	bag_.write("rgb_image_raw", ros::Time::now(), *msg);
+    // write_img_ = false;
                   
   }
 //-----------------------------------------------------------------
@@ -2220,11 +1601,11 @@ void DemoGrasping::taskStatusCallback( const hqp_controllers_msgs::TaskStatusArr
     boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
     if(!lock) return;
 
-    if(write_tf_)
-	bag_.write("tf", ros::Time::now(), *msg);
+    // if(write_tf_)
+    // 	bag_.write("tf", ros::Time::now(), *msg);
 
     //one-shot writing
-    write_tf_ =false;
+    // write_tf_ =false;
                   
   }
 //-----------------------------------------------------------------
@@ -2233,11 +1614,11 @@ void DemoGrasping::taskStatusCallback( const hqp_controllers_msgs::TaskStatusArr
     boost::mutex::scoped_lock lock(force_change_m_, boost::try_to_lock);
     if(!lock) return;
 
-    if(write_cluster_)
-	bag_.write("result_cloud", ros::Time::now(), *msg);
+    // if(write_cluster_)
+    // 	bag_.write("result_cloud", ros::Time::now(), *msg);
 
-    //one-shot writing
-    write_cluster_ =false;
+    // //one-shot writing
+    // write_cluster_ =false;
                   
   }
   //-----------------------------------------------------------------
@@ -2248,9 +1629,12 @@ void DemoGrasping::taskStatusCallback( const hqp_controllers_msgs::TaskStatusArr
     if(!load_tasks_clt_.call(persistent_tasks))
         return false;
 
+    unsigned int n_tasks=persistent_tasks.response.ids.size();
+    ROS_ASSERT(n_tasks>=7); //Make sure the joint limits are set
+
     //visualize (some of) the loaded tasks
-    for(unsigned int i=0; i<6;i++)
-        pers_task_vis_ids_.push_back(persistent_tasks.response.ids[i+7]);
+    for(unsigned int i=7; i<n_tasks;i++)//first 7 tasks are supposedly for joint limits
+      pers_task_vis_ids_.push_back(persistent_tasks.response.ids[i]); 
 
     if(!visualizeStateTasks(pers_task_vis_ids_))
         return false;
@@ -2655,9 +2039,9 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "demo_grasping");
 
-    demo_grasping::DemoGrasping experiments;
+    demo_grasping::DemoGrasping demo_grasping;
 
-    ROS_INFO("Grasping experiments node ready");
+    ROS_INFO("Demo grasping node ready");
     ros::AsyncSpinner spinner(4); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();

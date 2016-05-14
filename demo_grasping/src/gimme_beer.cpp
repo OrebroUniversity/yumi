@@ -6,35 +6,35 @@ namespace demo_grasping
   //----------------------------------------------------------------------------------
   bool DemoGrasping::gimmeBeer(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res )
   {
-    ROS_INFO("gimme beer callback");
-    ros::Time now=ros::Time::now();
-    bag_name_ = bag_path_+"/"+boost::lexical_cast<std::string>(now.toSec())+".bag";
+//     ROS_INFO("gimme beer callback");
+//     ros::Time now=ros::Time::now();
+//     bag_name_ = bag_path_+"/"+boost::lexical_cast<std::string>(now.toSec())+".bag";
 
-    ROS_INFO("opening bag file");
-    bag_.open(bag_name_, rosbag::bagmode::Write);
-    controller_manager_msgs::SwitchController switch_msg;
+//     ROS_INFO("opening bag file");
+//     bag_.open(bag_name_, rosbag::bagmode::Write);
+//     controller_manager_msgs::SwitchController switch_msg;
 
-#if 0
-    if(!with_gazebo_)
-      {
-	//SWITCH TO VELOCITY CONTROL
-	switch_msg.request.start_controllers.push_back("hqp_vel_controller");
-	switch_msg.request.stop_controllers.push_back("joint_trajectory_controller");
-	switch_msg.request.strictness=2;   
-	switch_msg.response.ok=false;
+// #if 0
+//     if(!with_gazebo_)
+//       {
+// 	//SWITCH TO VELOCITY CONTROL
+// 	switch_msg.request.start_controllers.push_back("hqp_vel_controller");
+// 	switch_msg.request.stop_controllers.push_back("joint_trajectory_controller");
+// 	switch_msg.request.strictness=2;   
+// 	switch_msg.response.ok=false;
 
-	ROS_INFO("Switching to hqp velocity control.");
-	deactivateHQPControl();
-	switch_controller_clt_.call(switch_msg);
-	if(!switch_msg.response.ok)
-	  {
-	    ROS_ERROR("Could not switch to the hqp velocity controller!");
-	    safeShutdown();
-	    return false;
-	  }
-	sleep(2);
-      }
-#endif
+// 	ROS_INFO("Switching to hqp velocity control.");
+// 	deactivateHQPControl();
+// 	switch_controller_clt_.call(switch_msg);
+// 	if(!switch_msg.response.ok)
+// 	  {
+// 	    ROS_ERROR("Could not switch to the hqp velocity controller!");
+// 	    safeShutdown();
+// 	    return false;
+// 	  }
+// 	sleep(2);
+//       }
+// #endif
 
     std_srvs::Empty srv;
     deactivateHQPControl();
@@ -62,83 +62,8 @@ namespace demo_grasping
 	//   }
 	// write_img_ = true;
       }
-    {//MANIPULATOR SENSING CONFIGURATION - Second
-      ROS_INFO("Trying to put the manipulator in sensing configuration.");
-      boost::mutex::scoped_lock lock(manipulator_tasks_m_);
-      task_status_changed_ = false;
-      task_success_ = false;
-      deactivateHQPControl();
-      if(!resetState())
-	{
-	  ROS_ERROR("Could not reset the state!");
-	  safeShutdown();
-	  return false;
-	}
 
-      if(!setJointConfiguration(sensing_config2_))
-	{
-	  ROS_ERROR("Could not set manipulator sensing state!");
-	  safeShutdown();
-	  return false;
-	}
-      task_error_tol_ = 1e-2;
-      activateHQPControl();
-
-      while(!task_status_changed_)
-	cond_.wait(lock);
-
-      if(!task_success_)
-	{
-	  ROS_ERROR("Could not complete the manipulator sensing state tasks!");
-	  safeShutdown();
-	  return false;
-	}
-      ROS_INFO("SECOND Manipulator sensing state tasks executed successfully.");
-    }
-    if(!with_gazebo_)
-      {
-	//RESET THE MAP
-	if(!reset_map_clt_.call(srv))
-	  {
-	    ROS_ERROR("could not reset gplanner map");
-	    ROS_BREAK();
-	  }
-      }
-    {//MANIPULATOR SENSING CONFIGURATION - Third
-      ROS_INFO("Trying to put the manipulator in sensing configuration.");
-      boost::mutex::scoped_lock lock(manipulator_tasks_m_);
-      task_status_changed_ = false;
-      task_success_ = false;
-      deactivateHQPControl();
-      if(!resetState())
-	{
-	  ROS_ERROR("Could not reset the state!");
-	  safeShutdown();
-	  return false;
-	}
-
-      if(!setJointConfiguration(sensing_config3_))
-	{
-	  ROS_ERROR("Could not set manipulator sensing state!");
-	  safeShutdown();
-	  return false;
-	}
-      task_error_tol_ = 1e-2;
-      activateHQPControl();
-
-      while(!task_status_changed_)
-	cond_.wait(lock);
-
-      if(!task_success_)
-	{
-	  ROS_ERROR("Could not complete the manipulator sensing state tasks!");
-	  safeShutdown();
-	  return false;
-	}
-      ROS_INFO("SECOND Manipulator sensing state tasks executed successfully.");
-    }
-
-    {//MANIPULATOR SENSING CONFIGURATION - First
+    {//MANIPULATOR SENSING CONFIGURATION 
       ROS_INFO("Trying to put the manipulator in sensing configuration.");
       boost::mutex::scoped_lock lock(manipulator_tasks_m_);
       task_status_changed_ = false;
@@ -172,10 +97,19 @@ namespace demo_grasping
       ROS_INFO("Manipulator sensing state tasks executed successfully.");
     }
 
+    if(!with_gazebo_)
+      {
+	//RESET THE MAP
+	if(!reset_map_clt_.call(srv))
+	  {
+	    ROS_ERROR("could not reset gplanner map");
+	    ROS_BREAK();
+	  }
+      }
 
     {//GRASP APPROACH
-      write_jnts_=true;
-      write_tf_=true;
+      //write_jnts_=true;
+      //write_tf_=true;
       ROS_INFO("Trying grasp approach.");
       boost::mutex::scoped_lock lock(manipulator_tasks_m_);
       task_status_changed_ = false;
@@ -188,9 +122,9 @@ namespace demo_grasping
 	  return false;
 	}
 
-      //if(!with_gazebo_)
+      if(!with_gazebo_)
 	{
-	  write_cluster_ = true;
+	  //write_cluster_ = true;
 	  if(!getGraspInterval())
 	    ROS_WARN("Could not obtain the grasp intervall - using default interval!");
 
@@ -213,7 +147,7 @@ namespace demo_grasping
 	{
 	  ROS_ERROR("Could not set the grasp approach!");
 	  safeReset();
-	  bag_.close();
+	  //	  bag_.close();
 	  return false;
 	}
       task_error_tol_ =  1e-3;
@@ -230,8 +164,9 @@ namespace demo_grasping
 	}
 
       ROS_INFO("Grasp approach tasks executed successfully.");
-      write_jnts_=false;
+      //write_jnts_=false;
     }
+
     if(!with_gazebo_)
       {
 	// //VELVET GRASP_
@@ -255,7 +190,7 @@ namespace demo_grasping
 
 
     {//OBJECT EXTRACT
-      write_tf_=true;
+      //write_tf_=true;
       ROS_INFO("Trying object extract.");
       boost::mutex::scoped_lock lock(manipulator_tasks_m_);
       task_status_changed_ = false;
@@ -292,10 +227,10 @@ namespace demo_grasping
 	  return false;
 	}
       ROS_INFO("Object extract tasks executed successfully.");
-      write_tf_=false;
+      //write_tf_=false;
     }
     
-    {//MANIPULATOR SENSING CONFIGURATION - First
+    {//MANIPULATOR SENSING CONFIGURATION 
       ROS_INFO("Trying to put the manipulator in sensing configuration.");
       boost::mutex::scoped_lock lock(manipulator_tasks_m_);
       task_status_changed_ = false;
@@ -348,30 +283,9 @@ namespace demo_grasping
     reset_hqp_control_clt_.call(srv);
     pers_task_vis_ids_.clear();
 
-#if 0
-    if(!with_gazebo_)
-      {
-	//SWITCH BACK TO POSITION CONTROL
-	switch_msg.request.start_controllers[0] = "joint_trajectory_controller";
-	switch_msg.request.stop_controllers[0] = "lwr_velvet_hqp_vel_controller";
-	switch_msg.request.strictness=2;   
-	switch_msg.response.ok=false;
-
-	ROS_INFO("Switching to position control.");
-	deactivateHQPControl();
-	switch_controller_clt_.call(switch_msg);
-	if(!switch_msg.response.ok)
-	  {
-	    ROS_ERROR("Could not switch to the hqp velocity controller!");
-	    safeShutdown();
-	    return false;
-	  }
-	sleep(2);
-      }
-#endif
     ROS_INFO("GIMME BEER FINISHED.");
 
-    bag_.close();
+    // bag_.close();
 
     return true;
   }
@@ -379,34 +293,6 @@ namespace demo_grasping
  //----------------------------------------------------------------------------------
   bool DemoGrasping::approachBeer(std_srvs::Empty::Request  &req, std_srvs::Empty::Response &res )
   {
-    ROS_INFO("approach beer callback");
-    ros::Time now=ros::Time::now();
-    bag_name_ = bag_path_+"/"+boost::lexical_cast<std::string>(now.toSec())+".bag";
-
-    ROS_INFO("opening bag file");
-    bag_.open(bag_name_, rosbag::bagmode::Write);
-    controller_manager_msgs::SwitchController switch_msg;
-
-    if(!with_gazebo_)
-      {
-	//SWITCH TO VELOCITY CONTROL
-	switch_msg.request.start_controllers.push_back("hqp_vel_controller");
-	switch_msg.request.stop_controllers.push_back("joint_trajectory_controller");
-	switch_msg.request.strictness=2;   
-	switch_msg.response.ok=false;
-
-	ROS_INFO("Switching to hqp velocity control.");
-	deactivateHQPControl();
-	switch_controller_clt_.call(switch_msg);
-	if(!switch_msg.response.ok)
-	  {
-	    ROS_ERROR("Could not switch to the hqp velocity controller!");
-	    safeShutdown();
-	    return false;
-	  }
-	sleep(2);
-      }
-
     std_srvs::Empty srv;
     deactivateHQPControl();
     resetState();
@@ -431,9 +317,10 @@ namespace demo_grasping
 	//     ROS_ERROR("could not call velvet to pos");
 	//     ROS_BREAK();
 	//   }
+	// write_img_ = true;
       }
 
-    {//MANIPULATOR SENSING CONFIGURATION - First
+    {//MANIPULATOR SENSING CONFIGURATION 
       ROS_INFO("Trying to put the manipulator in sensing configuration.");
       boost::mutex::scoped_lock lock(manipulator_tasks_m_);
       task_status_changed_ = false;
@@ -467,42 +354,19 @@ namespace demo_grasping
       ROS_INFO("Manipulator sensing state tasks executed successfully.");
     }
 
-    {//MANIPULATOR SENSING CONFIGURATION - Second
-      ROS_INFO("Trying to put the manipulator in sensing configuration.");
-      boost::mutex::scoped_lock lock(manipulator_tasks_m_);
-      task_status_changed_ = false;
-      task_success_ = false;
-      deactivateHQPControl();
-      if(!resetState())
-	{
-	  ROS_ERROR("Could not reset the state!");
-	  safeShutdown();
-	  return false;
-	}
-
-      if(!setJointConfiguration(sensing_config2_))
-	{
-	  ROS_ERROR("Could not set manipulator sensing state!");
-	  safeShutdown();
-	  return false;
-	}
-      task_error_tol_ = 1e-2;
-      activateHQPControl();
-
-      while(!task_status_changed_)
-	cond_.wait(lock);
-
-      if(!task_success_)
-	{
-	  ROS_ERROR("Could not complete the manipulator sensing state tasks!");
-	  safeShutdown();
-	  return false;
-	}
-      ROS_INFO("Manipulator sensing state tasks executed successfully.");
-    }
+    if(!with_gazebo_)
+      {
+	//RESET THE MAP
+	if(!reset_map_clt_.call(srv))
+	  {
+	    ROS_ERROR("could not reset gplanner map");
+	    ROS_BREAK();
+	  }
+      }
 
     {//GRASP APPROACH
       //write_jnts_=true;
+      //write_tf_=true;
       ROS_INFO("Trying grasp approach.");
       boost::mutex::scoped_lock lock(manipulator_tasks_m_);
       task_status_changed_ = false;
@@ -517,16 +381,30 @@ namespace demo_grasping
 
       if(!with_gazebo_)
 	{
-	  write_cluster_ = true;
+	  //write_cluster_ = true;
 	  if(!getGraspInterval())
 	    ROS_WARN("Could not obtain the grasp intervall - using default interval!");
 
+	}
+    
+	if(!with_gazebo_)
+	{
+	    // //VELVET pre-grasp configuration 
+	    // velvet_interface_node::VelvetToPos poscall;
+	    // poscall.request.angle = grasp_.angle;
+
+	    // if(!velvet_pos_clt_.call(poscall))
+	    // {
+	    // 	ROS_ERROR("could not call velvet to pos");
+	    // 	ROS_BREAK();
+	    // }
 	}
 
       if(!setGraspApproach())
 	{
 	  ROS_ERROR("Could not set the grasp approach!");
-	  safeShutdown();
+	  safeReset();
+	  //	  bag_.close();
 	  return false;
 	}
       task_error_tol_ =  1e-3;
@@ -543,15 +421,13 @@ namespace demo_grasping
 	}
 
       ROS_INFO("Grasp approach tasks executed successfully.");
-      //write_jnts_=false;
-      //write_tf_=true;
-      ros::Duration(0.5).sleep(); //make sure to write tf to the bag file
+      // write_jnts_=false;
     }
 
     deactivateHQPControl();
     ROS_INFO("APPROACH BEER FINISHED.");
 
-    bag_.close();
+    // bag_.close();
 
     return true;
   }
@@ -560,25 +436,25 @@ namespace demo_grasping
   {
     ROS_INFO("extract beer callback");
 
-    controller_manager_msgs::SwitchController switch_msg;
+    // controller_manager_msgs::SwitchController switch_msg;
 
-    if(!with_gazebo_)
-      {
-	//SWITCH TO VELOCITY CONTROL
-	switch_msg.request.start_controllers.push_back("cartesian_impedance_controller");
-	switch_msg.request.stop_controllers.push_back("joint_trajectory_controller");
-	switch_msg.request.strictness=2;   
-	switch_msg.response.ok=false;
+    // if(!with_gazebo_)
+    //   {
+    // 	//SWITCH TO VELOCITY CONTROL
+    // 	switch_msg.request.start_controllers.push_back("cartesian_impedance_controller");
+    // 	switch_msg.request.stop_controllers.push_back("joint_trajectory_controller");
+    // 	switch_msg.request.strictness=2;   
+    // 	switch_msg.response.ok=false;
 
-	ROS_INFO("Switching to cartesian impedance control.");
-	deactivateHQPControl();
-	switch_controller_clt_.call(switch_msg);
-	if(!switch_msg.response.ok)
-	  {
-	    ROS_ERROR("Could not switch to the cartesian impedance controller!");
-	    safeShutdown();
-	    return false;
-	  }
+    // 	ROS_INFO("Switching to cartesian impedance control.");
+    // 	deactivateHQPControl();
+    // 	switch_controller_clt_.call(switch_msg);
+    // 	if(!switch_msg.response.ok)
+    // 	  {
+    // 	    ROS_ERROR("Could not switch to the cartesian impedance controller!");
+    // 	    safeShutdown();
+    // 	    return false;
+    // 	  }
 
 	// //VELVET GRASP_
 	// velvet_interface_node::SmartGrasp graspcall;
@@ -598,11 +474,8 @@ namespace demo_grasping
 	// else
 	//   ROS_INFO("Grasp aquired.");
 
-      }
+    // }
 
-
-#if 0
-#endif
     ROS_INFO("EXTRACT BEER FINISHED.");
 
 
@@ -612,12 +485,12 @@ namespace demo_grasping
   //---------------------------------------------------------------------------------------------------
     bool DemoGrasping::expOutcome(hqp_controllers_msgs::ActivateHQPControl::Request & req, hqp_controllers_msgs::ActivateHQPControl::Response &res)
 {
-    bag_.open(bag_name_, rosbag::bagmode::Append);
-    std_msgs::Bool outcome;
-    outcome.data=req.active;
+    // bag_.open(bag_name_, rosbag::bagmode::Append);
+    // std_msgs::Bool outcome;
+    // outcome.data=req.active;
 
-    bag_.write("experiment_outcome",ros::Time::now(),outcome);
-    bag_.close();
+    // bag_.write("experiment_outcome",ros::Time::now(),outcome);
+    // bag_.close();
     return true;
 }
   //---------------------------------------------------------------------------------------------------
