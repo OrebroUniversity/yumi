@@ -77,6 +77,7 @@ LOCAL PROC send_joints()
     WaitTestAndSet ROS_joint_target_left_lock;
     WaitTestAndSet ROS_joint_target_right_lock;
     next_joint_target := target;
+
     ROS_new_joint_target_left := TRUE;
     ROS_new_joint_target_right := TRUE;
     ROS_joint_target_right_lock := FALSE; !release lock
@@ -84,5 +85,6 @@ LOCAL PROC send_joints()
 ERROR
     RAISE;  ! raise errors to calling code
 ENDPROC
+
 
 ENDMODULE

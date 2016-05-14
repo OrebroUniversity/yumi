@@ -31,6 +31,7 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 	boost::mutex data_buffer_mutex, t_m;
 	boost::condition_variable joint_state_received, joint_commands_set;
 	bool b_joint_state_received, b_joint_commands_set;
+	int mode;
 
     public:
 	bool getJointStates(float (&jnts)[N_YUMI_JOINTS]) {
@@ -42,10 +43,11 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 	    memcpy(&jnts,&joint_positions,sizeof(jnts));
 	}
 
-	bool setJointCommands(float (&jnts)[N_YUMI_JOINTS]) {
+	bool setJointCommands(float (&jnts)[N_YUMI_JOINTS], int mode_) {
 	    boost::mutex::scoped_lock lock(data_buffer_mutex);
 	    memcpy(&joint_command,&jnts,sizeof(jnts));
 	    b_joint_commands_set=true;
+	    mode = mode_;
 	    joint_commands_set.notify_all();
 	}
 
@@ -128,6 +130,10 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 		    rtn = false;
 		}
 	    }
+	    if (!joint_msg.getJoints().setJoint(N_YUMI_JOINTS, mode))
+	    {
+		rtn = false;
+	    }
 //	    std::cerr<<"\n";
 
 	    //TODO: send back on conncetion 
@@ -192,8 +198,8 @@ class YumiRapidInterface {
 	    js_handler.getJointStates(joints);	    
 	}
 
-	void setJointTargets(float (&joints)[N_YUMI_JOINTS]) {
-	    js_handler.setJointCommands(joints);
+	void setJointTargets(float (&joints)[N_YUMI_JOINTS], int mode) {
+	    js_handler.setJointCommands(joints, mode);
 	}
 
 
@@ -274,7 +280,7 @@ public:
       joint_position_prev_[j] = joint_position_[j];
       joint_position_[j] = readJntPosition[j];
       //joint_effort_[j] = readJntEffort[j]; //TODO: read effort 
-      joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j]-joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.2); //exponential smoothing
+      joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j]-joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.04); //exponential smoothing
       if(firstRunInPositionMode) {
 	  joint_position_command_[j] = readJntPosition[j];
       }
@@ -308,7 +314,7 @@ public:
 	for (int j = 0; j < n_joints_; j++)
 	{
 	  //std::cerr<<joint_velocity_command_[j]<<"*"<<period.toSec()<<" + "<<joint_position_[j]<<" ::: ";  
-	  newJntPosition[j] = joint_velocity_command_[j]*period.toSec() + joint_position_[j]; 
+	  newJntPosition[j] = joint_velocity_command_[j]; //*period.toSec() + joint_position_[j]; 
 	}
 	//std::cerr<<std::endl;
 	firstRunInPositionMode = true;
@@ -319,7 +325,7 @@ public:
 	break;
     }
 
-    robot_interface.setJointTargets(newJntPosition);
+    robot_interface.setJointTargets(newJntPosition, getControlStrategy());
     data_buffer_mutex.unlock();
     //ROS_INFO("wrote joints");
 
