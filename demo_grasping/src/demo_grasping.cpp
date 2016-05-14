@@ -167,57 +167,14 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
 #endif
 
     sensing_config_ = std::vector<double>(n_jnts);
-    sensing_config_[0] = -0.25;
-    sensing_config_[1] = -1.0;
-    sensing_config_[2] = 0.89;
-    sensing_config_[3] = 0.93;
-    sensing_config_[4] = -2.73;
-    sensing_config_[5] = 1.91;
-    sensing_config_[6] = 1.42;
+    sensing_config_[0] = 0.42;
+    sensing_config_[1] = -1.48;
+    sensing_config_[2] = -1.21;
+    sensing_config_[3] = 0.37;
+    sensing_config_[4] = -3.41;
+    sensing_config_[5] = -0.23;
+    sensing_config_[6] = 0.13;
    
-    sensing_config2_ = std::vector<double>(n_jnts);
-    sensing_config2_[0] = 0.195;
-    sensing_config2_[1] = -0.81;
-    sensing_config2_[2] = 0.916;
-    sensing_config2_[3] = 0.67;
-    sensing_config2_[4] = -2.86;
-    sensing_config2_[5] = 1.96;
-    sensing_config2_[6] = 1.42;
-
-    sensing_config3_ = std::vector<double>(n_jnts);
-    sensing_config3_[0] = 0.458;
-    sensing_config3_[1] = -1.259;
-    sensing_config3_[2] = 0.833;
-    sensing_config3_[3] = 0.612;
-    sensing_config3_[4] = -2.88;
-    sensing_config3_[5] = 1.82;
-    sensing_config3_[6] = 1.22;
-
-#if 0
-    sensing_config_ = std::vector<double>(n_jnts);
-    sensing_config_[0] = 2.13;
-    sensing_config_[1] = 0.93;
-    sensing_config_[2] = 0.43;
-    sensing_config_[3] = 1.41;
-    sensing_config_[4] = -0.34;
-    sensing_config_[5] = -1.8;
-    sensing_config_[6] = -1.55;
-#endif
-#ifdef HQP_GRIPPER_JOINT
-    sensing_config_[7] = 0.1;
-#endif
-
-    gimme_beer_config_ = std::vector<double>(n_jnts);
-    gimme_beer_config_[0] = 2.13;
-    gimme_beer_config_[1] = 0.93;
-    gimme_beer_config_[2] = 0.43;
-    gimme_beer_config_[3] = 1.41;
-    gimme_beer_config_[4] = -0.34;
-    gimme_beer_config_[5] = -1.8;
-    gimme_beer_config_[6] = -1.55;
-#ifdef HQP_GRIPPER_JOINT
-    gimme_beer_config_[7] = 0.1;
-#endif
 
     //DEFAULT GRASP
     grasp_.obj_frame_ = "world"; //object frame
@@ -226,16 +183,13 @@ DemoGrasping::DemoGrasping() : task_error_tol_(0.0), task_diff_tol_(1e-5), task_
     grasp_.isSphereGrasp = false;
     grasp_.isDefaultGrasp = true;
 
-#ifdef PILE_GRASPING
-    grasp_.a_(0) = 0.0; grasp_.a_(1) = -1.0; grasp_.a_(2) = 0.0;
-    grasp_.p_(0) = -0.75; grasp_.p_(1) = 0.3; grasp_.p_(2) = 1.065;
-#else
+
     grasp_.v_(0) = 0.0; grasp_.v_(1) = 0.0; grasp_.v_(2) = 1.0; //cylinder normal
-    grasp_.p_(0) = 0.9; grasp_.p_(1) = -0.9; grasp_.p_(2) = 0.16; //reference point on the cylinder axis
-    grasp_.r1_ = 0.05; grasp_.r2_ = 0.15; //cylinder radii
+    grasp_.p_(0) = 0.2; grasp_.p_(1) = 0; grasp_.p_(2) = 0.1; //reference point on the cylinder axis
+    grasp_.r1_ = 0.015; grasp_.r2_ = 0.025; //cylinder radii
     grasp_.n1_ =grasp_.v_; grasp_.n2_ = -grasp_.v_; //plane normals
-    grasp_.d1_ = 0.2; grasp_.d2_= -0.35; //plane offsets
-#endif
+    grasp_.d1_ = 0.1; grasp_.d2_= -0.3; //plane offsets
+
 
     //PLACEMENT ZONES
     PlaceInterval place;
