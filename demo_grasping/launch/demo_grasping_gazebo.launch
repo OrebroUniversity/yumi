@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- LAUNCH INTERFACE -->
+
+  <arg name="controllers" default="joint_state_controller hqp_vel_controller"/>
+  <arg name="hardware_interface" default="VelocityJointInterface"/>
+
+  <!-- LAUNCH IMPLEMENTATION -->
+
+  <!--Load the URDF and launch Gazebo-->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="false"/>
+    <arg name="headless" value="true"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
+
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model yumi"  respawn="false" output="screen" />
+
+  <!-- robot state publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <remap from="/joint_states" to="/yumi/joint_states" />
+  </node>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+
+ <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
+ <rosparam file="$(find demo_grasping)/hqp_tasks/task_definitions.yaml" command="load" ns="/yumi"/>
+
+  <!-- Show in Rviz   -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
+
+  <!-- launch the demo_grasping node -->
+  <node name="demo_grasping" pkg="demo_grasping" type="demo_grasping" respawn="false" output="screen" >
+     <param name="with_gazebo" type="bool" value="true"/>
+     <param name="bag_path" type="string" value="$(find demo_grasping)/data"/>
+
+     <!-- prototype grasp frame and pose -->
+     <param name="grasp_req_frame" value="world"/>
+     <param name="grasp_req_radius" value="0.05"/>
+     <param name="grasp_req_height" value="0.15"/>
+     <param name="grasp_req_px" value="-0.04"/>
+     <param name="grasp_req_py" value="0.68"/>
+     <param name="grasp_req_pz" value="0.07"/>
+     <param name="grasp_req_ox" value="0"/>
+     <param name="grasp_req_oy" value="0"/>
+     <param name="grasp_req_oz" value="0"/>
+     <param name="grasp_req_ow" value="1"/>
+     
+     <remap from="/get_grasp_interval" to="/gplanner/plan_grasp"/>
+     <remap from="/task_status_array" to="/yumi/hqp_vel_controller/task_status_array"/>
+     <remap from="/set_tasks" to="/yumi/hqp_vel_controller/set_tasks"/>
+     <remap from="/remove_tasks" to="/yumi/hqp_vel_controller/remove_tasks"/>
+     <remap from="/load_tasks" to="/yumi/hqp_vel_controller/load_tasks"/>
+     <remap from="/activate_hqp_control" to="/yumi/hqp_vel_controller/activate_hqp_control"/>
+     <remap from="/reset_hqp_control" to="/yumi/hqp_vel_controller/reset_hqp_control"/>
+     <remap from="/visualize_task_geometries" to="/yumi/hqp_vel_controller/visualize_task_geometries"/>
+     <remap from="/set_physics_properties" to="/gazebo/set_physics_properties"/>
+     <remap from="/joint_states" to="/yumi/joint_states"/>
+     <remap from="/switch_controller" to="/yumi/controller_manager/switch_controller"/>
+     <remap from="/reset_map" to="/gplanner/clear_map"/>
+
+  </node>
+
+ <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
+ <rosparam file="$(find demo_grasping)/hqp_tasks/task_definitions.yaml" command="load" ns="/yumi"/>
+
+
+  <!-- Launch RQT for control tuning 
+       <node name="yumi_rqt" pkg="rqt_gui" type="rqt_gui" respawn="false"
+       output="screen" args="-perspective-file $(find yumi_control)/launch/yumi_forward_pos_control.perspective"/-->
+
+</launch>
