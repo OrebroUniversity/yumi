@@ -37,4 +37,5 @@ PERS bool ROS_new_joint_target_right := FALSE;       ! can safely READ, but shou
 
 PERS ROS_msg_joint_data next_joint_target;
 
+PERS num cycle_time := 0.02; 
 ENDMODULE
