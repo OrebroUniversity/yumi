@@ -127,7 +127,7 @@ task_definitions:
             - link_frame: world
               geometries: 
                 - g_type: 3 #plane
-                  g_data: [0.0, 0.0, 1.0, 0.1] 
+                  g_data: [0.0, 0.0, 1.0, 0.115] 
             - link_frame: yumi_link_5_r
               geometries: 
                 - g_type: 10 #sphere
@@ -147,7 +147,7 @@ task_definitions:
             - link_frame: world
               geometries: 
                 - g_type: 3 #plane
-                  g_data: [0.0, 0.0, 1.0, 0.1] 
+                  g_data: [0.0, 0.0, 1.0, 0.115] 
             - link_frame: yumi_link_6_r
               geometries: 
                 - g_type: 10 #sphere
@@ -167,7 +167,7 @@ task_definitions:
             - link_frame: world
               geometries: 
                 - g_type: 3 #plane
-                  g_data: [0.0, 0.0, 1.0, 0.1] 
+                  g_data: [0.0, 0.0, 1.0, 0.115] 
             - link_frame: gripper_r_base
               geometries: 
                 - g_type: 1 #point
