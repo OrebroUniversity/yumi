@@ -14,7 +14,7 @@ rosservice call /yumi/hqp_vel_controller/set_tasks '{tasks: [{t_type: 1, priorit
 
 
 #visualize the tasks
-rosservice call /yumi/hqp_vel_controller/visualize_task_geometries '{ids: [7,8,9,10,11,12]}'
+rosservice call /yumi/hqp_vel_controller/visualize_task_geometries '{ids: [7,8,9,10,11,12,13,14,15]}'
 
 rosservice call /yumi/hqp_vel_controller/activate_hqp_control true
 

@@ -178,5 +178,71 @@ task_definitions:
                   g_data: [0.036, -0.035, 0.135]
                 - g_type: 1 #point
                   g_data: [-0.036, -0.035, 0.135]  
+
+       - t_type: 1 #projection
+         priority: 1
+         name: yumi_link_5_l_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.1 #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-2.0]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.115] 
+            - link_frame: yumi_link_5_l
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [-0.023, -0.04, 0.1, 0.04] 
+
+       - t_type: 1 #projection
+         priority: 1
+         name: yumi_link_6_l_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.1  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-2.0]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.115] 
+            - link_frame: yumi_link_6_l
+              geometries: 
+                - g_type: 10 #sphere
+                  g_data: [0.01, -0.01, -0.01, 0.06]   
+
+       - t_type: 1 #projection
+         priority: 1
+         name: gripper_l_points_avoidance
+         is_equality_task: 0
+         task_frame: world
+         ds: 0.0 #safety margin
+         di: 0.1  #influence zone
+         dynamics: 
+           d_type: 1
+           d_data: [-2.0]
+         t_links:
+            - link_frame: world
+              geometries: 
+                - g_type: 3 #plane
+                  g_data: [0.0, 0.0, 1.0, 0.115] 
+            - link_frame: gripper_l_base
+              geometries: 
+                - g_type: 1 #point
+                  g_data: [0.036, 0.035, 0.135] 
+                - g_type: 1 #point
+                  g_data: [-0.036, 0.035, 0.135] 
+                - g_type: 1 #point
+                  g_data: [0.036, -0.035, 0.135]
+                - g_type: 1 #point
+                  g_data: [-0.036, -0.035, 0.135]  
   
  
