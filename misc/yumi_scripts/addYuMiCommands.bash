@@ -11,6 +11,7 @@ if [ -z "$1" ]; then
 fi
 
 # Add YuMi alias for running scripts
+echo "" >> ~/.bashrc # add in blank line before addition
 echo "# From: YuMi Github Repo" >> ~/.bashrc
 echo "# Purpose: Alias for YuMi commands" >> ~/.bashrc
 echo "alias yumi='bash ${1}/misc/yumi_scripts/yumi.bash'" >> ~/.bashrc
