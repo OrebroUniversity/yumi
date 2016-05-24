@@ -10,27 +10,27 @@ Work Around:
  - Take the original file from SolidWorks and save it as a STEP file.
  - Import the STEP file into a free CAD software called FreeCAD
      NOTE: FreeCAD can only export in the units of milimeters, which is why the file needs be scaled as stated below
- - The file needs to be scaled by 0.001 on each access, this can be done using the walkthrough in this repo
+ - The file needs to be scaled by 0.001 on each axis, this can be done using the walkthrough in this repo
      NOTE: The walkthrough can be found at misc/FreeCAD/scaleSTL.py
            Scaling will mess up the origin, follow the step below to fix this issue
  - Export the file as mentioned in the walkthrough, and this will remove the [WARN] issue with RViz
- - Since the origin get changed through this process, load this file back into SolidWorks
+ - Since the origin is generally changed through this process, load this file back into SolidWorks
      NOTE: To load into SolidWorks properly, do the following:
             - Click open and find the STL file
-   				  - On the right hand size, choose the file type as ".stl"
+            - On the right hand size, choose the file type as ".stl"
             - Click the options button, and in the "Input As" seciton choosed "Solid Body"
             - Click ok, then click open
  - Get the distance from the desired origin position to the current origin
- - Write down the <dx,dy,dz> values and use those at the <origin_offset> variable below
+ - Write down the <dx,dy,dz> values and use those as the <origin_offset> variable below
  
 
 /* Variable Names to Change in URDF Below*/
 
-<object> - the name of the object
-<object>_link - can use the same name for object as in the previous variable
-<file_location> - folder location that contains the STL file
-<file_name> - name of the STL file
-<origin_offset> - offset retrieved from SolidWorks
+<object> - string - the name of the object
+<object>_link - string - can use the same name for object as in the previous variable
+<file_location> - string - folder location that contains the STL file
+<file_name> - string - name of the STL file
+<origin_offset> - "dx dy dz" - offset retrieved from SolidWorks, replace dx, dy, and dx appropriately
 
 
 /* Example Code for URDF */
