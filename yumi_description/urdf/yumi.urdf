@@ -36,6 +36,7 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
 
+
   <!--===================================-->
   <!-------------- Materials -------------->
   <!---- Programmer: Frederick Wachter ---->
@@ -57,6 +58,7 @@
   <!---------- End of Additions ---------->
   <!--==================================-->
   
+
   <gazebo>
     <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_controller">
       <robotNamespace>/yumi</robotNamespace>
@@ -182,10 +184,6 @@
     <origin rpy="-0.9795   -0.5682   -2.3155" xyz="0.05355 -0.0725 0.41492"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.94087978961" upper="2.94087978961" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_1_r">
@@ -216,10 +214,6 @@
     <origin rpy="1.57079632679 0.0 0.0" xyz="0.03 0.0 0.1"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.50454747661" upper="0.759218224618" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_2_r">
@@ -250,10 +244,6 @@
     <origin rpy="-1.57079632679 0.0 0.0" xyz="-0.03 0.17283 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.94087978961" upper="2.94087978961" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_3_r">
@@ -284,10 +274,6 @@
     <origin rpy="1.57079632679 -1.57079632679 0.0" xyz="-0.04188 0.0 0.07873"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.15548162621" upper="1.3962634016" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_4_r">
@@ -318,10 +304,6 @@
     <origin rpy="-1.57079632679 0.0 0.0" xyz="0.0405 0.16461 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-5.06145483078" upper="5.06145483078" velocity="6.98131700798"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_5_r">
@@ -352,10 +334,6 @@
     <origin rpy="1.57079632679 0.0 0.0" xyz="-0.027 0 0.10039"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-1.53588974176" upper="2.40855436775" velocity="6.98131700798"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_6_r">
@@ -386,10 +364,6 @@
     <origin rpy="-1.57079632679 0.0 0.0" xyz="0.027 0.029 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-3.99680398707" upper="3.99680398707" velocity="6.98131700798"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_7_r">
@@ -421,10 +395,6 @@
     <origin rpy="0.9781 -0.5716 2.3180" xyz="0.05355 0.07250 0.41492"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.94087978961" upper="2.94087978961" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_1_l">
@@ -455,10 +425,6 @@
     <origin rpy="1.57079632679 0.0 0.0" xyz="0.03 0.0 0.1"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.50454747661" upper="0.759218224618" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_2_l">
@@ -489,10 +455,6 @@
     <origin rpy="-1.57079632679 0.0 0.0" xyz="-0.03 0.17283 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.94087978961" upper="2.94087978961" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_3_l">
@@ -523,10 +485,6 @@
     <origin rpy="1.57079632679 -1.57079632679 0.0" xyz="-0.04188 0.0 0.07873"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-2.15548162621" upper="1.3962634016" velocity="3.14159265359"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_4_l">
@@ -557,10 +515,6 @@
     <origin rpy="-1.57079632679 0.0 0.0" xyz="0.0405 0.16461 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-5.06145483078" upper="5.06145483078" velocity="6.98131700798"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_5_l">
@@ -591,10 +545,6 @@
     <origin rpy="1.57079632679 0.0 0.0" xyz="-0.027 0 0.10039"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-1.53588974176" upper="2.40855436775" velocity="6.98131700798"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_6_l">
@@ -625,10 +575,6 @@
     <origin rpy="-1.57079632679 0.0 0.0" xyz="0.027 0.029 0.0"/>
     <axis xyz="0 0 1"/>
     <limit effort="300" lower="-3.99680398707" upper="3.99680398707" velocity="6.98131700798"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="yumi_link_7_l">
@@ -855,10 +801,6 @@
     <origin rpy="0 0 0" xyz="0 -0.0065 0.0837"/>
     <axis xyz="-1 0 0"/>
     <limit effort="300" lower="0" upper="0.025" velocity="0.02"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
   </joint>
   <link name="gripper_r_finger_l">
@@ -889,10 +831,6 @@
     <origin rpy="0 0 3.14159265359" xyz="0 0.0065 0.0837"/>
     <axis xyz="-1 0 0"/>
     <limit effort="300" lower="0" upper="0.025" velocity="0.02"/>
-    <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
     <dynamics damping="0.5"/>
     <mimic joint="gripper_r_joint"/>
   </joint>
@@ -923,7 +861,7 @@
   <!----------- Last Modified: 2016-05-24 ----------->
   <!--=============================================-->
 
-  <!---- Camera Holder ----->
+  <!---- Camera Assembly----->
   <link name="camera_assembly"> <!-- Link: Collision for Camera Holder Assembly -->
     <collision>
       <origin rpy="0 0 0" xyz="0 0.025 0.04"/>
