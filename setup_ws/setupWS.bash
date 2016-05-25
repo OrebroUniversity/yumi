@@ -122,6 +122,9 @@ echo "Workspace setup successfully." # notify user the setup was successful
 
 # Give directions to user on how to run YuMi files
 echo "" # add in a blank space before instructions
+echo "Please use the following command before continuing:"
+echo "cd && source ~/.bashrc" # go to the home directory and ensure bashrc has been source after changes
+echo ""
 echo "Please refer to the repo Wiki page for futher instructions"
 echo "Wiki location: www.github.com/ethz-asl/yumi/wiki"
 echo "" # add in a blank space after instructions
