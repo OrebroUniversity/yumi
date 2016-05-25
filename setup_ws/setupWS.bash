@@ -4,10 +4,10 @@
 # LAST MODIFIED: 2016-05-25
 # PURPOSE: Setup workspace to be able to run YuMi files
 
-# Before Running this File:
-#   - If not done already, clone YuMi repo into home directory: git clone https://github.com/ethz-asl/yumi.git
-#      - Or move the already cloned repo into the home directory
-#   - Run the following command: cd && bash yumi/setup_ws/setupWS.bash
+# How to set up the workspace:
+#  - Clone this repo into the home directory: cd && git clone https://www.github.com/ethz-asl/yumi
+#      (or move the file to the home directory: mv <path>/yumi ~/yumi)
+#  - Run the following command: bash ~/yumi/setup_ws/setupWS.bash
 
 #=========================================
 #---------- PRE-SETUP CHECKING -----------
@@ -25,11 +25,11 @@ fi
 
 # Ask the user if they are sure they would like to continue the setup
 # REFERENCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
-read -p "Are you sure you would like to continue with the setup (y/n)? " response
+read -p "Are you sure you would like to continue with the setup (y/n)? " response # get response from user
 case "$response" in 
-	y|Y ) echo "Continuing setup... ";;
-	n|N ) echo "Exiting setup... " && echo "Exited setup." && exit;;
-	* ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;;
+	y|Y ) echo "Continuing setup... ";; # continue with the setup
+	n|N ) echo "Exiting setup... " && echo "Exited setup." && exit;; # exit the setup
+	* ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;; # invalid input
 esac
 
 
@@ -40,28 +40,34 @@ echo "[Part 1/3] Verifying installs... " # notify the user that installs will po
 
 # Ask user if ROS Ingigo is installed
 # REFERENCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
-read -p "Is ROS Indigo installed on this machine (y/n)? " response
+read -p "Is ROS Indigo installed on this machine (y/n)? " response # get response from user
 case "$response" in 
-	y|Y ) testing=1;;
-	n|N ) testing=0;;
-	* ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;;
+	y|Y ) existROS=1;; # ROS has already been setup
+	n|N ) existROS=0;; # Set flag to install ROS
+	* ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;; # invalid input
 esac
 
 # If ROS Indigo has not been setup yet
-if [ $testing -eq 0 ]; then
+if [ $existROS -eq 0 ]; then
 	sudo apt-get update # update potential install list
 
 	sudo apt-get install ros-indigo-desktop-full -y # install indigo desktop
-	sudo apt-get install ros-indigo-moveit-full -y # install MoveIt!
 
-	source /opt/ros/indigo/setup.bash # setup the environment
 	sudo rosdep init # initialize ROS
 	rosdep update # update ROS dependencies
 fi
 
+# Ensure that MoveIt! is Downloaded
+sudo apt-get install ros-indigo-moveit-full -y # install MoveIt!
+source /opt/ros/indigo/setup.bash # setup the environment
+
+echo "Verified installs." # notify user that the installs have been verified
+
+
 #======================================
 #---------- SETUP WORKSPACE -----------
 #======================================
+clear # clear the terminal window
 echo "[Part 2/3] Setting up workspace... " # notify user the workspace setup has started
 
 # Create Workspace
@@ -77,15 +83,18 @@ git clone https://github.com/ros-industrial/industrial_core.git yumi_ws/src/indu
 cd ~/yumi_ws # go to the YuMi workspace
 catkin_make # build the workspace
 
+echo "Finished setting up the workspace." # notify user that the workspace has been setup
+
 
 #======================================
 #-------- FINALIZE INSTALLS -----------
 #======================================
+clear # clear the terminal window
 echo "[Part 3/3] Finalizing installs... " # notify user installations are being finalized
 
 # Add Workspace Variables to Allow Command Line Capabilities
 bash ~/yumi_ws/src/yumi/setup_ws/setupWSVariables.bash ~/yumi_ws/src/yumi # setup command line variables for running YuMi easier
-if [ $testing -eq 0 ]; then # if this is the first time for ROS install
+if [ $existROS -eq 0 ]; then # if this is the first time for ROS install
 	echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc # source ROS
 fi
 echo "source ~/yumi_ws/devel/setup.bash" >> ~/.bashrc # source workspace for future terminal windows on startup
@@ -98,13 +107,13 @@ echo "Finished setting up workspace." # notify user the setup has finished
 #-- Add in checks to ensure correct install? --
 #---------- Note Create: 2016-05-24 -----------
 #----------------------------------------------
-clear # clear the terminal window
-echo "Workspace setup successfully." # notify user the setup was successful
 
 
 #======================================
 #---------- USER DIRECTIONS -----------
 #======================================
+clear # clear the terminal window
+echo "Workspace setup successfully." # notify user the setup was successful
 
 #--------------------------------------
 #-- Need to add in Wiki page to repo --
@@ -112,16 +121,9 @@ echo "Workspace setup successfully." # notify user the setup was successful
 #--------------------------------------
 
 # Give directions to user on how to run YuMi files
-echo ""
-echo "The following commands can be used to run the YuMi simulation from command line."
-echo "NOTE: Ensure roscore is running in a seperate terminal window"
-echo "  - For Demo Only:"
-echo "      In a terminal window, run: yumi_demo"
-echo "  - For Running on an existing YuMi connected to this computer:"
-echo "  NOTE: YuMi must have been setup in RobotStudio according to the wiki or it will not work"
-echo "      In one terminal window, run: yumi_server 192.168.125.1"
-echo "      In another terminal window, run: yumi"
-echo "    NOTE: Wait a few seconds before running the second command"
-echo ""
+echo "" # add in a blank space before instructions
+echo "Please refer to the repo Wiki page for futher instructions"
+echo "Wiki location: www.github.com/ethz-asl/yumi/wiki"
+echo "" # add in a blank space after instructions
 
 

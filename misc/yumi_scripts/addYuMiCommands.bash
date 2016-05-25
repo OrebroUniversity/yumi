@@ -16,7 +16,7 @@ echo "# From: YuMi Github Repo" >> ~/.bashrc
 echo "# Purpose: Alias for YuMi commands" >> ~/.bashrc
 echo "alias yumi='bash ${1}/misc/yumi_scripts/yumi.bash'" >> ~/.bashrc
 echo "alias yumi_demo='bash ${1}/misc/yumi_scripts/yumi_demo.bash'" >> ~/.bashrc
-echo "alias yumi_server='bash ${1}/misc/yumi_scripts/yumi.bash'" >> ~/.bashrc
+echo "alias yumi_server='bash ${1}/misc/yumi_scripts/yumi_server.bash'" >> ~/.bashrc
 echo "" >> ~/.bashrc # add in blank line underneath addition
 
 
