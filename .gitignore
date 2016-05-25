@@ -19,6 +19,47 @@ lbr_fri/fri
 # patch results
 *.rej
 
+
+# PROGRAMMER: Frederick Wachter #
+# FIRST MODIFIED: 2016-05-25    #
+# LAST MODIFIED: 2016-05-25     #
+# PURPOSE: Adjusting ignores    #
+# REFERENCE: https://gist.github.com/octocat/9257657
+
+# Compuled Source
+*.com
+*.class
+*.so
+
+# Packages #
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Log and Databases # 
+*.log
+*.sql
+*.sqlite
+
+# OSX Generated Files #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.ehthumbs.db
+Thumbs.db
+
+#                  #
+# End of Additions #
+#                  #
+
+
 # Build products
 tmp/*
 build/Makefile*
@@ -35,9 +76,6 @@ build
 *#
 *.#
 *.obj
-*.urdf
-*.dae
-.stl
 *.zip
 *.a
 *.dll
