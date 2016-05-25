@@ -1,7 +1,7 @@
 #!/bin/bash
 # PROGRAMMER: Frederick Wachter
 # DATE CREATED: 2016-05-24
-# LAST MODIFIED: 2016-05-24
+# LAST MODIFIED: 2016-05-25
 # PURPOSE: Setup workspace to be able to run YuMi files
 
 # Before Running this File:
@@ -27,40 +27,42 @@ fi
 # REFERENCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
 read -p "Are you sure you would like to continue with the setup (y/n)? " response
 case "$response" in 
-  y|Y ) echo "Continuing setup... ";;
-  n|N ) echo "Exiting setup... " && echo "Exited setup." && exit;;
-  * ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;;
+	y|Y ) echo "Continuing setup... ";;
+	n|N ) echo "Exiting setup... " && echo "Exited setup." && exit;;
+	* ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;;
 esac
 
 
 #======================================
 #---------- VERIFY INSTALLS -----------
 #======================================
-echo "[Part 1/2] Verifying installs... " # notify the user that installs will potentially be made
+echo "[Part 1/3] Verifying installs... " # notify the user that installs will potentially be made
 
-sudo apt-get update # update potential install list
+# Ask user if ROS Ingigo is installed
+# REFERENCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
+read -p "Is ROS Indigo installed on this machine (y/n)? " response
+case "$response" in 
+	y|Y ) testing=1;;
+	n|N ) testing=0;;
+	* ) echo "invalid response. Please use 'y' for Yes and 'n' for No" && exit;;
+esac
 
-# ROS Installs
-sudo apt-get install ros-indigo-desktop-full -y # install indigo desktop
+# If ROS Indigo has not been setup yet
+if [ $testing -eq 0 ]; then
+	sudo apt-get update # update potential install list
 
-# MoveIt! Installs
-#sudo apt-get install python-wstool -y -- DO I NEED THIS? --
+	sudo apt-get install ros-indigo-desktop-full -y # install indigo desktop
+	sudo apt-get install ros-indigo-moveit-full -y # install MoveIt!
 
-# RViz Installs
-#sudo apt-get install ros-indigo-rviz -y -- DO I NEED THIS? --
-
-# Install ROS and related packages if not alredy installed
-# Initialize ROS if not already initialized
-
-exit # add breakpoint
-
-sudo rosdep init # initialize ROS
-
+	source /opt/ros/indigo/setup.bash # setup the environment
+	sudo rosdep init # initialize ROS
+	rosdep update # update ROS dependencies
+fi
 
 #======================================
 #---------- SETUP WORKSPACE -----------
 #======================================
-echo "[Part 2/2] Setting up workspace... " # notify user the setup has started
+echo "[Part 2/3] Setting up workspace... " # notify user the workspace setup has started
 
 # Create Workspace
 mkdir yumi_ws # create workspace folder
@@ -75,8 +77,17 @@ git clone https://github.com/ros-industrial/industrial_core.git yumi_ws/src/indu
 cd ~/yumi_ws # go to the YuMi workspace
 catkin_make # build the workspace
 
+
+#======================================
+#-------- FINALIZE INSTALLS -----------
+#======================================
+echo "[Part 3/3] Finalizing installs... " # notify user installations are being finalized
+
 # Add Workspace Variables to Allow Command Line Capabilities
 bash ~/yumi_ws/src/yumi/setup_ws/setupWSVariables.bash ~/yumi_ws/src/yumi # setup command line variables for running YuMi easier
+if [ $testing -eq 0 ]; then # if this is the first time for ROS install
+	echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc # source ROS
+fi
 echo "source ~/yumi_ws/devel/setup.bash" >> ~/.bashrc # source workspace for future terminal windows on startup
 echo "# End of Addition" >> ~/.bashrc # indicate that there are no more additions for YuMi
 source ~/.bashrc # ensure all changes has been soruced
@@ -87,6 +98,7 @@ echo "Finished setting up workspace." # notify user the setup has finished
 #-- Add in checks to ensure correct install? --
 #---------- Note Create: 2016-05-24 -----------
 #----------------------------------------------
+clear # clear the terminal window
 echo "Workspace setup successfully." # notify user the setup was successful
 
 
@@ -102,6 +114,7 @@ echo "Workspace setup successfully." # notify user the setup was successful
 # Give directions to user on how to run YuMi files
 echo ""
 echo "The following commands can be used to run the YuMi simulation from command line."
+echo "NOTE: Ensure roscore is running in a seperate terminal window"
 echo "  - For Demo Only:"
 echo "      In a terminal window, run: yumi_demo"
 echo "  - For Running on an existing YuMi connected to this computer:"
