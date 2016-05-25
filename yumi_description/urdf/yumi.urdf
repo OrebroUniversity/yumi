@@ -37,12 +37,12 @@
   </material>
 
 
-  <!--===================================-->
-  <!-------------- Materials -------------->
-  <!---- Programmer: Frederick Wachter ---->
-  <!----- First Modified: 2016-05-23 ------>
-  <!------ Last Modified: 2016-05-24 ------>
-  <!--===================================-->
+  <!--                                   -->
+  <!--             Materials             -->
+  <!--   Programmer: Frederick Wachter   -->
+  <!--    First Modified: 2016-05-23     -->
+  <!--     Last Modified: 2016-05-24     -->
+  <!--                                   -->
 
   <material name="Drexel_Blue">
     <color rgba="0.027 0.161 0.302 1.0"/>
@@ -54,9 +54,9 @@
     <color rgba="1.0 1.0 1.0 0.5"/>
   </material>
 
-  <!--==================================-->
-  <!---------- End of Additions ---------->
-  <!--==================================-->
+  <!--                                  -->
+  <!--         End of Additions         -->
+  <!--                                  -->
   
 
   <gazebo>
@@ -69,14 +69,14 @@
   <link name="world"/>
 
 
-  <!--===================================-->
-  <!---------- Workspace Objects ---------->
-  <!---- Programmer: Frederick Wachter ---->
-  <!----- First Modified: 2016-05-20 ------>
-  <!------ Last Modified: 2016-05-23 ------>
-  <!--===================================-->
+  <!--                                   -->
+  <!--         Workspace Objects         -->
+  <!--   Programmer: Frederick Wachter   -->
+  <!--    First Modified: 2016-05-20     -->
+  <!--     Last Modified: 2016-05-23     -->
+  <!--                                   -->
 
-  <!----- Table Elements ----->
+  <!-- Table Elements -->
   <link name="table"/> <!-- Link: Table to World -->
   <link name="table_top"> <!-- Link: Table top to table link -->
     <visual>
@@ -105,7 +105,7 @@
     <child link="table"/>
     <origin rpy="0 0 0" xyz="-0.07 0.54 -0.013"/>
   </joint>
-  <!-------------------------->
+  <!--                      -->
 
 
   <!-- YuMi Stand Elements -->
@@ -127,10 +127,10 @@
     </collision>
   </link>
 
-  <!------------------------------->
-  <!---- NOTE: Attach to Yumi? ---->
-  <!-- Note Created: 2015-05-23 --->
-  <!------------------------------->
+  <!--                           -->
+  <!--   NOTE: Attach to Yumi?   -->
+  <!-- Note Created: 2015-05-23  -->
+  <!--                           -->
   <joint name="base_to_stand" type="fixed"> <!-- Joint: Stand to YuMi stand -->
     <parent link="stand"/>
     <child link="stand_base"/>
@@ -141,11 +141,11 @@
     <child link="stand"/>
     <origin rpy="0 0 0" xyz="-0.466 -0.26 0"/>
   </joint>
-  <!------------------------->
+  <!--                     -->
 
-  <!--==================================-->
-  <!---------- End of Additions ---------->
-  <!--==================================-->
+  <!--                                  -->
+  <!--         End of Additions         -->
+  <!--                                  -->
 
 
   <!--yumi-->
@@ -854,14 +854,14 @@
   <!--left gripper-->
 
 
-  <!--=============================================-->
-  <!---------- Camera Assembly - Left Hand ---------->
-  <!--------- Programmer: Frederick Wachter --------->
-  <!---------- First Modified: 2016-05-23 ----------->
-  <!----------- Last Modified: 2016-05-24 ----------->
-  <!--=============================================-->
+  <!--                                             -->
+  <!--         Camera Assembly - Left Hand         -->
+  <!--        Programmer: Frederick Wachter        -->
+  <!--         First Modified: 2016-05-23          -->
+  <!--          Last Modified: 2016-05-24          -->
+  <!--                                             -->
 
-  <!---- Camera Assembly----->
+  <!-- Camera Assembly -->
   <link name="camera_assembly"> <!-- Link: Collision for Camera Holder Assembly -->
     <collision>
       <origin rpy="0 0 0" xyz="0 0.025 0.04"/>
@@ -872,11 +872,11 @@
     </collision>
   </link>
   <link name="camera_holder"> <!-- Link: Camera Holder to Hand -->
-    <!------------------------------------>
-    <!- Need to add inertial properties -->
-    <!--     <inertial></inertial>      -->
-    <!----- Note Created: 2015-05-23 ----->
-    <!------------------------------------>
+    <!--                                 -->
+    <!-- Need to add inertial properties -->
+    <!--      <inertial></inertial>      -->
+    <!--     Note Created: 2015-05-23    -->
+    <!--                                 -->
     <visual>
       <origin rpy="0 0 0" xyz="-0.0377 -0.0129 0"/>
       <geometry>
@@ -945,11 +945,11 @@
     <child link="vi_sensor"/>
     <origin rpy="0 0 0" xyz="0 -0.0138 0.028"/>
   </joint>
-  <!------------------------>
+  <!--                    -->
 
-  <!--==================================-->
-  <!---------- End of Additions ---------->
-  <!--==================================-->
+  <!--                                  -->
+  <!--         End of Additions         -->
+  <!--                                  -->
 
 
 </robot>
