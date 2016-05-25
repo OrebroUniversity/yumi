@@ -52,6 +52,8 @@ sudo apt-get install ros-indigo-desktop-full -y # install indigo desktop
 # Install ROS and related packages if not alredy installed
 # Initialize ROS if not already initialized
 
+exit # add breakpoint
+
 sudo rosdep init # initialize ROS
 
 
@@ -73,24 +75,30 @@ git clone https://github.com/ros-industrial/industrial_core.git yumi_ws/src/indu
 cd ~/yumi_ws # go to the YuMi workspace
 catkin_make # build the workspace
 
-echo "source ~/yumi_ws/devel/setup.bash" >> ~/.bashrc # source workspace for future terminal windows on startup
-
 # Add Workspace Variables to Allow Command Line Capabilities
-bash ~/yumi_ws/src/yumi/setupWSVariables.bash ~/yumi_ws/src/yumi # setup command line variables for running YuMi easier
+bash ~/yumi_ws/src/yumi/setup_ws/setupWSVariables.bash ~/yumi_ws/src/yumi # setup command line variables for running YuMi easier
+echo "source ~/yumi_ws/devel/setup.bash" >> ~/.bashrc # source workspace for future terminal windows on startup
+echo "# End of Addition" >> ~/.bashrc # indicate that there are no more additions for YuMi
 source ~/.bashrc # ensure all changes has been soruced
 
 echo "Finished setting up workspace." # notify user the setup has finished
 
-#----------------------------------------------------
-#----- Add in checks to ensure correct install? -----
-#------------- Note Create: 2016-05-24 --------------
-#----------------------------------------------------
+#----------------------------------------------
+#-- Add in checks to ensure correct install? --
+#---------- Note Create: 2016-05-24 -----------
+#----------------------------------------------
 echo "Workspace setup successfully." # notify user the setup was successful
 
 
 #======================================
 #---------- USER DIRECTIONS -----------
 #======================================
+
+#--------------------------------------
+#-- Need to add in Wiki page to repo --
+#------ Note Create: 2016-05-24 -------
+#--------------------------------------
+
 # Give directions to user on how to run YuMi files
 echo ""
 echo "The following commands can be used to run the YuMi simulation from command line."
