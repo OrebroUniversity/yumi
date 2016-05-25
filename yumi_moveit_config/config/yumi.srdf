@@ -9,6 +9,11 @@
     <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="both_arms">
+      <group name="left_arm"/>
+      <group name="right_arm"/>
+    </group>
+
     <group name="left_arm">
         <joint name="world_joint" />
         <joint name="yumi_joint_1_l" />
@@ -31,8 +36,80 @@
         <joint name="yumi_joint_6_r" />
         <joint name="yumi_link_7_r_joint" />
     </group>
+
+    <group_state name="calc" group="both_arms">
+      <joint name="yumi_joint_1_l" value="0"/>
+      <joint name="yumi_joint_1_r" value="0"/>
+      <joint name="yumi_joint_2_l" value="-2.2689"/>
+      <joint name="yumi_joint_2_r" value="-2.2689"/>
+      <joint name="yumi_joint_7_l" value="2.3562"/>
+      <joint name="yumi_joint_7_r" value="-2.3562"/>
+      <joint name="yumi_joint_3_l" value="0.5236"/>
+      <joint name="yumi_joint_3_r" value="0.5236"/>
+      <joint name="yumi_joint_4_l" value="0"/>
+      <joint name="yumi_joint_4_r" value="0"/>
+      <joint name="yumi_joint_5_l" value="0.6981"/>
+      <joint name="yumi_joint_5_r" value="0.6981"/>
+      <joint name="yumi_joint_6_l" value="0"/>
+      <joint name="yumi_joint_6_r" value="0"/>
+    </group_state>
+    <group_state name="calc" group="left_arm">
+      <joint name="yumi_joint_1_l" value="0"/>
+      <joint name="yumi_joint_2_l" value="-2.2689"/>
+      <joint name="yumi_joint_7_l" value="2.3562"/>
+      <joint name="yumi_joint_3_l" value="0.5236"/>
+      <joint name="yumi_joint_4_l" value="0"/>
+      <joint name="yumi_joint_5_l" value="0.6981"/>
+      <joint name="yumi_joint_6_l" value="0"/>
+    </group_state>
+    <group_state name="calc" group="right_arm">
+      <joint name="yumi_joint_1_r" value="0"/>
+      <joint name="yumi_joint_2_r" value="-2.2689"/>
+      <joint name="yumi_joint_7_r" value="-2.3562"/>
+      <joint name="yumi_joint_3_r" value="0.5236"/>
+      <joint name="yumi_joint_4_r" value="0"/>
+      <joint name="yumi_joint_5_r" value="0.6981"/>
+      <joint name="yumi_joint_6_r" value="0"/>
+    </group_state>
+
+    <group_state name="home" group="both_arms">
+      <joint name="yumi_joint_1_l" value="-1.2217"/>
+      <joint name="yumi_joint_1_r" value="1.2217"/>
+      <joint name="yumi_joint_2_l" value="-1.3963"/>
+      <joint name="yumi_joint_2_r" value="-1.3963"/>
+      <joint name="yumi_joint_7_l" value="1.7453"/>
+      <joint name="yumi_joint_7_r" value="-1.7453"/>
+      <joint name="yumi_joint_3_l" value="0.4363"/>
+      <joint name="yumi_joint_3_r" value="0.4363"/>
+      <joint name="yumi_joint_4_l" value="0.5236"/>
+      <joint name="yumi_joint_4_r" value="-0.5236"/>
+      <joint name="yumi_joint_5_l" value="0.6981"/>
+      <joint name="yumi_joint_5_r" value="0.6981"/>
+      <joint name="yumi_joint_6_l" value="0"/>
+      <joint name="yumi_joint_6_r" value="-3.1416"/>
+    </group_state>
+    <group_state name="home" group="left_arm">
+      <joint name="yumi_joint_1_l" value="-1.2217"/>
+      <joint name="yumi_joint_2_l" value="-1.3963"/>
+      <joint name="yumi_joint_7_l" value="1.7453"/>
+      <joint name="yumi_joint_3_l" value="0.4363"/>
+      <joint name="yumi_joint_4_l" value="0.5236"/>
+      <joint name="yumi_joint_5_l" value="0.6981"/>
+      <joint name="yumi_joint_6_l" value="0"/>
+    </group_state>
+    <group_state name="home" group="right_arm">
+      <joint name="yumi_joint_1_r" value="1.2217"/>
+      <joint name="yumi_joint_2_r" value="-1.3963"/>
+      <joint name="yumi_joint_7_r" value="-1.7453"/>
+      <joint name="yumi_joint_3_r" value="0.4363"/>
+      <joint name="yumi_joint_4_r" value="-0.5236"/>
+      <joint name="yumi_joint_5_r" value="0.6981"/>
+      <joint name="yumi_joint_6_r" value="-3.1416"/>
+    </group_state>
+
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="world_joint" type="fixed" parent_frame="world" child_link="yumi_body" />
+    
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="gripper_l_base" link2="gripper_l_finger_l" reason="Adjacent" />
     <disable_collisions link1="gripper_l_base" link2="gripper_l_finger_r" reason="Adjacent" />
