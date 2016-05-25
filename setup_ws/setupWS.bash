@@ -6,7 +6,7 @@
 
 # Before Running this File:
 #   - If not done already, clone YuMi repo into home directory: git clone https://github.com/ethz-asl/yumi.git
-#      - Or Move the already cloned repo into the home directory
+#      - Or move the already cloned repo into the home directory
 #   - Run the following command: cd && bash yumi/setup_ws/setupWS.bash
 
 #=========================================
@@ -24,7 +24,7 @@ if [ -d "yumi_ws" ]; then
 fi
 
 # Ask the user if they are sure they would like to continue the setup
-# REFERNCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
+# REFERENCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
 read -p "Are you sure you would like to continue with the setup (y/n)? " response
 case "$response" in 
   y|Y ) echo "Continuing setup... ";;
@@ -36,7 +36,7 @@ esac
 #======================================
 #---------- VERIFY INSTALLS -----------
 #======================================
-echo "Verifying installs... "
+echo "[Part 1/2] Verifying installs... " # notify the user that installs will potentially be made
 
 sudo apt-get update # update potential install list
 
@@ -52,13 +52,13 @@ sudo apt-get install ros-indigo-desktop-full -y # install indigo desktop
 # Install ROS and related packages if not alredy installed
 # Initialize ROS if not already initialized
 
-sudo rosdep init # Initialize ROS
+sudo rosdep init # initialize ROS
 
 
 #======================================
 #---------- SETUP WORKSPACE -----------
 #======================================
-echo "Setting up workspace... " # notify user the setup has started
+echo "[Part 2/2] Setting up workspace... " # notify user the setup has started
 
 # Create Workspace
 mkdir yumi_ws # create workspace folder
