@@ -22,6 +22,10 @@ if [ -d "yumi_ws" ]; then
     exit
 fi
 
+echo "Please read the wiki before continuing in order to ensure the workspace is properly setup. The Wiki and more information about this repo can be found at:" # tell user to visit Wiki
+echo "  https://www.github.com/ethz-asl/yumi/wiki" # webpage for the wiki of this repo
+echo "" # add in a space after comments
+
 #----- Ask the user if they are sure they would like to continue the setup -----
 # REFERENCE: http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
 read -p "Are you sure you would like to continue with the setup (y/n)? " response # get response from user
@@ -95,11 +99,11 @@ echo "[Part 3/3] Finalizing installs... " # notify user installations are being 
 addYuMiCommands=0 # 0) Don't add YuMi command line tools | 1) Add YuMi commands line tools (yumi, yumi_demo, yumi_server)
 addYuMiSource=0 # 0) Don't add YuMi workspace source command to bashrc | 1) Add YuMi workspace source command to bashrc
 addBashrcHeader=1 # 0) Header for additions to bashrc file has already been added | 1) Header for additions to bashrc file has not been added yet
-addBashrcFooter=0 # 0) No additions have been made to bashrc file, footer is not needed | 2) Additions have been made to bashrc file, add footer to additions
+addBashrcFooter=0 # 0) No additions have been made to bashrc file, footer is not needed | 1) Additions have been made to bashrc file, add footer to additions
 
 #----- Add Workspace Variables to Allow Command Line Capabilities -----
 # YuMi command line tools
-read -p "Would you like to add YuMi quick commands to command line? (recommended) (y/n)? " response # get response from user
+read -p "Add YuMi quick commands to command line? (recommended) (y/n)? " response # get response from user
 case "$response" in 
 	y|Y ) addYuMiCommands=1;; # add in command line alias to run YuMi easier 
 	n|N ) echo "Not adding command line tools for YuMi... ";; # don't add in command line alias
@@ -130,7 +134,7 @@ if [ $existROS -eq 0 ]; then # if this is the first time for ROS install
 fi
 
 #----- YuMi Workspace Sourcing -----
-read -p "Automaticall add sourcing of the YuMi workspace to bashrc? (recommended) (y/n)? " response # get response from user
+read -p "Automatically add workspace source to bashrc? (recommended) (y/n)? " response # get response from user
 case "$response" in 
 	y|Y ) addYuMiSource=1;; # add in command line alias to run YuMi easier 
 	* ) echo "Not adding source to bashrc file... ";; # don't add in comamnd line alias

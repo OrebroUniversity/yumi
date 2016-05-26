@@ -10,7 +10,7 @@ if [ -z "$1" ]; then
 	exit
 fi
 
-echo "Adding Command Line Workspace Variables... " # notify user the process has started
+echo "Adding command line workspace variables... " # notify user the process has started
 
 # Add YuMi alias for running scriptsecho "" >> ~/.bashrc # add in blank line before addition
 echo "" >> ~/.bashrc # add in a blank ine before addition
