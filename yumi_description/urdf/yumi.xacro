@@ -9,6 +9,9 @@
 
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- Import Gazebo Elements -->
+  <xacro:include filename="$(find yumi_description)/urdf/yumi.gazebo.xacro"/>
+
   <!-- Import Transmissions -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi.transmission.xacro" />
 
@@ -497,9 +500,10 @@
       </collision>
     </link>
 
-    <!--                            -->
-    <!--   YuMi Body Transmission   -->
-    <!--                            -->
+    <!--                          -->
+    <!--   YuMi Body Extensions   -->
+    <!--                          -->
+    <xacro:yumi_gazebo name="${name}"/>
     <xacro:yumi_transmission name="${name}" hardware_interface="${hardware_interface}"/>
 
   </xacro:macro>

@@ -30,6 +30,9 @@
   <!-- Import Camera Assembly -->
   <xacro:include filename="$(find yumi_description)/urdf/camera_assembly.xacro"/>
 
+  <!-- Import Gazebo Plugins -->
+  <xacro:include filename="$(find yumi_description)/urdf/gazebo.urdf.xacro"/>
+
 
   <!--                  		   -->
   <!--     LINK DEFINITIONS    -->

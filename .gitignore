@@ -76,6 +76,7 @@ build
 *#
 *.#
 *.obj
+*.urdf
 *.zip
 *.a
 *.dll

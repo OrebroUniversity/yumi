@@ -9,10 +9,13 @@
 
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- Import Gazebo Elements -->
+  <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.gazebo.xacro"/>
+
   <!-- Import Transmissions -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.transmission.xacro"/>
 
-  <!-- Include Utilities -->
+  <!-- Import Utilities -->
   <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
 
   <!-- Constants -->
@@ -116,9 +119,10 @@
       </collision>
     </link>
 
-    <!--                               -->
-    <!--   YuMi Gripper Transmission   -->
-    <!--                               -->
+    <!--                              -->
+    <!--   YuMi Gripper Extensions    -->
+    <!--                              -->
+    <xacro:yumi_servo_gripper_gazebo name="${name}"/>
     <xacro:yumi_servo_gripper_transmission name="${name}" hardware_interface="${hardware_interface}"/>
 
   </xacro:macro>
