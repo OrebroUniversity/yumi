@@ -337,19 +337,4 @@
     <!---------- End of Additions ---------->
     <!--==================================-->
 
-    <!--==============================================-->
-    <!-- Remove Sections - Camera Holder on Left Hand -->
-    <!--==============================================-->
-    <!--<disable_collisions link1="gripper_l_base" link2="gripper_l_finger_l" reason="Adjacent" />
-    <disable_collisions link1="gripper_l_base" link2="gripper_l_finger_r" reason="Adjacent" />
-    <disable_collisions link1="gripper_l_base" link2="yumi_link_6_l" reason="Never" />
-    <disable_collisions link1="gripper_l_base" link2="yumi_link_7_l" reason="Adjacent" />
-    <disable_collisions link1="gripper_l_finger_l" link2="gripper_l_finger_r" reason="Default" />
-    <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_5_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_6_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_l" link2="yumi_link_7_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_r" link2="yumi_link_5_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_r" link2="yumi_link_6_l" reason="Never" />
-    <disable_collisions link1="gripper_l_finger_r" link2="yumi_link_7_l" reason="Never" />-->
-
 </robot>
