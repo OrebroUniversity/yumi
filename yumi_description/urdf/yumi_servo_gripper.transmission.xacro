@@ -3,14 +3,14 @@
 
   <xacro:macro name="yumi_servo_gripper_transmission" params="name hardware_interface">
 
-   <transmission name="${name}_tran_1">
+    <transmission name="${name}_tran_1">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="${name}_joint_1">
-	<hardwareInterface>${hardware_interface}</hardwareInterface>
+        <hardwareInterface>${hardware_interface}</hardwareInterface>
       </joint>
       <actuator name="${name}_motor_1">
-	<hardwareInterface>${hardware_interface}</hardwareInterface>
-	<mechanicalReduction>1</mechanicalReduction>
+        <hardwareInterface>${hardware_interface}</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>
 

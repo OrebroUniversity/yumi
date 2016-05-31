@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+<!-- 
+  PROGRAMMER: Frederick Wachter
+  DATE CREATED: 2016-05-30
+  LAST MODIFIED: 2016-05-30
+  PURPOSE: Provide colors for the different objects in the YuMi workspace
+  REFERENCE: https://github.com/rtkg/yumi
+-->
+
 <robot>
 
   <material name="Black">
@@ -41,4 +49,18 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
 
+  <material name="Drexel_Blue">
+    <color rgba="0.027 0.161 0.302 1.0"/>
+  </material>
+
+  <material name="SeeThrough">
+    <color rgba="0 0 0 0"/>
+  </material>
+  
+  <material name="Transparent">
+    <color rgba="1.0 1.0 1.0 0.5"/>
+  </material>
+
 </robot>
+
+
