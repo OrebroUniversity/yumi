@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!-- 
+  PROGRAMMER: Frederick Wachter
+  DATE CREATED: 2016-05-30
+  LAST MODIFIED: 2016-05-30
+  PURPOSE: Provide colors for the different objects in the YuMi workspace
+-->
+
+<robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="camera_assembly" params="parent">
+
+    <!--                         -->
+    <!--     CAMERA ASSEMBLY     -->
+    <!--                         -->
+    
+    <joint name="${parent}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="camera_assembly"/>
+      <origin rpy="0 0 0" xyz="0 0 0.007"/>
+    </joint>
+
+    <link name="camera_assembly">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0.025 0.04"/>
+        <geometry>
+          <box size="0.16 0.17 0.08"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <joint name="camera_holder_assembly" type="fixed">
+      <parent link="camera_assembly"/>
+      <child link="camera_holder"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="camera_holder">
+      <!--                                 -->
+      <!-- Need to add inertial properties -->
+      <!--      <inertial></inertial>      -->
+      <!--     Note Created: 2015-05-23    -->
+      <!--                                 -->
+      <visual>
+        <origin rpy="0 0 0" xyz="-0.0377 -0.0129 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/camera/Camera_Holder.stl"/>
+        </geometry>
+        <material name="Drexel_Blue"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="-0.0377 -0.0129 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/camera/Camera_Holder.stl"/>
+        </geometry>
+        <material name="Drexel_Blue"/>
+      </collision>
+    </link>
+
+    <link name="creative_camera">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/camera/Camera_F200.stl"/>
+        </geometry>
+        <material name="Drexel_Blue"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/camera/Camera_F200.stl"/>
+        </geometry>
+        <material name="Drexel_Blue"/>
+      </collision>
+    </link>
+    <link name="vi_sensor">
+      <visual>
+        <origin rpy="0 -1.575 -1.5098" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/camera/vi_sensor.stl"/>
+        </geometry>
+        <material name="Drexel_Blue"/>
+      </visual>
+      <collision>
+        <origin rpy="0 -1.575 -1.508" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/camera/vi_sensor.stl"/>
+        </geometry>
+        <material name="Drexel_Blue"/>
+      </collision>
+    </link>
+
+    <joint name="creative_to_holder" type="fixed">
+      <parent link="camera_holder"/>
+      <child link="creative_camera"/>
+      <origin rpy="0 0 0" xyz="-0.002 0.0765 0.0335"/>
+    </joint>
+    <joint name="vi_to_holder" type="fixed">
+      <parent link="camera_holder"/>
+      <child link="vi_sensor"/>
+      <origin rpy="0 0 0" xyz="0 -0.0138 0.028"/>
+    </joint>
+
+  </xacro:macro>
+
+</robot>
+
+

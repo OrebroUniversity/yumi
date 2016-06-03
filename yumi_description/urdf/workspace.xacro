@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!-- 
+  PROGRAMMER: Frederick Wachter
+  DATE CREATED: 2016-05-30
+  LAST MODIFIED: 2016-05-30
+  PURPOSE: Build the workspace around YuMi
+-->
+
+<robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="workspace" params="stand_parent table_parent *origin">
+
+    <!--                         -->
+    <!--          TABLE          -->
+    <!--                         -->
+
+    <joint name="world_to_table" type="fixed">
+      <parent link="${table_parent}"/>
+      <child link="table"/>
+      <insert_block name="origin"/>
+    </joint>
+
+    <link name="table"/>
+
+    <joint name="table_top_to_table" type="fixed">
+      <parent link="table"/>
+      <child link="table_top"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="table_top">
+      <visual>
+        <geometry>
+          <box size="0.8 1.6 0.026"/>
+        </geometry>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <material name="Ivory"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.8 1.6 0.026"/>
+        </geometry>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <material name="Ivory"/>
+      </collision>
+    </link>
+
+
+    <!--                         -->
+    <!--       YUMI STAND        -->
+    <!--                         -->
+
+    <joint name="stand_to_world" type="fixed">
+      <parent link="${stand_parent}"/>
+      <child link="stand"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="stand"/>
+
+    <joint name="base_to_stand" type="fixed">
+      <parent link="stand"/>
+      <child link="stand_base"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <link name="stand_base">
+      <visual>
+        <origin rpy="0 0 0" xyz="165.03939 -0.25716 0.00014"/>
+        <origin rpy="0 0 0" xyz=""/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/base/IRB14000_BaseStand_Fixed.stl"/>
+        </geometry>
+        <material name="Orange"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="165.03939 -0.25716 0.00014"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/base/IRB14000_BaseStand_Fixed.stl"/>
+        </geometry>
+        <material name="Orange"/>
+      </collision>
+    </link>
+
+  </xacro:macro>
+
+</robot>
+
+
