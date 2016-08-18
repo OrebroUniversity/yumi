@@ -42,7 +42,6 @@
   <!-- Show in Rviz   -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
-<include file="$(find yumi_launch)/launch/asus_yumi.launch" />
 
 </launch>
 
