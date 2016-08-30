@@ -5,12 +5,12 @@
 <!--arg name="port" default="49939"/-->
 <!--arg name="ip" default="192.168.1.1"/--> <!--when talking to a virtual controller -->
 <arg name="ip" default="192.168.125.1"/> <!--when talking to the real robot controller -->
-<arg name="controllers" default="joint_state_controller hqp_vel_controller"/>
+<arg name="controllers" default="joint_state_controller"/><!-- hqp_vel_controller"/-->
 <arg name="stopped_controllers" default="joint_trajectory_vel_controller yumi_joint_1_l_forward_vel_controller"/>
 <arg name="hardware_interface" default="VelocityJointInterface"/>
 
 <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
- <rosparam file="$(find demo_grasping)/hqp_tasks/task_definitions.yaml" command="load" ns="/yumi"/>
+ <!--rosparam file="$(find demo_grasping)/hqp_tasks/task_definitions.yaml" command="load" ns="/yumi"/-->
 
  <!-- the urdf/sdf parameter -->
 <!--param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/-->

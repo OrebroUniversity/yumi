@@ -318,17 +318,17 @@ bool YumiHW::canSwitch(const std::list<hardware_interface::ControllerInfo> &star
 
     for ( std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it )
     {
-	if( it->hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+	if( it->type.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
 	{
 	    desired_strategies.push_back( JOINT_VELOCITY );
 	    ROS_WARN("Uncharted teritories here: switching to VelocityInterface\n");
 	}
-	else if( it->hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+	else if( it->type.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
 	{
 	    desired_strategies.push_back( JOINT_POSITION );
 	    ROS_INFO("Switching to Positon Control mode");
 	}
-	else if( it->hardware_interface.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
+	else if( it->type.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
 	{
 	    ROS_WARN("Effort not implemented!");
 	}
@@ -356,19 +356,19 @@ void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start
     // If any of the controllers in the start list works on a velocity interface, the switch can't be done.
     for ( std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it )
     {
-	if( it->hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+	if( it->type.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
 	{
 	    ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
 	    desired_strategy = JOINT_POSITION;
 	    break;
 	}
-	else if( it->hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+	else if( it->type.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
 	{
 	    ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
 	    desired_strategy = JOINT_VELOCITY;
 	    break;
 	}
-	else if( it->hardware_interface.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
+	else if( it->type.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
 	{
 	    ROS_ERROR("Request to switch to hardware_interface::EffortJointInterface (JOINT_EFFORT) which is not yet implemented");
 	    break;
