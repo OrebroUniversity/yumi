@@ -14,6 +14,9 @@
 #include "simple_message/socket/tcp_socket.h"
 #include "simple_message/socket/tcp_client.h"
 
+#include "simple_message/socket/udp_socket.h"
+#include "simple_message/socket/udp_client.h"
+
 #ifndef N_YUMI_JOINTS
 #define N_YUMI_JOINTS 14
 #endif
@@ -156,8 +159,9 @@ class YumiRapidInterface {
 	boost::thread RapidCommThread_;
 	
 	///industrial connection
-	industrial::tcp_client::TcpClient default_tcp_connection_; //?
-	//industrial::tcp_client::RobotStatusRelayHandler default_robot_status_handler_; //?
+	//industrial::tcp_client::TcpClient default_tcp_connection_; //?
+	//industrial::udp_client::UdpClient default_udp_connection_; //?
+	industrial::tcp_client::RobotStatusRelayHandler default_robot_status_handler_; //?
 
 	industrial::smpl_msg_connection::SmplMsgConnection* connection_;
 	industrial::message_manager::MessageManager manager_;
@@ -208,9 +212,11 @@ class YumiRapidInterface {
 	    char* ip_addr = strdup(ip.c_str());  // connection.init() requires "char*", not "const char*"
 	    ROS_INFO("Robot state connecting to IP address: '%s:%d'", ip_addr, port);
 	    default_tcp_connection_.init(ip_addr, port);
+	    //default_udp_connection_.init(ip_addr, port);
 	    free(ip_addr);
 
 	    connection_ = &default_tcp_connection_;
+	    //connection_ = &default_udp_connection_;
 	    connection_->makeConnect();
 
 	    //initialize message manager
