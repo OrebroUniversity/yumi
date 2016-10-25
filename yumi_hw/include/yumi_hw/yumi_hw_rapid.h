@@ -159,9 +159,9 @@ class YumiRapidInterface {
 	boost::thread RapidCommThread_;
 	
 	///industrial connection
-	//industrial::tcp_client::TcpClient default_tcp_connection_; //?
+	industrial::tcp_client::TcpClient default_tcp_connection_; //?
 	//industrial::udp_client::UdpClient default_udp_connection_; //?
-	industrial::tcp_client::RobotStatusRelayHandler default_robot_status_handler_; //?
+	//industrial::tcp_client::RobotStatusRelayHandler default_robot_status_handler_; //?
 
 	industrial::smpl_msg_connection::SmplMsgConnection* connection_;
 	industrial::message_manager::MessageManager manager_;
