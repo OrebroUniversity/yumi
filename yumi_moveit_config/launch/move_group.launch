@@ -22,7 +22,7 @@
 
   <!-- Planning Functionality -->
   <include ns="move_group" file="$(find yumi_moveit_config)/launch/planning_pipeline.launch.xml">
-    <arg name="pipeline" value="ompl" />
+    <arg name="pipeline" value="chomp" />
   </include>
 
   <!-- Trajectory Execution Functionality -->
