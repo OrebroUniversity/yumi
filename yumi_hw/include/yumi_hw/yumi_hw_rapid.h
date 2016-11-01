@@ -213,6 +213,7 @@ class YumiRapidInterface {
 	    connection_ = &default_tcp_connection_;
 	    connection_->makeConnect();
 
+	    ROS_INFO("Connection established");
 	    //initialize message manager
 	    manager_.init(connection_);
 
@@ -222,6 +223,7 @@ class YumiRapidInterface {
 	    //register handler to manager
 	    manager_.add(&js_handler,false);
 
+	    ROS_INFO("Callbacks and handlers set up");
 	    stopComm_ = false;
 	}
 	

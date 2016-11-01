@@ -334,6 +334,7 @@ bool YumiHW::canSwitch(const std::list<hardware_interface::ControllerInfo> &star
 	}
 	else
 	{
+	    ROS_INFO("Controller of type %s?", it->type.c_str());
 	    // Debug
 	    // std::cout << "This controller does not use any command interface, so it is only sensing, no problem" << std::endl;
 	}
@@ -350,35 +351,48 @@ bool YumiHW::canSwitch(const std::list<hardware_interface::ControllerInfo> &star
 
 void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start_list, const std::list<hardware_interface::ControllerInfo> &stop_list)
 {
-    // at this point, we now that there is only one controller that ones to command joints
     ControlStrategy desired_strategy = JOINT_POSITION; // default
 
-    // If any of the controllers in the start list works on a velocity interface, the switch can't be done.
+    bool wantsPosition = false;
+    bool wantsVelocity = false;
+
     for ( std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it )
     {
-	if( it->type.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
-	{
-	    ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
-	    desired_strategy = JOINT_POSITION;
-	    break;
+	for(int i=0; i<it->claimed_resources.size(); i++) {
+
+	    if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+	    {
+		ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
+		wantsPosition = true;
+	    }
+	    else if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+	    {
+		ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
+		wantsVelocity = true;
+	    } 
+	    else
+	    {
+		ROS_INFO("Controller of type %s, requested interface of type %s. Impossible, sorry.\n", 
+			it->type.c_str(), it->claimed_resources[i].hardware_interface.c_str());
+	    }
 	}
-	else if( it->type.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
-	{
-	    ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
-	    desired_strategy = JOINT_VELOCITY;
-	    break;
-	}
-	else if( it->type.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
-	{
-	    ROS_ERROR("Request to switch to hardware_interface::EffortJointInterface (JOINT_EFFORT) which is not yet implemented");
-	    break;
-	}
+    }
+    if(wantsPosition) {		
+	desired_strategy = JOINT_POSITION;
+    }
+    if(wantsVelocity) {
+	desired_strategy = JOINT_VELOCITY;
+    }
+
+    if(wantsPosition && wantsVelocity) {
+	ROS_ERROR("Cannot have both position and velocity interface. Will assume Velocity. Beware!");
     }
 
     for (int j = 0; j < n_joints_; ++j)
     {
 	///semantic Zero
 	joint_position_command_[j] = joint_position_[j];
+	joint_velocity_command_[j] = 0.0;
 	//joint_effort_command_[j] = 0.0;
 
 	///call setCommand once so that the JointLimitsInterface receive the correct value on their getCommand()!

@@ -127,42 +127,6 @@
       </collision>
     </link>
 
-    <!-- joint between palm and left finger -->
-    <!--joint name="${name}_joint_2" type="revolute">
-      <parent link="${name}_palm"/>
-      <child link="${name}_left"/>
-      <origin xyz="0.121 0.016 0.0" rpy="${PI} 0 ${PI / 2}"/>
-      <axis xyz="0 0 1"/>
-      <limit lower="${0 * PI / 180}" upper="${90 * PI / 180}"
-             effort="${max_effort}" velocity="${max_velocity}" />
-      <dynamics damping="${joint_damping}"/>
-      <mimic joint="${name}_joint_1"/>
-    </joint>
-
-    <link name="${name}_left">
-      <inertial>
-        <origin xyz="0.01 0 0" rpy="0 0 0"/>
-        <mass value="0.5"/>
-        <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
-      </inertial>
-
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://velvet_fingers_description/meshes/velvet_fingers_left.stl"/> 
-        </geometry>
-        <material name="VELVET_FINGERS/Orange"/>
-      </visual>
-
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://velvet_fingers_description/meshes/velvet_fingers_left.stl"/>
-        </geometry>
-        <material name="VELVET_FINGERS/Orange"/>
-      </collision>
-    </link-->
-
      <!--Extensions -->
     <xacro:yumi_servo_gripper_gazebo name="${name}" />
     <xacro:yumi_servo_gripper_transmission name="${name}" hardware_interface="${hardware_interface}"/>
