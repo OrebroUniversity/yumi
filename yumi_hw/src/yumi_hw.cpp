@@ -358,24 +358,42 @@ void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start
 
     for ( std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it )
     {
-	for(int i=0; i<it->claimed_resources.size(); i++) {
+#if ROS_VERSION_MINIMUM(1,12,0)
+	    //jade and karmic
+	    for(int i=0; i<it->claimed_resources.size(); i++) {
 
-	    if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+		if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+		{
+		    ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
+		    wantsPosition = true;
+		}
+		else if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+		{
+		    ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
+		    wantsVelocity = true;
+		} 
+		else
+		{
+		    ROS_INFO("Controller of type %s, requested interface of type %s. Impossible, sorry.\n", 
+			    it->type.c_str(), it->claimed_resources[i].hardware_interface.c_str());
+		}
+	    }
+#else
+
+	    //indigo and below
+	    if( it->hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
 	    {
 		ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
-		wantsPosition = true;
+		desired_strategy = JOINT_POSITION;
+		break;
 	    }
-	    else if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+	    else if( it->hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
 	    {
 		ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
-		wantsVelocity = true;
-	    } 
-	    else
-	    {
-		ROS_INFO("Controller of type %s, requested interface of type %s. Impossible, sorry.\n", 
-			it->type.c_str(), it->claimed_resources[i].hardware_interface.c_str());
+		desired_strategy = JOINT_VELOCITY;
+		break;
 	    }
-	}
+#endif
     }
     if(wantsPosition) {		
 	desired_strategy = JOINT_POSITION;
