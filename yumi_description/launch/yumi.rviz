@@ -11,6 +11,7 @@ Panels:
         - /TF1/Tree1
         - /PointCloud21
         - /MarkerArray1
+        - /PointCloud22
       Splitter Ratio: 0.664206982
     Tree Height: 725
   - Class: rviz/Selection
@@ -212,7 +213,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -229,13 +230,13 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /gplanner/sdf_marker
       Name: MarkerArray
       Namespaces:
-        my_namespace: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -262,8 +263,8 @@ Visualization Manager:
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.00999999978
-      Style: Flat Squares
-      Topic: /gplanner/fused_pc
+      Style: Points
+      Topic: /kinect2/qhd/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -292,7 +293,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.94227004
+      Distance: 1.63641846
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -306,10 +307,10 @@ Visualization Manager:
       Focal Shape Size: 0.0500000007
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.829797685
+      Pitch: 0.334798306
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.0172373019
+      Yaw: 0.462232351
     Saved: ~
 Window Geometry:
   Displays:
