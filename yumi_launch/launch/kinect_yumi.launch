@@ -3,7 +3,7 @@
 <launch>
 
   <node pkg="tf" type="static_transform_publisher" name="kinect_yumi_link"
-        args="-0.344 0.319 0.527 -1.9717 -0.0276 -2.0697 /yumi_body /kinect2_link 50" /> <!--hand calibrated --> 
+        args="-0.344 0.319 0.51 -1.9717 -0.0276 -2.0697 /yumi_body /kinect2_link 50" /> <!--hand calibrated --> 
   
   <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
       <arg name="publish_tf" value="true" />
