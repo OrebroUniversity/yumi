@@ -5,16 +5,16 @@
   <arg name="tf_prefix" default="" />
 
   <param name="/camera/driver/use_device_time"              value="false" />
-  <param name="/camera/driver/data_skip"              value="5" />
+  <param name="/camera/driver/data_skip"              value="8" />
   <param name="/camera/driver/depth_registration"              value="true" />
   <arg name="pi/2" value="1.5707963267948966" />
   <arg name="pi" value="3.141592654" />
   <arg name="optical_rotate" value="0 0 0 -$(arg pi/2) 0 -$(arg pi/2)" />
 
   <node pkg="tf" type="static_transform_publisher" name="$(arg camera)_base_link"
-    args="0 0.065  0 0 0 0 $(arg tf_prefix)/$(arg camera)_link $(arg tf_prefix)/$(arg camera)_depth_frame 100" />
+    args="0 0.02  0 0 0 0 $(arg tf_prefix)/$(arg camera)_link $(arg tf_prefix)/$(arg camera)_depth_frame 100" />
   <node pkg="tf" type="static_transform_publisher" name="$(arg camera)_base_link1"
-    args="0 0.045 0 0 0 0 $(arg tf_prefix)/$(arg camera)_link $(arg tf_prefix)/$(arg camera)_rgb_frame 100" />
+    args="0 0.0 0 0 0 0 $(arg tf_prefix)/$(arg camera)_link $(arg tf_prefix)/$(arg camera)_rgb_frame 100" />
   <node pkg="tf" type="static_transform_publisher" name="$(arg camera)_base_link2"
     args="$(arg optical_rotate) $(arg tf_prefix)/$(arg camera)_depth_frame $(arg tf_prefix)/$(arg camera)_depth_optical_frame  100" />
   <node pkg="tf" type="static_transform_publisher" name="$(arg camera)_base_link3"
@@ -22,7 +22,7 @@
 
 
   <node pkg="tf" type="static_transform_publisher" name="camera_velvet_link"
-        args="0.89 0.0 0.875 3.135 0.785 0.025 /yumi_body /camera_link 50" /> <!--hand calibrated --> 
+        args="0.883 -0.06 0.877 3.12 0.795 0.005 /yumi_body /camera_link 50" /> <!--hand calibrated --> 
   
   <include file="$(find openni2_launch)/launch/openni2.launch">
       <arg name="publish_tf" value="false" />
