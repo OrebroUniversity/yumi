@@ -9,8 +9,10 @@ Panels:
         - /RobotModel1/Links1
         - /Tasks1
         - /TF1/Tree1
-        - /PointCloud21
         - /MarkerArray1
+        - /PointCloud23
+        - /MarkerArray2
+        - /MarkerArray2/Namespaces1
       Splitter Ratio: 0.664206982
     Tree Height: 725
   - Class: rviz/Selection
@@ -179,13 +181,13 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /yumi/hqp_vel_controller/task_geometries
       Name: Tasks
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/TF
       Enabled: false
       Frame Timeout: 15
@@ -212,7 +214,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -229,7 +231,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /gplanner/sdf_marker
@@ -238,6 +240,36 @@ Visualization Manager:
         my_namespace: true
       Queue Size: 100
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00999999978
+      Style: Points
+      Topic: /kinect2/qhd/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -260,13 +292,24 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 3
+      Size (Pixels): 5
       Size (m): 0.00999999978
-      Style: Flat Squares
+      Style: Points
       Topic: /gplanner/fused_pc
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /gplanner/constraint_marker
+      Name: MarkerArray
+      Namespaces:
+        cylinder: false
+        normal: false
+        plane: false
+        request: true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -292,24 +335,24 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.94227004
+      Distance: 0.785959005
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.102151997
-        Y: -0.162722006
-        Z: 0.149351001
+        X: 0.23924078
+        Y: -0.0866899863
+        Z: 0.0690456256
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.829797685
+      Pitch: 0.159798294
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.0172373019
+      Yaw: 1.29722154
     Saved: ~
 Window Geometry:
   Displays:

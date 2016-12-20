@@ -5,7 +5,7 @@
 <!--arg name="port" default="49939"/-->
 <!--arg name="ip" default="192.168.1.1"/--> <!--when talking to a virtual controller -->
 <arg name="ip" default="192.168.125.1"/> <!--when talking to the real robot controller -->
-<arg name="controllers" default="joint_state_controller hqp_vel_controller"/>
+<arg name="controllers" default="joint_state_controller hiqp_joint_velocity_controller"/>
 <arg name="hardware_interface" default="VelocityJointInterface"/>
 
 <!--load predifined persistent task descriptions (joint limit avoidance, self-collision avoidance ...) definitions for the HQP controller -->
@@ -19,7 +19,12 @@
 </node>
 
 <!-- Load joint controller configurations from YAML file to parameter server -->
-<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
+<!--rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/-->
+
+<!-- Load the YAML file -->
+<rosparam file="$(find hiqp_ros)/config/yumi.yaml" command="load"/>
+<!-- Load preload configurations for YuMi and HiQP -->
+<rosparam file="$(find hiqp_ros)/config/yumi_preload_ldyn.yaml" command="load"/>
 
 <!-- load the controllers -->
 <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
@@ -36,9 +41,9 @@
     <!-- addresses /-->
     <param name="ip" value="$(arg ip)"/>
 </node>
-  <!-- Show in Rviz   -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
+  <!-- Run RViz for visualization instead of the Gazebo GUI -->
+  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find hiqp_controllers)/launch/yumi.rviz"/-->
 
 </launch>
 

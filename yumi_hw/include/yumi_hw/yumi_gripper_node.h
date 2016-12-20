@@ -131,7 +131,7 @@ class YumiGripperStateInterface {
 	}
 
 	void getCurrentJointStates(float &left, float &right) {
-	    gripper_handler.getGripperStates(left,right);	    
+	    gripper_handler.getGripperStates(right,left);	    
 	}
 
 	void setGripperEfforts(float left, float right) {
