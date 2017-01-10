@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch> 
 
-<arg name="controllers" default="joint_trajectory_pos_controller"/>
-<arg name="hardware_interface" default="PositionJointInterface"/>
+<arg name="controllers" default="joint_state_controller joint_trajectory_vel_controller"/>
+<arg name="hardware_interface" default="VelocityJointInterface"/>
 
 <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused" value="false"/>
