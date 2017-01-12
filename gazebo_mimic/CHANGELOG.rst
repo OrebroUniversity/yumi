@@ -2,6 +2,9 @@
 Changelog for package gazebo_mimic
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.2 (2017-01-10)
 ------------------
 * fix for backcompatibility with gazebo

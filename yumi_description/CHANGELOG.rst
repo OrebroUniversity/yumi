@@ -2,6 +2,9 @@
 Changelog for package yumi_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.2 (2017-01-10)
 ------------------
 * Add coarser meshes.
