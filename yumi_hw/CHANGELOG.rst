@@ -2,8 +2,8 @@
 Changelog for package yumi_hw
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.4 (2017-01-12)
+------------------
 * Fix for message generation dependency
 * Contributors: Todor Stoyanov
 
