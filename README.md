@@ -10,6 +10,7 @@ Install all of these:
 
 #### Step 2
 Install ros-industrial from source. 
+Note: If you wish to use this package with a YuMi Robot (and not just in simulation), you need to pull OrebroUniversity's fork of ros_industrial.
 
 #### Step 3
 Source the workspace containing ros-industrial and then catkin_make the workspace containing the clone of this package.
