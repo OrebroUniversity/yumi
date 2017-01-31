@@ -10,31 +10,18 @@
   <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.xacro"/>
   <!--Import the yumi camera macro -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi_camera.xacro"/>
-  <!--Import the table macro -->
-  <xacro:include filename="$(find yumi_description)/urdf/yumi_table.urdf.xacro"/>
-  <!--Import the box macro -->
-  <!-- <xacro:include filename="$(find yumi_description)/urdf/object.urdf.xacro"/> -->
+  <!--Import the yumi box macro -->
+  <!-- <xacro:include filename="$(find yumi_description)/urdf/box.xacro"/> -->
+
   <!-- Import Gazebo plugins -->
   <xacro:include filename="$(find yumi_description)/gazebo/gazebo.urdf.xacro"/>
-
-
 
   <!-- Fix to world just for testing -->
   <link name="world"/>
 
-  <!--Define the table height-->
-  <property name="table_height_from_gound" value="0.89" />
-  <!--table-->
-  <xacro:yumi_table parent="world" table_height="${table_height_from_gound}"/>
-
-  <!--box-->
-<!--   <xacro:yumi_box parent="table_top_link">
-    <origin xyz="0.5 0 ${table_height_from_gound+0.1}" rpy="0 0 0" />
-  </xacro:yumi_box>
- -->
   <!--yumi-->
-  <xacro:yumi name="yumi" hardware_interface="$(arg prefix)" parent="table_top_link">
-    <origin xyz="0 0 ${table_height_from_gound}" rpy="0 0 0" />
+  <xacro:yumi name="yumi" hardware_interface="$(arg prefix)" parent="world">
+    <origin xyz="0 0 0.1" rpy="0 0 0" />
   </xacro:yumi>
 
   <!--right gripper-->
@@ -47,10 +34,13 @@
     <origin xyz="0 0 0.007" rpy="0 0 ${PI}" />
   </xacro:yumi_servo_gripper>
 
-  <xacro:yumi_camera name="yumi_top_camera" parent="table_top_link">
-    <origin xyz="0.883 -0.06 ${0.877+table_height_from_gound}" rpy="3.12 0.795 0.005" />
+  <xacro:yumi_camera name="yumi_top_camera" parent="world">
+    <origin xyz="0.883 -0.06 0.877" rpy="3.12 0.795 0.005" />
   </xacro:yumi_camera>
 
-
+<!--   <xacro:yumi_box name="box" parent="world">
+    <origin xyz="0.883 -0.06 0.877" rpy="0 0 0" />
+  </xacro:yumi_box>
+ -->
 
 </robot>

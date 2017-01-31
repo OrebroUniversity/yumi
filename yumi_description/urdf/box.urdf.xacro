@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<robot name="box" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Import Rviz colors -->
+  <xacro:include filename="$(find yumi_description)/urdf/materials.xacro" />
+  <!-- Import utilities -->
+  <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
+  <xacro:include filename="$(find yumi_description)/urdf/box.xacro"/>
+
+  <!-- Fix to world just for testing -->
+  <link name="world"/>
+
+  <xacro:yumi_box name="box" parent="world">
+    <origin xyz="0.883 -0.06 0.877" rpy="0 0 0" />
+  </xacro:yumi_box>
+
+
+</robot>

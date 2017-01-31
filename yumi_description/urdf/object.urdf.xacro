@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot name="box" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- rosrun gazebo_ros spawn_model -urdf -file object.urdf -model box3 -x 0.5 -y 0.0 -z 0.0 -->
+
+  <property name="width" value="0.02" />
+  <property name="depth" value="0.02" />
+  <property name="height" value="0.1" />
+
+  <xacro:macro name="yumi_box" params="parent *origin">
+
+    <joint name="box_joint" type="continuous">
+      <insert_block name="origin"/>
+      <parent link="${parent}"/>
+      <child link="box_link"/>
+    </joint>
+
+  <!-- <xacro:macro name="yumi_box"> -->
+
+    <link name="box_link">
+      <inertial>
+        <origin xyz="0 0 0" />
+        <mass value="1.0" />
+        <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0"/>
+        <geometry>
+          <box size="${width} ${depth} ${height}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0"/>
+        <geometry>
+          <box size="${width} ${depth} ${height}"/>
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="box_link">
+      <static>false</static>
+      <material>Gazebo/Blue</material>
+    </gazebo>
+  </xacro:macro>
+</robot>

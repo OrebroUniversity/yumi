@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch> 
+
+
+<!-- the urdf/sdf parameter -->
+<node name="spawn_cube" pkg="gazebo_ros" type="spawn_model" args="-file $(find yumi_description)/urdf/object.urdf -urdf -model cube gravity=false" />
+
+</launch>
+

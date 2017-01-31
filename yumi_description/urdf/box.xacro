@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+
+  <xacro:property name="box_link" value="0.05" /> 
+
+  <xacro:macro name="yumi_box" params="parent name *origin">
+   <joint name="box_joint" type="floating">
+    <insert_block name="origin"/>
+    <parent link="${parent}"/>
+    <child link="${name}_base"/>
+  </joint>
+
+  <!-- Box -->
+  <link name="${name}_base">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${box_link} ${box_link} ${box_link}"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+       <box size="${box_link} ${box_link} ${box_link}"/>
+     </geometry>
+     <material name="red"/>
+   </visual>
+
+   <inertial>
+    <mass value="1e-5" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+  </inertial>
+</link>
+ <gazebo reference="box_base">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <material>Gazebo/red</material>
+  </gazebo>
+</xacro:macro>
+
+</robot>
+
