@@ -23,6 +23,8 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
   simple_message
   message_generation
+  abb_egm_interface
+  abb_rws_interface
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,7 +59,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message
+  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message abb_egm_interface abb_rws_interface
 #  DEPENDS gazebo
 )
 
@@ -77,6 +79,7 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/yumi_hw.cpp
   src/yumi_hw_rapid.cpp
+  src/yumi_hw_egm.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -87,18 +90,23 @@ add_library(${PROJECT_NAME}
 
 ## Declare a C++ executable
 add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
+add_executable(yumi_hw_egm_node src/yumi_hw_egm_node.cpp)
 
 add_executable(yumi_gripper_node src/yumi_gripper_node.cpp)
+add_executable(yumi_rws_gripper_node src/yumi_rws_gripper_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(yumi_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(yumi_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(yumi_rws_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries( ${PROJECT_NAME} ${catkin_LIBRARIES} )
 target_link_libraries( yumi_hw_ifce_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
+target_link_libraries( yumi_hw_egm_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 target_link_libraries( yumi_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
+target_link_libraries( yumi_rws_gripper_node ${catkin_LIBRARIES} )
 
 
 #############
@@ -106,7 +114,7 @@ target_link_libraries( yumi_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME} sim
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS ${PROJECT_NAME} yumi_hw_ifce_node yumi_gripper_node
+install(TARGETS ${PROJECT_NAME} yumi_hw_ifce_node yumi_hw_egm_node yumi_gripper_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
