@@ -32,7 +32,7 @@
 #ifndef __YUMI_HW_EGM_H
 #define __YUMI_HW_EGM_H
 
-#include "yumi_hw/yumi_hw.h"
+#include <yumi_hw/yumi_hw.h>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread.hpp>
@@ -51,14 +51,13 @@
 #define MAX_NUMBER_OF_EGM_CONNECTIONS 4
 #endif
 
-// Wrapper class for setting up EGM and RWS connections to the Yumi robot
-// with their corresponding IO service threads
-// It assumes velocity control mode
-
 
 using namespace abb::egm_interface;
 using namespace abb::rws_interface;
 
+// Wrapper class for setting up EGM and RWS connections to the Yumi robot
+// with their corresponding IO service threads
+// It assumes velocity control mode
 class YumiEGMInterface
 {
 
@@ -69,7 +68,11 @@ public:
 
     ~YumiEGMInterface();
 
-    bool init(const std::string &ip, const std::string &port);
+    /** \brief Gets parameters for the EGM & RWS connections from the ROS parameter server
+      */
+    void getParams();
+
+    bool init();
 
     void stop();
 
@@ -77,24 +80,35 @@ public:
 
     void setJointTargets(float (&joints)[N_YUMI_JOINTS]);
 
+protected:
+
+    bool initRWS();
+
+    bool initEGM();
+
+    void configureEGM();
+
 private:
 
+    // EGM //
     // EGM interface which uses UDP communication for realtime robot control @ 250 Hz
-    EGMInterfaceDefault left_arm_egm_interface_;
-    EGMInterfaceDefault right_arm_egm_interface_;
+    boost::shared_ptr<EGMInterfaceDefault> left_arm_egm_interface_;
+    boost::shared_ptr<EGMInterfaceDefault> right_arm_egm_interface_;
 
     // io service used for EGM
     boost::asio::io_service io_service_;
     boost::thread_group io_service_threads_;
 
+    // RWS //
     // RWS interface which uses TCP communication for starting the EGM joint mode on YuMi
     boost::shared_ptr<RWSInterfaceYuMi> rws_interface_yumi_;
 
     // IP and port for RWS interface
     std::string rws_ip_, rws_port_;
+    double rws_delay_time_;
+    bool rws_connection_ready_;
 
-    void configureEGM();
-
+    bool has_params_;
 
 };
 
@@ -120,7 +134,6 @@ private:
 
     float sampling_rate_;
 
-
     bool is_rws_setup_;
 
     YumiEGMInterface yumi_egm_interface_;
@@ -130,8 +143,6 @@ private:
 
     // data buffers
     float joint_feedback_[N_YUMI_JOINTS];
-
-
 };
 
 #endif

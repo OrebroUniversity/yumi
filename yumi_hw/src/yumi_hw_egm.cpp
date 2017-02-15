@@ -34,10 +34,9 @@
 #include <abb_egm_interface/egm_common.h>
 
 void YumiEGMInterface::YumiEGMInterface() :
-    left_arm_egm_interface_(io_service_, egm_common_values::communication::DEFAULT_PORT_NUMBER),
-    right_arm_egm_interface_(io_service_, egm_common_values::communication::DEFAULT_PORT_NUMBER + 1)
+    has_params_(false), rws_connection_ready_(false)
 {
-    configureEGM();
+    getParams();
 }
 
 
@@ -46,16 +45,129 @@ void YumiEGMInterface::~YumiEGMInterface()
 
 }
 
-
-bool YumiEGMInterface::init(const std::string &ip, const std::string &port)
+void YumiEGMInterface::getParams()
 {
 
-    rws_interface_yumi_.reset(new RWSInterfaceYuMi(ip, port));
+    ros::NodeHandle nh("~");
+    if(nh.hasParam("rws/ip"))
+    {
+        nh.param("rws/ip", rws_ip_, std::string(""));
+    }
 
+    else
+    {
+        ROS_ERROR(ros::this_node::getName() + ": rws/ip param not found.");
+        return;
+    }
+
+    if(nh.hasParam("rws/port"))
+    {
+        nh.param("rws/port", rws_port_, std::string(""));
+    }
+
+    else
+    {
+        ROS_ERROR(ros::this_node::getName() + ": rws/port param not found.");
+        return;
+    }
+
+    if(nh.hasParam("rws/delay_time"))
+    {
+        nh.param("rws/delay_time", rws_delay_time_, 0.0);
+    }
+
+    else
+    {
+        ROS_ERROR(ros::this_node::getName() + ": rws/delay_time param not found.");
+        return;
+    }
+
+    if(nh.hasParam("egm/default_condition_time"))
+    {
+        nh.param("rws/delay_time", rws_delay_time_, 0.0);
+    }
+
+    else
+    {
+        ROS_ERROR(ros::this_node::getName() + ": rws/delay_time param not found.");
+        return;
+    }
+
+
+    has_params_ = true;
+}
+
+
+bool YumiEGMInterface::init()
+{
+    if (!has_params_){
+
+        ROS_ERROR(ros::this_node::getName() + ": missing EGM/RWS parameters.");
+        return false;
+    }
+
+    if (!initEGM()) return false;
+
+    if(!initRWS()) return false;
+}
+
+
+bool YumiEGMInterface::initRWS()
+{
+    ROS_INFO(ros::this_node::getName() + ": starting RWS connection with IP & PORT: " + rws_ip_ + " / " + rws_port_);
+
+    rws_interface_yumi_.reset(new RWSInterfaceYuMi(rws_ip_, rws_port_));
+    ros::Duration(rws_delay_time_).sleep();
+
+    // Check that RAPID is running on the robot and that robot is in AUTO mode
+    if(!rws_interface_yumi_->isRAPIDRunning())
+    {
+        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure that the RAPID program is running on the flexpendant.");
+        return false;
+    }
+
+    ros::Duration(rws_delay_time_).sleep();
+
+    if(!rws_interface_yumi_->isModeAuto())
+    {
+        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
+        return false;
+    }
+
+    ros::Duration(rws_delay_time_).sleep();
+
+    DualEGMData egm_data;
+
+    if(!rws_interface_yumi_->getData(&egm_data))
+    {
+        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
+        return false;
+    }
+
+    egm_data.left.setCondTime(DEFAULT_EGM_CONDITION_TIME_);
+    egm_data.left.setMaxSpeedDeviation(max_moveit_joint_velocity_*conversions::RAD_TO_DEG);
+    egm_data.right.setCondTime(DEFAULT_EGM_CONDITION_TIME_);
+    egm_data.right.setMaxSpeedDeviation(max_moveit_joint_velocity_*conversions::RAD_TO_DEG);
+    rws_interface_yumi_->setData(egm_data);
+
+    rws_connection_ready_ = true;
+
+    return true;
+}
+
+bool YumiEGMInterface::initEGM()
+{
+    left_arm_egm_interface_.reset(new EGMInterfaceDefault(io_service_, egm_common_values::communication::DEFAULT_PORT_NUMBER));
+    right_arm_egm_interface_.reset(new EGMInterfaceDefault(io_service_, egm_common_values::communication::DEFAULT_PORT_NUMBER + 1));
+    configureEGM();
+
+    // create threads for EGM communication
     for(size_t i = 0; i < MAX_NUMBER_OF_EGM_CONNECTIONS; i++)
     {
         io_service_threads_.create_thread(boost::bind(&boost::asio::io_service::run, &io_service_));
     }
+
+    return true;
 }
 
 void YumiEGMInterface::configureEGM()
@@ -68,6 +180,6 @@ void YumiEGMInterface::configureEGM()
     configuration.simple_interpolation.use_speed = true;
     configuration.simple_interpolation.use_acceleration = true;
     configuration.simple_interpolation.use_interpolation = true;
-    left_arm_egm_interface_.setConfiguration(configuration);
-    right_arm_egm_interface_.setConfiguration(configuration);
+    left_arm_egm_interface_->setConfiguration(configuration);
+    right_arm_egm_interface_->setConfiguration(configuration);
 }
