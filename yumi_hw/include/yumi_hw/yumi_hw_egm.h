@@ -52,14 +52,15 @@
 #endif
 
 
-using namespace abb::egm_interface;
-using namespace abb::rws_interface;
 
 // Wrapper class for setting up EGM and RWS connections to the Yumi robot
 // with their corresponding IO service threads
 // It assumes velocity control mode
 class YumiEGMInterface
 {
+
+    using namespace abb::egm_interface;
+    using namespace abb::rws_interface;
 
 public:
 
@@ -74,7 +75,7 @@ public:
 
     bool init();
 
-    void stop();
+    bool stop();
 
     void getCurrentJointStates(float (&joints)[N_YUMI_JOINTS]);
 
@@ -88,9 +89,26 @@ protected:
 
     void configureEGM();
 
+    bool startEGM();
+
+    bool stopEGM();
+
+
 private:
 
-    // EGM //
+
+    /* RWS */
+    // RWS interface which uses TCP communication for starting the EGM joint mode on YuMi
+    boost::shared_ptr<RWSInterfaceYuMi> rws_interface_yumi_;
+
+    // IP and port for RWS interface
+    std::string rws_ip_, rws_port_;
+    double rws_delay_time_;
+    bool rws_connection_ready_;
+    unsigned int rws_max_signal_retries_;
+
+    /* EGM */
+
     // EGM interface which uses UDP communication for realtime robot control @ 250 Hz
     boost::shared_ptr<EGMInterfaceDefault> left_arm_egm_interface_;
     boost::shared_ptr<EGMInterfaceDefault> right_arm_egm_interface_;
@@ -99,14 +117,9 @@ private:
     boost::asio::io_service io_service_;
     boost::thread_group io_service_threads_;
 
-    // RWS //
-    // RWS interface which uses TCP communication for starting the EGM joint mode on YuMi
-    boost::shared_ptr<RWSInterfaceYuMi> rws_interface_yumi_;
+    double egm_default_condition_time_;
 
-    // IP and port for RWS interface
-    std::string rws_ip_, rws_port_;
-    double rws_delay_time_;
-    bool rws_connection_ready_;
+    double max_joint_velocity_;
 
     bool has_params_;
 

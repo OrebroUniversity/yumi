@@ -33,6 +33,7 @@
 #include <yumi_hw/yumi_hw_egm.h>
 #include <abb_egm_interface/egm_common.h>
 
+
 void YumiEGMInterface::YumiEGMInterface() :
     has_params_(false), rws_connection_ready_(false)
 {
@@ -51,47 +52,23 @@ void YumiEGMInterface::getParams()
     ros::NodeHandle nh("~");
     if(nh.hasParam("rws/ip"))
     {
-        nh.param("rws/ip", rws_ip_, std::string(""));
+        nh.param("rws/ip", rws_ip_, std::string("192.168.1.25"));
     }
 
     else
     {
-        ROS_ERROR(ros::this_node::getName() + ": rws/ip param not found.");
+        ROS_ERROR(ros::this_node::getName() + "/rws/ip param not found.");
         return;
     }
 
-    if(nh.hasParam("rws/port"))
-    {
-        nh.param("rws/port", rws_port_, std::string(""));
-    }
+    nh.param("rws/port", rws_port_, std::string("80"));
+    nh.param("rws/delay_time", rws_delay_time_, 0.01);
+    nh.param("rws/max_signal_retries", rws_max_signal_retries_, 5);
 
-    else
-    {
-        ROS_ERROR(ros::this_node::getName() + ": rws/port param not found.");
-        return;
-    }
+    nh.param("egm/default_condition_time", egm_default_condition_time_, 10.0);
 
-    if(nh.hasParam("rws/delay_time"))
-    {
-        nh.param("rws/delay_time", rws_delay_time_, 0.0);
-    }
+    nh.param("max_joint_velocity", max_joint_velocity_, 400.0*M_PI/180.0);
 
-    else
-    {
-        ROS_ERROR(ros::this_node::getName() + ": rws/delay_time param not found.");
-        return;
-    }
-
-    if(nh.hasParam("egm/default_condition_time"))
-    {
-        nh.param("rws/delay_time", rws_delay_time_, 0.0);
-    }
-
-    else
-    {
-        ROS_ERROR(ros::this_node::getName() + ": rws/delay_time param not found.");
-        return;
-    }
 
 
     has_params_ = true;
@@ -109,6 +86,15 @@ bool YumiEGMInterface::init()
     if (!initEGM()) return false;
 
     if(!initRWS()) return false;
+
+}
+
+bool YumiEGMInterface::stop()
+{
+    if(!stopEGM()) return false;
+
+    io_service.stop();
+    io_service_threads_.join_all();
 }
 
 
@@ -144,13 +130,15 @@ bool YumiEGMInterface::initRWS()
         return false;
     }
 
-    egm_data.left.setCondTime(DEFAULT_EGM_CONDITION_TIME_);
-    egm_data.left.setMaxSpeedDeviation(max_moveit_joint_velocity_*conversions::RAD_TO_DEG);
-    egm_data.right.setCondTime(DEFAULT_EGM_CONDITION_TIME_);
-    egm_data.right.setMaxSpeedDeviation(max_moveit_joint_velocity_*conversions::RAD_TO_DEG);
+    egm_data.left.setCondTime(egm_default_condition_time_);
+    egm_data.left.setMaxSpeedDeviation(max_joint_velocity_*egm_common_values::conversions::RAD_TO_DEG);
+    egm_data.right.setCondTime(egm_default_condition_time_);
+    egm_data.right.setMaxSpeedDeviation(max_joint_velocity_*egm_common_values::conversions::RAD_TO_DEG);
     rws_interface_yumi_->setData(egm_data);
 
     rws_connection_ready_ = true;
+
+    if(!startEGM()) return false;
 
     return true;
 }
@@ -182,4 +170,44 @@ void YumiEGMInterface::configureEGM()
     configuration.simple_interpolation.use_interpolation = true;
     left_arm_egm_interface_->setConfiguration(configuration);
     right_arm_egm_interface_->setConfiguration(configuration);
+}
+
+bool YumiEGMInterface::startEGM()
+{
+    bool egm_started = false;
+
+    if(rws_interface_yumi_ && rws_connection_ready_)
+    {
+      for(int i = 0; i < rws_max_signal_retries_ && !done; ++i)
+      {
+        egm_started = rws_interface_yumi_->doEGMStartJoint();
+        if(!egm_started)
+        {
+          ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM start signal! [Attempt " << i+1 << "/" <<
+                           rws_max_signal_retries_<< "]");
+        }
+      }
+    }
+
+    return egm_started;
+}
+
+bool YumiEGMInterface::stopEGM()
+{
+    bool egm_stopped = false;
+
+    if(rws_interface_yumi_ && rws_connection_ready_)
+    {
+      for(int i = 0; i < rws_max_signal_retries_ && !done; ++i)
+      {
+        egm_stopped = rws_interface_yumi_->doEGMStartJoint();
+        if(!egm_stopped)
+        {
+          ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM stop signal! [Attempt " << i+1 << "/" <<
+                           rws_max_signal_retries_<< "]");
+        }
+      }
+    }
+
+    return egm_stopped;
 }
