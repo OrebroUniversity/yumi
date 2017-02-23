@@ -1,7 +1,7 @@
 /*
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2017, Francisco Vina
+ * Copyright (c) 2017, Francisco Vina, francisco.vinab@gmail.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,9 @@ void YumiEGMInterface::~YumiEGMInterface()
 
 void YumiEGMInterface::getParams()
 {
-
     ros::NodeHandle nh("~");
+
+    // RWS parameters
     if(nh.hasParam("rws/ip"))
     {
         nh.param("rws/ip", rws_ip_, std::string("192.168.1.25"));
@@ -65,11 +66,38 @@ void YumiEGMInterface::getParams()
     nh.param("rws/delay_time", rws_delay_time_, 0.01);
     nh.param("rws/max_signal_retries", rws_max_signal_retries_, 5);
 
-    nh.param("egm/default_condition_time", egm_default_condition_time_, 10.0);
+    // EGM parameters
+    std::string tool_name;
+    nh.param("egm/tool_name", tool_name, "tool0");
+    egm_params_.setToolName(tool_name);
 
-    nh.param("max_joint_velocity", max_joint_velocity_, 400.0*M_PI/180.0);
+    std::string wobj_name;
+    nh.param("egm/wobj_name", wobj_name, "wobj0");
+    egm_params_.setWobjName(wobj_name);
 
+    double cond_min_max;
+    nh.param("egm/cond_min_max", cond_min_max, 0.5);
+    egm_params_.setCondMinMax(cond_min_max);
 
+    double lp_filter;
+    nh.param("egm/lp_filter", lp_filter, 0.0);
+    egm_params_.setLpFilter(lp_filter);
+
+    double max_speed_deviation;
+    nh.param("egm/max_speed_deviation", max_speed_deviation, 400.0*M_PI/180.0);
+    egm_parmas_.setMaxSpeedDeviation(max_speed_deviation);
+
+    double condition_time;
+    nh.param("egm/condition_time", condition_time, 10.0);
+    egm_params_.setCondTime(condition_time);
+
+    double ramp_in_time;
+    nh.param("egm/ramp_in_time", ramp_in_time, 0.1);
+    egm_params_.setRampInTime(ramp_in_time);
+
+    double pos_corr_gain;
+    nh.param("egm/pos_corr_gain", pos_corr_gain, 0);
+    egm_params_.setPosCorrGain(pos_corr_gain);
 
     has_params_ = true;
 }
@@ -95,6 +123,25 @@ bool YumiEGMInterface::stop()
 
     io_service.stop();
     io_service_threads_.join_all();
+
+    return true;
+}
+
+void YumiEGMInterface::getCurrentJointPos(float (&joints)[N_YUMI_JOINTS])
+{
+    bool new_data_left_arm;
+    bool new_data_right_arm;
+
+
+}
+
+
+void YumiEGMInterface::getCurrentJointVel(float (&joints)[N_YUMI_JOINTS])
+{
+    bool new_data_left_arm;
+    bool new_data_right_arm;
+
+
 }
 
 
@@ -122,19 +169,7 @@ bool YumiEGMInterface::initRWS()
 
     ros::Duration(rws_delay_time_).sleep();
 
-    DualEGMData egm_data;
-
-    if(!rws_interface_yumi_->getData(&egm_data))
-    {
-        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
-        return false;
-    }
-
-    egm_data.left.setCondTime(egm_default_condition_time_);
-    egm_data.left.setMaxSpeedDeviation(max_joint_velocity_*egm_common_values::conversions::RAD_TO_DEG);
-    egm_data.right.setCondTime(egm_default_condition_time_);
-    egm_data.right.setMaxSpeedDeviation(max_joint_velocity_*egm_common_values::conversions::RAD_TO_DEG);
-    rws_interface_yumi_->setData(egm_data);
+    if(!sendEGMParams()) return false;
 
     rws_connection_ready_ = true;
 
@@ -154,6 +189,24 @@ bool YumiEGMInterface::initEGM()
     {
         io_service_threads_.create_thread(boost::bind(&boost::asio::io_service::run, &io_service_));
     }
+
+    return true;
+}
+
+bool YumiEGMInterface::sendEGMParams()
+{
+    DualEGMData dual_egm_data;
+
+    if(!rws_interface_yumi_->getData(&dual_egm_data))
+    {
+        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
+        return false;
+    }
+
+    dual_egm_data.left = egm_params_;
+    dual_egm_data.right = egm_params_;
+
+    rws_interface_yumi_->setData(dual_egm_data);
 
     return true;
 }
@@ -200,7 +253,7 @@ bool YumiEGMInterface::stopEGM()
     {
       for(int i = 0; i < rws_max_signal_retries_ && !done; ++i)
       {
-        egm_stopped = rws_interface_yumi_->doEGMStartJoint();
+        egm_stopped = rws_interface_yumi_->doEGMStop();
         if(!egm_stopped)
         {
           ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM stop signal! [Attempt " << i+1 << "/" <<
