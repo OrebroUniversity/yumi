@@ -100,19 +100,50 @@ public:
     bool stop();
 
 
-    /** \brief gets the current joint positions from the robot
+    /** \brief gets the current joint positions/velocities/accelerations from the robot.
+     *
+     * \param joint_* the joint positions/velocities/accelerations. Elements 0-6 correspond to the
+     *  left arm and elements 7-13 to the right arm. The joints are ordered as in the URDF,
+     * starting from the shoulder until the wrist.
      */
-    void getCurrentJointPos(float (&joint_pos)[N_YUMI_JOINTS]);
+    void getCurrentJointStates(float (&joint_pos)[N_YUMI_JOINTS],
+                               float (&joint_vel)[N_YUMI_JOINTS],
+                               float (&joint_acc)[N_YUMI_JOINTS]);
 
-    /** \brief gets the current joint velocities from the robot
-     */
-    void getCurrentJointVel(float (&joint_vel)[N_YUMI_JOINTS]);
 
-    /** \brief sets the joint velocity commands
+    /** \brief sets the joint velocities to command to the robot.
+     *
+     * \param joint_vel_targets Array with the joint velocity commands, where elements 0-6
+     * correspond to the left arm and elements 7-13 correspond to the right arm.
      */
-    void setJointTargets(float (&joint_targets)[N_YUMI_JOINTS]);
+    void setJointVelTargets(float (&joint_vel_targets)[N_YUMI_JOINTS]);
 
 protected:
+
+
+    /** \brief Preallocate memory for the joint space messages used for interfacing with the EGM server
+     *
+     */
+    void reserveEGMJointSpaceMessage(abb::egm_interface::proto::JointSpace *joint_space_message);
+
+    /** \brief Copies protobuf joint states (pos, vel or acc) collected from
+     * the EGM interface to an array.
+     *
+     * \param joint_states These correspond to YuMi's joints 1,2,4,5,6,7.
+     *
+     * \param external_joint_states This corresponds to YuMi's 3rd joint, the redudancy joint.
+     *
+     * \param joint_array The array at which the joint states are copied, in the same order
+     * as the robot's URDF, starting from the shoulder until the wrist.
+     */
+    void copyProtobufJointStateToArray(const google::protobuf::RepeatedField<double> &joint_states,
+                                       const google::protobuf::RepeatedField<double> &external_joint_states,
+                                       float &joint_array[N_YUMI_JOINTS/2]);
+
+    void copyArrayToProtobufJointState(float &joint_array[N_YUMI_JOINTS/2], google::protobuf::RepeatedField<double> *joint_states,
+                                       google::protobuf::RepeatedField<double> *external_joint_states
+                                       );
+
 
     bool initRWS();
 
@@ -128,9 +159,6 @@ protected:
     bool startEGM();
 
     bool stopEGM();
-
-
-private:
 
 
     /* RWS */
@@ -149,7 +177,16 @@ private:
     boost::shared_ptr<EGMInterfaceDefault> left_arm_egm_interface_;
     boost::shared_ptr<EGMInterfaceDefault> right_arm_egm_interface_;
 
+    // feedback and status read from the egm interface
+    boost::shared_ptr<abb::egm_interface::proto::Feedback> left_arm_feedback_;
+    boost::shared_ptr<abb::egm_interface::proto::RobotStatus> left_arm_status_;
+    boost::shared_ptr<abb::egm_interface::proto::Feedback> right_arm_feedback_;
+    boost::shared_ptr<abb::egm_interface::proto::RobotStatus> right_arm_status_;
 
+    boost::shared_ptr<abb::egm_interface::proto::JointSpace> left_arm_joint_vel_targets_;
+    boost::shared_ptr<abb::egm_interface::proto::JointSpace> right_arm_joint_vel_targets_;
+
+    // joint velocity commands sent to the egm interface
 
     // io service used for EGM
     boost::asio::io_service io_service_;

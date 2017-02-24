@@ -37,6 +37,20 @@
 void YumiEGMInterface::YumiEGMInterface() :
     has_params_(false), rws_connection_ready_(false)
 {
+    left_arm_feedback_.reset(new abb::egm_interface::proto::Feedback());
+    left_arm_status_.reset(new abb::egm_interface::proto::RobotStatus());
+    right_arm_feedback_.reset(new abb::egm_interface::proto::Feedback());
+    right_arm_status_.reset(new abb::egm_interface::proto::RobotStatus());
+
+    left_arm_joint_vel_targets_.reset(new abb::egm_interface::proto::JointSpace());
+    right_arm_joint_vel_targets_.reset(new abb::egm_interface::proto::JointSpace());
+
+    // preallocate memory for feedback/command messages
+    reserveEGMJointSpaceMessage(left_arm_feedback_->mutable_joints());
+    reserveEGMJointSpaceMessage(right_arm_feedback_->mutable_joints());
+    reserveEGMJointSpaceMessage(left_arm_joint_vel_targets_.get());
+    reserveEGMJointSpaceMessage(right_arm_joint_vel_targets_.get());
+
     getParams();
 }
 
@@ -84,8 +98,8 @@ void YumiEGMInterface::getParams()
     egm_params_.setLpFilter(lp_filter);
 
     double max_speed_deviation;
-    nh.param("egm/max_speed_deviation", max_speed_deviation, 400.0*M_PI/180.0);
-    egm_parmas_.setMaxSpeedDeviation(max_speed_deviation);
+    nh.param("egm/max_speed_deviation", max_speed_deviation, 400.0);
+    egm_params_.setMaxSpeedDeviation(max_speed_deviation);
 
     double condition_time;
     nh.param("egm/condition_time", condition_time, 10.0);
@@ -127,23 +141,54 @@ bool YumiEGMInterface::stop()
     return true;
 }
 
-void YumiEGMInterface::getCurrentJointPos(float (&joints)[N_YUMI_JOINTS])
+void YumiEGMInterface::getCurrentJointStates(float (&joint_pos)[N_YUMI_JOINTS], float (&joint_vel)[N_YUMI_JOINTS], float (&joint_acc)[N_YUMI_JOINTS])
 {
-    bool new_data_left_arm;
-    bool new_data_right_arm;
+    left_arm_egm_interface_->read(left_arm_feedback_.get(), left_arm_status_.get());
+    right_arm_egm_interface_->read(right_arm_feedback_.get(), right_arm_status_.get());
 
+    copyProtobufJointStateToArray(left_arm_feedback_->joints().position(), left_arm_feedback_->joints().external_position(), joint_pos);
+    copyProtobufJointStateToArray(left_arm_feedback_->joints().speed(), left_arm_feedback_->joints().external_speed(), joint_vel);
+    copyProtobufJointStateToArray(left_arm_feedback_->joints().acceleration(), left_arm_feedback_->joints().external_acceleration(), joint_acc);
+
+
+    copyProtobufJointStateToArray(right_arm_feedback_->joints().position(), right_arm_feedback_->joints().external_position(), &joint_pos[7]);
+    copyProtobufJointStateToArray(right_arm_feedback_->joints().speed(), right_arm_feedback_->joints().external_speed(), &joint_vel[7]);
+    copyProtobufJointStateToArray(right_arm_feedback_->joints().acceleration(), right_arm_feedback_->joints().external_acceleration(), &joint_acc[7]);
+}
+
+void YumiEGMInterface::setJointVelocityCommands(float (&joint_velocity_commands)[N_YUMI_JOINTS])
+{
 
 }
 
-
-void YumiEGMInterface::getCurrentJointVel(float (&joints)[N_YUMI_JOINTS])
+void YumiEGMInterface::reserveEGMJointSpaceMessage(abb::egm_interface::proto::JointSpace *joint_space_message)
 {
-    bool new_data_left_arm;
-    bool new_data_right_arm;
-
-
+    joint_space_message->position.Reserve(N_YUMI_JOINTS/2 - 1);
+    joint_space_message->speed.Reserve(N_YUMI_JOINTS/2 - 1);
+    joint_space_message->acceleration.Reserve(N_YUMI_JOINTS/2 -1);
+    joint_space_message->external_position.Reserve(1);
+    joint_space_message->external_speed.Reserve(1);
+    joint_space_message->external_acceleration.Reserve(1);
 }
 
+void YumiEGMInterface::copyProtobufJointStateToArray(const google::protobuf::RepeatedField<double> &joint_states,
+                                                     const google::protobuf::RepeatedField<double> &external_joint_states,
+                                                     float &joint_array[N_YUMI_JOINTS/2])
+{
+    joint_array[0] = (float)joint_states[0];
+    joint_array[1] = (float)joint_states[1];
+    joint_array[2] = (float)external_joint_states[0];
+    joint_array[3] = (float)joint_states[2];
+    joint_array[4] = (float)joint_states[3];
+    joint_array[5] = (float)joint_states[4];
+    joint_array[6] = (float)joint_states[5];
+}
+
+
+void YumiEGMInterface::copyArrayToProtobufJointState(float (&joint_array)[N_YUMI_JOINTS/2])
+{
+
+}
 
 bool YumiEGMInterface::initRWS()
 {
