@@ -52,14 +52,14 @@
 #endif
 
 
+using namespace abb::egm_interface;
+using namespace abb::rws_interface;
+
 // Wrapper class for setting up EGM and RWS connections to the Yumi robot
 // with their corresponding IO service threads
 // It assumes velocity control mode
 class YumiEGMInterface
 {
-
-    using namespace abb::egm_interface;
-    using namespace abb::rws_interface;
 
 public:
 
@@ -124,7 +124,37 @@ protected:
     /** \brief Preallocate memory for the joint space messages used for interfacing with the EGM server
      *
      */
-    void reserveEGMJointSpaceMessage(abb::egm_interface::proto::JointSpace *joint_space_message);
+    void reserveEGMJointSpaceMessage(proto::JointSpace *joint_space_message);
+
+
+    /** \brief Copies EGM protobuf joint states (pos, vel or acc) collected from
+     * the EGM interface to an array.
+     *
+     * \param joint_states These correspond to YuMi's joints 1,2,4,5,6,7.
+     *
+     * \param external_joint_states This corresponds to YuMi's 3rd joint, the redudancy joint.
+     *
+     * \param joint_array The array at which the joint states are copied, in the same order
+     * as the robot's URDF, starting from the shoulder until the wrist.
+     */
+    void copyEGMJointStateToArray(const google::protobuf::RepeatedField<double>& joint_states,
+                                  const google::protobuf::RepeatedField<double>& external_joint_states,
+                                  float* joint_array) const;
+
+    /** \brief Extracts joint pos, vel and acc from an EGM protobuf joint space message
+     * and copies them to separate float arrays.
+     *
+     * \param joint_space EGM joint space protobuf message from which to extract the joint variables
+     *
+     * \param joint_pos
+     *
+     * \param joint_vel
+     *
+     * \param joint_acc
+     */
+    void copyEGMJointSpaceToArray(const proto::JointSpace &joint_space,
+                                  float* joint_pos, float* joint_vel, float* joint_acc ) const;
+
 
     /** \brief Copies protobuf joint states (pos, vel or acc) collected from
      * the EGM interface to an array.
@@ -136,13 +166,9 @@ protected:
      * \param joint_array The array at which the joint states are copied, in the same order
      * as the robot's URDF, starting from the shoulder until the wrist.
      */
-    void copyProtobufJointStateToArray(const google::protobuf::RepeatedField<double> &joint_states,
-                                       const google::protobuf::RepeatedField<double> &external_joint_states,
-                                       float &joint_array[N_YUMI_JOINTS/2]);
-
-    void copyArrayToProtobufJointState(float &joint_array[N_YUMI_JOINTS/2], google::protobuf::RepeatedField<double> *joint_states,
-                                       google::protobuf::RepeatedField<double> *external_joint_states
-                                       );
+    void copyArrayToEGMJointState(const float* joint_array,
+                                  google::protobuf::RepeatedField<double>* joint_states,
+                                  google::protobuf::RepeatedField<double>* external_joint_states);
 
 
     bool initRWS();
@@ -168,7 +194,7 @@ protected:
     // RWS connection parameters
     std::string rws_ip_, rws_port_;
     double rws_delay_time_;
-    unsigned int rws_max_signal_retries_;
+    int rws_max_signal_retries_;
     bool rws_connection_ready_;
 
     /* EGM */
@@ -221,8 +247,6 @@ private:
     bool is_initialized_, is_setup_, first_run_in_position_mode_;
 
     float sampling_rate_;
-
-    bool is_rws_setup_;
 
     YumiEGMInterface yumi_egm_interface_;
 

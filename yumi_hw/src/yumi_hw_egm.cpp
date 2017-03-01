@@ -32,18 +32,22 @@
 
 #include <yumi_hw/yumi_hw_egm.h>
 #include <abb_egm_interface/egm_common.h>
+#include <ros/ros.h>
 
 
-void YumiEGMInterface::YumiEGMInterface() :
+using namespace abb::egm_interface;
+using namespace abb::rws_interface;
+
+YumiEGMInterface::YumiEGMInterface() :
     has_params_(false), rws_connection_ready_(false)
 {
-    left_arm_feedback_.reset(new abb::egm_interface::proto::Feedback());
-    left_arm_status_.reset(new abb::egm_interface::proto::RobotStatus());
-    right_arm_feedback_.reset(new abb::egm_interface::proto::Feedback());
-    right_arm_status_.reset(new abb::egm_interface::proto::RobotStatus());
+    left_arm_feedback_.reset(new proto::Feedback());
+    left_arm_status_.reset(new proto::RobotStatus());
+    right_arm_feedback_.reset(new proto::Feedback());
+    right_arm_status_.reset(new proto::RobotStatus());
 
-    left_arm_joint_vel_targets_.reset(new abb::egm_interface::proto::JointSpace());
-    right_arm_joint_vel_targets_.reset(new abb::egm_interface::proto::JointSpace());
+    left_arm_joint_vel_targets_.reset(new proto::JointSpace());
+    right_arm_joint_vel_targets_.reset(new proto::JointSpace());
 
     // preallocate memory for feedback/command messages
     reserveEGMJointSpaceMessage(left_arm_feedback_->mutable_joints());
@@ -55,7 +59,7 @@ void YumiEGMInterface::YumiEGMInterface() :
 }
 
 
-void YumiEGMInterface::~YumiEGMInterface()
+YumiEGMInterface::~YumiEGMInterface()
 {
 
 }
@@ -72,7 +76,7 @@ void YumiEGMInterface::getParams()
 
     else
     {
-        ROS_ERROR(ros::this_node::getName() + "/rws/ip param not found.");
+        ROS_ERROR_STREAM(ros::this_node::getName() << "/rws/ip param not found.");
         return;
     }
 
@@ -82,11 +86,11 @@ void YumiEGMInterface::getParams()
 
     // EGM parameters
     std::string tool_name;
-    nh.param("egm/tool_name", tool_name, "tool0");
+    nh.param("egm/tool_name", tool_name, std::string("tool0"));
     egm_params_.setToolName(tool_name);
 
     std::string wobj_name;
-    nh.param("egm/wobj_name", wobj_name, "wobj0");
+    nh.param("egm/wobj_name", wobj_name, std::string("wobj0"));
     egm_params_.setWobjName(wobj_name);
 
     double cond_min_max;
@@ -110,7 +114,7 @@ void YumiEGMInterface::getParams()
     egm_params_.setRampInTime(ramp_in_time);
 
     double pos_corr_gain;
-    nh.param("egm/pos_corr_gain", pos_corr_gain, 0);
+    nh.param("egm/pos_corr_gain", pos_corr_gain, 0.0);
     egm_params_.setPosCorrGain(pos_corr_gain);
 
     has_params_ = true;
@@ -121,7 +125,7 @@ bool YumiEGMInterface::init()
 {
     if (!has_params_){
 
-        ROS_ERROR(ros::this_node::getName() + ": missing EGM/RWS parameters.");
+        ROS_ERROR_STREAM(ros::this_node::getName() << ": missing EGM/RWS parameters.");
         return false;
     }
 
@@ -135,7 +139,7 @@ bool YumiEGMInterface::stop()
 {
     if(!stopEGM()) return false;
 
-    io_service.stop();
+    io_service_.stop();
     io_service_threads_.join_all();
 
     return true;
@@ -146,53 +150,67 @@ void YumiEGMInterface::getCurrentJointStates(float (&joint_pos)[N_YUMI_JOINTS], 
     left_arm_egm_interface_->read(left_arm_feedback_.get(), left_arm_status_.get());
     right_arm_egm_interface_->read(right_arm_feedback_.get(), right_arm_status_.get());
 
-    copyProtobufJointStateToArray(left_arm_feedback_->joints().position(), left_arm_feedback_->joints().external_position(), joint_pos);
-    copyProtobufJointStateToArray(left_arm_feedback_->joints().speed(), left_arm_feedback_->joints().external_speed(), joint_vel);
-    copyProtobufJointStateToArray(left_arm_feedback_->joints().acceleration(), left_arm_feedback_->joints().external_acceleration(), joint_acc);
-
-
-    copyProtobufJointStateToArray(right_arm_feedback_->joints().position(), right_arm_feedback_->joints().external_position(), &joint_pos[7]);
-    copyProtobufJointStateToArray(right_arm_feedback_->joints().speed(), right_arm_feedback_->joints().external_speed(), &joint_vel[7]);
-    copyProtobufJointStateToArray(right_arm_feedback_->joints().acceleration(), right_arm_feedback_->joints().external_acceleration(), &joint_acc[7]);
+    copyEGMJointSpaceToArray(left_arm_feedback_->joints(), joint_pos, joint_vel, joint_acc);
+    copyEGMJointSpaceToArray(right_arm_feedback_->joints(), &joint_pos[7], &joint_vel[7], &joint_acc[7]);
 }
 
-void YumiEGMInterface::setJointVelocityCommands(float (&joint_velocity_commands)[N_YUMI_JOINTS])
+void YumiEGMInterface::setJointVelTargets(float (&joint_vel_targets)[N_YUMI_JOINTS])
 {
+    copyArrayToEGMJointState(joint_vel_targets, left_arm_joint_vel_targets_->mutable_speed(), left_arm_joint_vel_targets_->mutable_external_speed());
+    copyArrayToEGMJointState(&joint_vel_targets[7], right_arm_joint_vel_targets_->mutable_speed(), right_arm_joint_vel_targets_->mutable_external_speed());
+    left_arm_egm_interface_->write(*left_arm_joint_vel_targets_);
+    right_arm_egm_interface_->write(*right_arm_joint_vel_targets_);
 
 }
 
-void YumiEGMInterface::reserveEGMJointSpaceMessage(abb::egm_interface::proto::JointSpace *joint_space_message)
+void YumiEGMInterface::reserveEGMJointSpaceMessage(proto::JointSpace *joint_space_message)
 {
-    joint_space_message->position.Reserve(N_YUMI_JOINTS/2 - 1);
-    joint_space_message->speed.Reserve(N_YUMI_JOINTS/2 - 1);
-    joint_space_message->acceleration.Reserve(N_YUMI_JOINTS/2 -1);
-    joint_space_message->external_position.Reserve(1);
-    joint_space_message->external_speed.Reserve(1);
-    joint_space_message->external_acceleration.Reserve(1);
+    joint_space_message->mutable_position()->Reserve(6);
+    joint_space_message->mutable_speed()->Reserve(6);
+    joint_space_message->mutable_acceleration()->Reserve(6);
+    joint_space_message->mutable_external_position()->Reserve(1);
+    joint_space_message->mutable_external_speed()->Reserve(1);
+    joint_space_message->mutable_external_acceleration()->Reserve(1);
 }
 
-void YumiEGMInterface::copyProtobufJointStateToArray(const google::protobuf::RepeatedField<double> &joint_states,
+void YumiEGMInterface::copyEGMJointStateToArray(const google::protobuf::RepeatedField<double> &joint_states,
                                                      const google::protobuf::RepeatedField<double> &external_joint_states,
-                                                     float &joint_array[N_YUMI_JOINTS/2])
+                                                     float* joint_array) const
 {
-    joint_array[0] = (float)joint_states[0];
-    joint_array[1] = (float)joint_states[1];
-    joint_array[2] = (float)external_joint_states[0];
-    joint_array[3] = (float)joint_states[2];
-    joint_array[4] = (float)joint_states[3];
-    joint_array[5] = (float)joint_states[4];
-    joint_array[6] = (float)joint_states[5];
+    joint_array[0] = (float)joint_states.Get(0);
+    joint_array[1] = (float)joint_states.Get(1);
+    joint_array[2] = (float)external_joint_states.Get(0);
+    joint_array[3] = (float)joint_states.Get(2);
+    joint_array[4] = (float)joint_states.Get(3);
+    joint_array[5] = (float)joint_states.Get(4);
+    joint_array[6] = (float)joint_states.Get(5);
+}
+
+void YumiEGMInterface::copyEGMJointSpaceToArray(const proto::JointSpace &joint_space,
+                                                     float* joint_pos, float* joint_vel, float* joint_acc ) const
+{
+    copyEGMJointStateToArray(joint_space.position(), joint_space.external_position(), joint_pos);
+    copyEGMJointStateToArray(joint_space.speed(), joint_space.external_speed(), joint_vel);
+    copyEGMJointStateToArray(joint_space.acceleration(), joint_space.external_acceleration(), joint_acc);
 }
 
 
-void YumiEGMInterface::copyArrayToProtobufJointState(float (&joint_array)[N_YUMI_JOINTS/2])
+void YumiEGMInterface::copyArrayToEGMJointState(const float* joint_array,
+                                                google::protobuf::RepeatedField<double>* joint_states,
+                                                google::protobuf::RepeatedField<double>* external_joint_states)
 {
-
+    joint_states->Set(0, (double) joint_array[0]);
+    joint_states->Set(1, (double) joint_array[1]);
+    external_joint_states->Set(0, (double) joint_array[2]);
+    joint_states->Set(2, (double) joint_array[3]);
+    joint_states->Set(3, (double) joint_array[4]);
+    joint_states->Set(4, (double) joint_array[5]);
+    joint_states->Set(5, (double) joint_array[6]);
 }
 
 bool YumiEGMInterface::initRWS()
 {
-    ROS_INFO(ros::this_node::getName() + ": starting RWS connection with IP & PORT: " + rws_ip_ + " / " + rws_port_);
+    ROS_INFO_STREAM(ros::this_node::getName() << ": starting RWS connection with IP & PORT: " << rws_ip_ << " / " << rws_port_);
 
     rws_interface_yumi_.reset(new RWSInterfaceYuMi(rws_ip_, rws_port_));
     ros::Duration(rws_delay_time_).sleep();
@@ -200,7 +218,7 @@ bool YumiEGMInterface::initRWS()
     // Check that RAPID is running on the robot and that robot is in AUTO mode
     if(!rws_interface_yumi_->isRAPIDRunning())
     {
-        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure that the RAPID program is running on the flexpendant.");
+        ROS_ERROR_STREAM(ros::this_node::getName() << ": robot unavailable, make sure that the RAPID program is running on the flexpendant.");
         return false;
     }
 
@@ -208,7 +226,7 @@ bool YumiEGMInterface::initRWS()
 
     if(!rws_interface_yumi_->isModeAuto())
     {
-        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
+        ROS_ERROR_STREAM(ros::this_node::getName() << ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
         return false;
     }
 
@@ -244,12 +262,12 @@ bool YumiEGMInterface::sendEGMParams()
 
     if(!rws_interface_yumi_->getData(&dual_egm_data))
     {
-        ROS_ERROR(ros::this_node::getName() + ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
+        ROS_ERROR_STREAM(ros::this_node::getName() << ": robot unavailable, make sure to set the robot to AUTO mode on the flexpendant.");
         return false;
     }
 
-    dual_egm_data.left = egm_params_;
-    dual_egm_data.right = egm_params_;
+    //dual_egm_data.left = egm_params_;
+    //dual_egm_data.right = egm_params_;
 
     rws_interface_yumi_->setData(dual_egm_data);
 
@@ -261,7 +279,7 @@ void YumiEGMInterface::configureEGM()
     EGMInterfaceConfiguration configuration;
     configuration.basic.use_conditions = false;
     configuration.basic.axes = EGMInterfaceConfiguration::Seven;
-    configuration.basic.execution_mode = EGMInterfaceConfiguration::ExecutionModes::Direct;
+    configuration.basic.execution_mode = EGMInterfaceConfiguration::Direct;
     configuration.communication.use_speed = true;
     configuration.simple_interpolation.use_speed = true;
     configuration.simple_interpolation.use_acceleration = true;
@@ -276,7 +294,7 @@ bool YumiEGMInterface::startEGM()
 
     if(rws_interface_yumi_ && rws_connection_ready_)
     {
-      for(int i = 0; i < rws_max_signal_retries_ && !done; ++i)
+      for(int i = 0; i < rws_max_signal_retries_ && !egm_started; ++i)
       {
         egm_started = rws_interface_yumi_->doEGMStartJoint();
         if(!egm_started)
@@ -296,7 +314,7 @@ bool YumiEGMInterface::stopEGM()
 
     if(rws_interface_yumi_ && rws_connection_ready_)
     {
-      for(int i = 0; i < rws_max_signal_retries_ && !done; ++i)
+      for(int i = 0; i < rws_max_signal_retries_ && !egm_stopped; ++i)
       {
         egm_stopped = rws_interface_yumi_->doEGMStop();
         if(!egm_stopped)
@@ -309,3 +327,15 @@ bool YumiEGMInterface::stopEGM()
 
     return egm_stopped;
 }
+
+YumiHWEGM::YumiHWEGM() : YumiHW()
+{
+
+}
+
+YumiHWEGM::~YumiHWEGM()
+{
+
+}
+
+
