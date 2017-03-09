@@ -234,8 +234,6 @@ public:
 
     ~YumiHWEGM();
 
-    void initRWS();
-
     bool init();
 
     void read(ros::Time time, ros::Duration period);
@@ -244,17 +242,19 @@ public:
 
 
 private:
-    bool is_initialized_, is_setup_, first_run_in_position_mode_;
-
-    float sampling_rate_;
+    bool is_initialized_;
 
     YumiEGMInterface yumi_egm_interface_;
 
+    boost::mutex data_buffer_mutex_;
+
     // command buffers
-    float joint_command_[N_YUMI_JOINTS];
+    float joint_vel_targets_[N_YUMI_JOINTS];
 
     // data buffers
-    float joint_feedback_[N_YUMI_JOINTS];
+    float joint_pos_[N_YUMI_JOINTS];
+    float joint_vel_[N_YUMI_JOINTS];
+    float joint_acc_[N_YUMI_JOINTS];
 };
 
 

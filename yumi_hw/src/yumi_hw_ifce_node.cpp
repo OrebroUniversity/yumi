@@ -8,9 +8,11 @@
 // ROS headers
 #include <ros/ros.h>
 #include <controller_manager/controller_manager.h>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
 // the lwr hw fri interface
 #include "yumi_hw/yumi_hw_rapid.h"
+#include <yumi_hw/yumi_hw_egm.h>
 
 bool g_quit = false;
 
@@ -72,18 +74,35 @@ int main( int argc, char** argv )
   int port;
   std::string hintToRemoteHost;
   std::string name;
+  bool use_egm;
   //yumi_nh.param("port", port, 49939);
   yumi_nh.param("ip", hintToRemoteHost, std::string("192.168.125.1") );
   yumi_nh.param("name", name, std::string("yumi"));
+  yumi_nh.param("egm", use_egm, false);
 
   // get the general robot description, the lwr class will take care of parsing what's useful to itself
   std::string urdf_string = getURDF(yumi_nh, "/robot_description");
 
-  YumiHWRapid yumi_robot;
-  yumi_robot.create(name, urdf_string);
-  yumi_robot.setup(hintToRemoteHost);
+  YumiHW* yumi_robot;
+
+  if(!use_egm)
+  {
+      yumi_robot = new YumiHWRapid();
+      YumiHWRapid* yumi_robot_rapid = dynamic_cast<YumiHWRapid*>(yumi_robot);
+      yumi_robot_rapid->setup(hintToRemoteHost);
+
+      float sampling_time = yumi_robot_rapid->getSampleTime();
+      ROS_INFO("Sampling time on robot: %f", sampling_time);
+  }
+
+  else
+  {
+      yumi_robot = new YumiHWEGM();
+  }
+
+  yumi_robot->create(name, urdf_string);
   
-  if(!yumi_robot.init())
+  if(!yumi_robot->init())
   {
     ROS_FATAL_NAMED("yumi_hw","Could not initialize robot real interface");
     return -1;
@@ -94,11 +113,9 @@ int main( int argc, char** argv )
   ros::Time last(ts.tv_sec, ts.tv_nsec), now(ts.tv_sec, ts.tv_nsec);
   ros::Duration period(1.0);
 
-  float sampling_time = yumi_robot.getSampleTime();
-  ROS_INFO("Sampling time on robot: %f", sampling_time);
 
   //the controller manager
-  controller_manager::ControllerManager manager(&yumi_robot);
+  controller_manager::ControllerManager manager(yumi_robot);
 
   // run as fast as possible
   while( !g_quit )
@@ -119,17 +136,19 @@ int main( int argc, char** argv )
     //}
 
     // read the state from the lwr
-    yumi_robot.read(now, period);
+    yumi_robot->read(now, period);
     
     // update the controllers
     manager.update(now, period);
 
     // write the command to the lwr
-    yumi_robot.write(now, period);
+    yumi_robot->write(now, period);
     
     //std::cout<<"Period is "<<period.toSec()<<std::endl;
     //ros::Duration(sampling_time).sleep();
   }
+
+  delete yumi_robot;
 
   std::cerr<<"Stopping spinner..."<<std::endl;
   spinner.stop();

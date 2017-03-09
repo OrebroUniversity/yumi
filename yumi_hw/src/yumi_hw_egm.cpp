@@ -328,14 +328,60 @@ bool YumiEGMInterface::stopEGM()
     return egm_stopped;
 }
 
-YumiHWEGM::YumiHWEGM() : YumiHW()
+YumiHWEGM::YumiHWEGM() : YumiHW(), is_initialized_(false)
 {
 
 }
 
 YumiHWEGM::~YumiHWEGM()
 {
+    yumi_egm_interface_.stop();
+}
+
+bool YumiHWEGM::init()
+{
+    if (is_initialized_) return false;
+
+    bool success = yumi_egm_interface_.init();
+    if(!success) return false;
+
+    is_initialized_ = true;
+    return true;
+}
+
+void YumiHWEGM::read(ros::Time time, ros::Duration period)
+{
+    if(!is_initialized_) return;
+
+    data_buffer_mutex_.lock();
+
+    yumi_egm_interface_.getCurrentJointStates(joint_pos_, joint_vel_, joint_acc_);
+
+    for (int j = 0; j < n_joints_; j++)
+    {
+      joint_position_prev_[j] = joint_position_[j];
+      joint_position_[j] = joint_pos_[j];
+      joint_velocity_[j] = joint_vel_[j];
+    }
+
+    data_buffer_mutex_.unlock();
 
 }
 
+void YumiHWEGM::write(ros::Time time, ros::Duration period)
+{
+    if(!is_initialized_) return;
 
+    enforceLimits(period);
+
+    data_buffer_mutex_.lock();
+
+    for (int j = 0; j < n_joints_; j++)
+    {
+      joint_vel_targets_[j] = joint_velocity_command_[j];
+    }
+
+    yumi_egm_interface_.setJointVelTargets(joint_vel_targets_);
+
+    data_buffer_mutex_.unlock();
+}
