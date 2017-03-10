@@ -95,7 +95,7 @@ public:
     /** \brief Initializes EGM + RWS connection to the robot
      *
      */
-    bool init();
+    bool init(const std::string& ip, const std::string& port);
 
     bool stop();
 
@@ -168,7 +168,7 @@ protected:
      */
     void copyArrayToEGMJointState(const float* joint_array,
                                   google::protobuf::RepeatedField<double>* joint_states,
-                                  google::protobuf::RepeatedField<double>* external_joint_states);
+                                  google::protobuf::RepeatedField<double>* external_joint_states) const;
 
 
     bool initRWS();
@@ -179,6 +179,8 @@ protected:
      * LP filter bandwidth, condition time, etc. For more details see getParams()
      */
     bool sendEGMParams();
+
+    void setEGMParams(EGMData* egm_data);
 
     void configureEGM();
 
@@ -234,6 +236,8 @@ public:
 
     ~YumiHWEGM();
 
+    void setup(const std::string& ip, const std::string& port);
+
     bool init();
 
     void read(ros::Time time, ros::Duration period);
@@ -247,6 +251,8 @@ private:
     YumiEGMInterface yumi_egm_interface_;
 
     boost::mutex data_buffer_mutex_;
+
+    std::string ip_, port_;
 
     // command buffers
     float joint_vel_targets_[N_YUMI_JOINTS];

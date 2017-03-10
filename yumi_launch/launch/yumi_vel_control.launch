@@ -2,11 +2,12 @@
 <launch> 
 
 <arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
-<!--arg name="port" default="49939"/-->
+<arg name="port" default="49939"/>
 <!--arg name="ip" default="192.168.1.1"/--> <!--when talking to a virtual controller -->
 <arg name="ip" default="192.168.125.1"/> <!--when talking to the real robot controller -->
 <arg name="controllers" default="joint_state_controller joint_trajectory_vel_controller"/>
 <arg name="hardware_interface" default="VelocityJointInterface"/>
+<arg name="egm" default="false"/>
 
 <!-- the urdf/sdf parameter -->
 <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
@@ -18,6 +19,9 @@
 <!-- Load joint controller configurations from YAML file to parameter server -->
 <rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 
+<!-- EGM communication parameters -->
+<rosparam file="$(find yumi_hw)/config/egm_rws_config.yaml" command="load" ns="/yumi" if="$(arg egm)"/>
+
 <!-- load the controllers -->
 <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 
@@ -25,11 +29,12 @@
 <node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_node" respawn="false" ns="/yumi" output="screen"> <!--launch-prefix="xterm -e gdb - -args"-->
     <!-- addresses /-->
     <param name="name" value="$(arg name)" />
-    <!--param name="port" value="$(arg port)"/-->
     <param name="ip" value="$(arg ip)"/>
+    <param name="port" value="$(arg port)"/>
+    <param name="egm" value="$(arg egm)"/>
 </node>
  
-<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> <!--launch-prefix="xterm -e gdb - -args"-->
+<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen" unless="$(arg egm)"> <!--launch-prefix="xterm -e gdb - -args"-->
     <!-- addresses /-->
     <param name="ip" value="$(arg ip)"/>
 </node>

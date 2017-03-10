@@ -9,6 +9,9 @@ rws:
 
 # EGM parameters, documentation taken from the RAPID module TRobEGM.sys
 egm:
+  
+  comm_timeout: 1.0
+
   # tool and work object names,
   # not important for YuMi since EGM control is at the joint level
   tool_name: tool0
