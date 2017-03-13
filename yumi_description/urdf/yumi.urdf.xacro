@@ -20,12 +20,12 @@
   </xacro:yumi>
 
   <!--right gripper-->
-  <xacro:yumi_servo_gripper name="gripper_r" hardware_interface="$(arg prefix)" parent="yumi_link_7_r">
+  <xacro:yumi_servo_gripper name="gripper_r" hardware_interface="EffortJointInterface" parent="yumi_link_7_r">
     <origin xyz="0 0 0.007" rpy="0 0 ${PI}" />
   </xacro:yumi_servo_gripper>
 
   <!--left gripper-->
-  <xacro:yumi_servo_gripper name="gripper_l" hardware_interface="$(arg prefix)" parent="yumi_link_7_l">
+  <xacro:yumi_servo_gripper name="gripper_l" hardware_interface="EffortJointInterface" parent="yumi_link_7_l">
     <origin xyz="0 0 0.007" rpy="0 0 ${PI}" />
   </xacro:yumi_servo_gripper>
 
