@@ -321,8 +321,18 @@
         </geometry>
         <material name="Grey"/>
       </collision>
-    </link>
+   </link>
 
+   <!-- A Tool frame -->
+   <joint name="${name}_joint_tool_r" type="fixed">
+     <parent link="${name}_link_7_r"/>
+     <child link="${name}_link_tool_r"/>
+     <origin xyz="0.0 0.0 0.1" rpy="-${PI / 2} -${PI / 2} 0.0"/>
+   </joint>
+
+   <link name="${name}_link_tool_r"/>
+     
+   
    <!--///////////////////////////////////// LEFT ARM ////////////////////////////////  -->
 
   <!-- joint between body and link_1_l -->
@@ -596,7 +606,15 @@
         </geometry>
         <material name="Grey"/>
       </collision>
-    </link>
+   </link>
+   
+   <joint name="${name}_joint_tool_l" type="fixed">
+     <parent link="${name}_link_7_l"/>
+     <child link="${name}_link_tool_l"/>
+     <origin xyz="0.0 0.0 0.1" rpy="-${PI / 2} -${PI / 2} 0.0"/>
+   </joint>
+   
+   <link name="${name}_link_tool_l"/>
 
     <!--Extensions -->
     <xacro:yumi_gazebo name="${name}" />
