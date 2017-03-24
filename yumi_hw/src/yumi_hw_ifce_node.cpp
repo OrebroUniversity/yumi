@@ -78,7 +78,7 @@ int main( int argc, char** argv )
   yumi_nh.param("port", port, 49939);
   yumi_nh.param("ip", hintToRemoteHost, std::string("192.168.125.1") );
   yumi_nh.param("name", name, std::string("yumi"));
-  yumi_nh.param("egm", use_egm, false);
+  yumi_nh.param("use_egm", use_egm, false);
 
   // get the general robot description, the lwr class will take care of parsing what's useful to itself
   std::string urdf_string = getURDF(yumi_nh, "/robot_description");
@@ -148,6 +148,7 @@ int main( int argc, char** argv )
     // write the command to the lwr
     yumi_robot->write(now, period);
 
+    ros::Duration(0.01).sleep();
     //std::cout<<"Period is "<<period.toSec()<<std::endl;
     //ros::Duration(sampling_time).sleep();
   }

@@ -191,7 +191,7 @@ protected:
 
     /* RWS */
     // RWS interface which uses TCP communication for starting the EGM joint mode on YuMi
-    boost::shared_ptr<RWSInterfaceYuMi> rws_interface_yumi_;
+    boost::shared_ptr<RWSInterfaceYuMi> rws_interface_;
 
     // RWS connection parameters
     std::string rws_ip_, rws_port_;

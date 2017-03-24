@@ -20,7 +20,7 @@
 <rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 
 <!-- EGM communication parameters -->
-<rosparam file="$(find yumi_hw)/config/egm_rws_config.yaml" command="load" ns="/yumi" if="$(arg egm)"/>
+<rosparam file="$(find yumi_hw)/config/egm_rws_config.yaml" command="load" ns="/yumi/yumi_hw" if="$(arg egm)"/>
 
 <!-- load the controllers -->
 <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
@@ -31,7 +31,7 @@
     <param name="name" value="$(arg name)" />
     <param name="ip" value="$(arg ip)"/>
     <param name="port" value="$(arg port)"/>
-    <param name="egm" value="$(arg egm)"/>
+    <param name="use_egm" value="$(arg egm)"/>
 </node>
  
 <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen" unless="$(arg egm)"> <!--launch-prefix="xterm -e gdb - -args"-->
