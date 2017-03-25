@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>yumi_description</name>
-  <version>0.0.1</version>
+  <version>0.0.4</version>
   <description>The yumi_description package</description>
 
   <maintainer email="robert.krug@oru.se">Robert Krug</maintainer>
