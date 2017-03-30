@@ -121,10 +121,16 @@ public:
 protected:
 
 
-    /** \brief Preallocate memory for the joint space messages used for interfacing with the EGM server
+    /** \brief Preallocate memory for the joint space messages used for interfacing with the EGM server.
      *
      */
-    void reserveEGMJointSpaceMessage(proto::JointSpace *joint_space_message);
+    void initEGMJointSpaceMessage(proto::JointSpace *joint_space_message);
+
+    /** \brief Set to zero joint states. Allocate 6 joint states and 1 external joint state
+     *
+     */
+    void initEGMJointStateMessage(google::protobuf::RepeatedField<double>* joint_states,
+                                  google::protobuf::RepeatedField<double>* external_joint_state);
 
 
     /** \brief Copies EGM protobuf joint states (pos, vel or acc) collected from
@@ -182,7 +188,7 @@ protected:
 
     void setEGMParams(EGMData* egm_data);
 
-    void configureEGM();
+    void configureEGM(boost::shared_ptr<EGMInterfaceDefault> egm_interface);
 
     bool startEGM();
 

@@ -148,7 +148,6 @@ int main( int argc, char** argv )
     // write the command to the lwr
     yumi_robot->write(now, period);
 
-    ros::Duration(0.01).sleep();
     //std::cout<<"Period is "<<period.toSec()<<std::endl;
     //ros::Duration(sampling_time).sleep();
   }
