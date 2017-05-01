@@ -61,8 +61,8 @@ int main( int argc, char** argv )
   spinner.start();
 
   // custom signal handlers
-  signal(SIGTERM, quitRequested);
-  signal(SIGINT, quitRequested);
+  //signal(SIGTERM, quitRequested);
+  //signal(SIGINT, quitRequested);
   signal(SIGHUP, quitRequested);
 
   // create a node
@@ -101,7 +101,7 @@ int main( int argc, char** argv )
   controller_manager::ControllerManager manager(&yumi_robot);
 
   // run as fast as possible
-  while( !g_quit )
+  while( !g_quit && ros::ok())
   {
     // get the time / period
     //if (!clock_gettime(CLOCK_MONOTONIC, &ts))

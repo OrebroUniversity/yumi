@@ -5,7 +5,7 @@
   <arg name="tf_prefix" default="" />
 
   <param name="/camera/driver/use_device_time"              value="false" />
-  <param name="/camera/driver/data_skip"              value="8" />
+  <param name="/camera/driver/data_skip"              value="0" />
   <param name="/camera/driver/depth_registration"              value="true" />
   <arg name="pi/2" value="1.5707963267948966" />
   <arg name="pi" value="3.141592654" />
