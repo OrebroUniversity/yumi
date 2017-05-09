@@ -1,1 +1,1 @@
-rosrun gazebo_ros spawn_model -urdf -file ../urdf/object.urdf -model box$1 -x 0.5 -y 0.0 -z 0.9
+rosrun gazebo_ros spawn_model -urdf -file ../urdf/object.urdf -model box$1 -x 0.45 -y 0.0 -z 0.9

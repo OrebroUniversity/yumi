@@ -1,0 +1,46 @@
+  joint_state_controller:
+      type: joint_state_controller/JointStateController
+      publish_rate: 500 
+  hiqp_joint_velocity_controller:
+    type: hiqp_ros/HiQPJointVelocityController
+    sampling_time: 1.0 # ms
+    visualization_publish_rate: 50 #Hz
+    joints:
+      - yumi_joint_1_r
+      - yumi_joint_2_r
+      - yumi_joint_7_r
+      - yumi_joint_3_r
+      - yumi_joint_4_r
+      - yumi_joint_5_r
+      - yumi_joint_6_r
+      - yumi_joint_1_l
+      - yumi_joint_2_l
+      - yumi_joint_7_l
+      - yumi_joint_3_l
+      - yumi_joint_4_l
+      - yumi_joint_5_l
+      - yumi_joint_6_l
+    task_monitoring:
+      active: 1
+      publish_rate: 50.0 # Hz
+  hiqp_joint_velocity_controller_collision:
+    type: hiqp_ros/HiQPJointVelocityControllerCollision
+    fps: 20
+    joints:
+      - yumi_joint_1_r
+      - yumi_joint_2_r
+      - yumi_joint_7_r
+      - yumi_joint_3_r
+      - yumi_joint_4_r
+      - yumi_joint_5_r
+      - yumi_joint_6_r
+      - yumi_joint_1_l
+      - yumi_joint_2_l
+      - yumi_joint_7_l
+      - yumi_joint_3_l
+      - yumi_joint_4_l
+      - yumi_joint_5_l
+      - yumi_joint_6_l
+    task_monitoring:
+      active: 1
+      publish_rate: 50.0
