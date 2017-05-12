@@ -92,19 +92,19 @@ add_library(${PROJECT_NAME}
 add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 
 add_executable(yumi_gripper_node src/yumi_gripper_node.cpp)
-add_executable(yumi_rws_gripper_node src/yumi_rws_gripper_node.cpp)
+# add_executable(yumi_rws_gripper_node src/yumi_rws_gripper_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(yumi_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(yumi_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(yumi_rws_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
+# add_dependencies(yumi_rws_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries( ${PROJECT_NAME} ${catkin_LIBRARIES} )
 target_link_libraries( yumi_hw_ifce_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
 target_link_libraries( yumi_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
-target_link_libraries( yumi_rws_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+# target_link_libraries( yumi_rws_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 
 #############
