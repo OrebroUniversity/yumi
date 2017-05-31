@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>yumi_test_controllers</name>
+  <version>0.1.0</version>
+  <description>YuMi test controllers</description>
+
+
+  <maintainer email="yoshua@kth.se">Yoshua Nava</maintainer>
+
+  <license>BSD</license>
+
+  <author>Yoshua Nava</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>angles</build_depend>
+  <build_depend>control_msgs</build_depend>
+  <build_depend>control_toolbox</build_depend>
+  <build_depend>controller_interface</build_depend>
+  <build_depend>forward_command_controller</build_depend>
+  <build_depend>realtime_tools</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>angles</run_depend>
+  <run_depend>control_msgs</run_depend>
+  <run_depend>control_toolbox</run_depend>
+  <run_depend>controller_interface</run_depend>
+  <run_depend>forward_command_controller</run_depend>
+  <run_depend>realtime_tools</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+
+</package>

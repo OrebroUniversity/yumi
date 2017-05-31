@@ -43,6 +43,7 @@
         <param name="use_egm" value="$(arg egm)"/>
     </node>
      
+
     <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen" unless="$(arg egm)"> <!--launch-prefix="xterm -e gdb - -args"-->
         <!-- IP address provided as a parameter to yumi_gripper_node /-->
         <param name="ip" value="$(arg ip)"/>
@@ -51,7 +52,6 @@
 
     <!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
-
 
 </launch>
 
