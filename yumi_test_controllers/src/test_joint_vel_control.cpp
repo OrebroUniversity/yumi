@@ -38,12 +38,13 @@ void joint_states_callback(const sensor_msgs::JointState &msg)
 		for (int i = 0; i < num_joints; i++)
 		{
 	        p.positions.push_back(joints_state.position[i]);
-	        // p.velocities.push_back(0.0);
-	        // p.accelerations.push_back(0.0);
+	        p.velocities.push_back(0.0);
+	        p.accelerations.push_back(0.0);
 	        p.time_from_start = ros::Duration(1.0);
 		}
 
-		p.positions[3] = -1.0;
+		p.positions[1] = 2.1;
+		p.velocities[1] = 0.0;
 
 		traj.points.push_back(p);
 		traj.header.stamp = ros::Time::now();

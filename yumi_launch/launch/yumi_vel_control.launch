@@ -33,7 +33,7 @@
     </node>
 
 
-
+    <!-- Calls to yumi_hw members -->
     <!-- The real hardware interface /-->
     <node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_node" respawn="false" ns="/yumi" output="screen"> <!--launch-prefix="xterm -e gdb - -args"-->
         <!-- addresses /-->
