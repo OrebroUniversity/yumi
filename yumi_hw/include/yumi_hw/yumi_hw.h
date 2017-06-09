@@ -37,7 +37,7 @@ class YumiHW : public hardware_interface::RobotHW
 
 	YumiHW() 
 	{
-	    n_joints_=14;
+	    n_joints_ = 14;
 	}
 	virtual ~YumiHW() {}
 

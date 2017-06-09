@@ -92,7 +92,7 @@ int main( int argc, char** argv )
       yumi_robot_rapid->setup(hintToRemoteHost);
 
       float sampling_time = yumi_robot_rapid->getSampleTime();
-      ROS_INFO("Sampling time on robot: %f", sampling_time);
+      ROS_INFO("No EGM. Sampling time on robot: %f", sampling_time);
   }
 
   else
@@ -102,6 +102,7 @@ int main( int argc, char** argv )
       std::stringstream port_ss;
       port_ss << port;
       yumi_robot_egm->setup(hintToRemoteHost, port_ss.str());
+      ROS_INFO("Setting up EGM");
   }
 
   yumi_robot->create(name, urdf_string);

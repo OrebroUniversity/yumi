@@ -11,7 +11,6 @@ int main( int argc, char* argv[] )
     spinner.start();
     ros::waitForShutdown();
 
-    //ros::spin();
     return 0;
 }
 
