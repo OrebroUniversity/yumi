@@ -44,10 +44,10 @@
 	</node>
 
 
- 	<!-- <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> -->
+ 	<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen">
 	    <!-- IP address provided as a parameter to yumi_gripper_node / -->
-        <!-- <param name="ip" value="$(arg ip)"/>	 -->
-	<!-- </node> -->
+        <param name="ip" value="$(arg ip)"/>	
+	</node>
 
 
     <!-- Show robot in Rviz   -->

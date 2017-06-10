@@ -44,7 +44,7 @@
     </node>
      
 
-    <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen" unless="$(arg egm)"> <!--launch-prefix="xterm -e gdb - -args"-->
+    <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> <!--unless="$(arg egm)" launch-prefix="xterm -e gdb - -args"-->
         <!-- IP address provided as a parameter to yumi_gripper_node /-->
         <param name="ip" value="$(arg ip)"/>
     </node>
