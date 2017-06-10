@@ -4,16 +4,19 @@ joint_state_controller:
   publish_rate: 500
 
 
+
+
 # Effort gripper position controllers ---------------------------------------
 yumi_gripper_r_effort_position_controller:
   type: effort_controllers/JointPositionController
   joint: gripper_r_joint
-  pid: {p: 200.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+  pid: {p: 5.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
 
 yumi_gripper_l_effort_position_controller:
   type: effort_controllers/JointPositionController
   joint: gripper_l_joint
-  pid: {p: 200.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+  pid: {p: 5.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+
 
 # Forward gripper position controllers ---------------------------------------
 yumi_gripper_r_forward_position_controller:
@@ -32,6 +35,7 @@ yumi_gripper_r_forward_velocity_controller:
 yumi_gripper_l_forward_velocity_controller:
   type: velocity_controllers/JointVelocityController
   joint: gripper_l_joint
+
 
 
 
