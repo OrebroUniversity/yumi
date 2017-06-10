@@ -38,7 +38,7 @@ build
 *.urdf
 *.dae
 .stl
-*.zip
+# *.zip
 *.a
 *.dll
 *.lib
