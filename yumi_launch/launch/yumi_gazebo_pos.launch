@@ -1,32 +1,42 @@
 <?xml version="1.0"?>
 <launch> 
+	
+	<!-- Load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
+	<arg name="controllers" default="joint_state_controller joint_trajectory_pos_controller yumi_gripper_r_forward_position_controller yumi_gripper_l_forward_position_controller"/>
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi" />
+	<arg name="hardware_interface" default="PositionJointInterface"/>
 
-<arg name="controllers" default="joint_state_controller joint_trajectory_pos_controller"/>
-<arg name="hardware_interface" default="PositionJointInterface"/>
+	<!-- URDF / SRDF parameters -->
+	<!-- <param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/> -->
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
 
-<include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="paused" value="false"/>
-    <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
-    <arg name="debug" value="false"/>
-</include>
 
-<!-- the urdf/sdf parameter -->
-<param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/>
+	<!-- Configuration for debug  -->
+	<arg name="debug" default="false"/>
+	<arg unless="$(arg debug)" name="launch_prefix" value="" />
+	<arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
 
-<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model yumi"  respawn="false" output="screen" />
 
-<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
-    <remap from="/joint_states" to="/yumi/joint_states" />
-</node>
+	<!-- Call Gazebo -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+	    <arg name="paused" value="false"/>
+	    <arg name="use_sim_time" value="true"/>
+	    <arg name="gui" value="false"/>
+	    <arg name="headless" value="false"/>
+	    <arg name="debug" value="$(arg debug)" />
+	</include>
 
-<!-- Load joint controller configurations from YAML file to parameter server -->
-<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 
-<!-- load the controllers -->
-<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi">
-</node>
+
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+	    <remap from="/joint_states" to="/yumi/joint_states" />
+	</node>
+
+
+	<!-- Show in Rviz   -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
 </launch>
 
