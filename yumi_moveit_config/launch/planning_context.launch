@@ -6,9 +6,9 @@
   <!-- The name of the parameter under which the URDF is loaded -->
   <arg name="robot_description" default="robot_description"/>
 
-  <arg name="hardware_interface" default="PositionJointInterface"/>
+  <arg name="hardware_interface" default="VelocityJointInterface"/>
 
-  <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi.urdf.xacro prefix:=$(arg hardware_interface)"/>
+  <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)"/>
 
   <!-- The semantic description that corresponds to the URDF -->
   <param name="$(arg robot_description)_semantic" textfile="$(find yumi_moveit_config)/config/yumi.srdf" />

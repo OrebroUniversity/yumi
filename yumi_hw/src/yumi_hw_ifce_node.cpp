@@ -75,7 +75,7 @@ int main( int argc, char** argv )
   std::string hintToRemoteHost;
   std::string name;
   bool use_egm;
-  yumi_nh.param("port", port, 49939);
+  yumi_nh.param("port", port, 80);
   yumi_nh.param("ip", hintToRemoteHost, std::string("192.168.125.1") );
   yumi_nh.param("name", name, std::string("yumi"));
   yumi_nh.param("use_egm", use_egm, false);
@@ -106,7 +106,7 @@ int main( int argc, char** argv )
   }
 
   yumi_robot->create(name, urdf_string);
-  
+
   if(!yumi_robot->init())
   {
     ROS_FATAL_NAMED("yumi_hw","Could not initialize robot real interface");

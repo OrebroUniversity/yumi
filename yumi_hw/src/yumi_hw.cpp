@@ -96,66 +96,66 @@ void YumiHW::registerInterfaces(const urdf::Model *const urdf_model,
     // Initialize values
     for(int j=0; j < n_joints_; j++)
     {
-	// Check that this transmission has one joint
-	if(transmissions[j].joints_.size() == 0)
-	{
-	    ROS_WARN_STREAM("Transmission " << transmissions[j].name_
-		<< " has no associated joints." << std::endl);
-	    continue;
-	}
-	else if(transmissions[j].joints_.size() > 1)
-	{
-	    ROS_WARN_STREAM("Transmission " << transmissions[j].name_
-		<< " has more than one joint, and they can't be controlled simultaneously"
-		<< std::endl);
-	    continue;
-	}
+		// Check that this transmission has one joint
+		if(transmissions[j].joints_.size() == 0)
+		{
+			ROS_WARN_STREAM("Transmission " << transmissions[j].name_
+			<< " has no associated joints." << std::endl);
+			continue;
+		}
+		else if(transmissions[j].joints_.size() > 1)
+		{
+			ROS_WARN_STREAM("Transmission " << transmissions[j].name_
+			<< " has more than one joint, and they can't be controlled simultaneously"
+			<< std::endl);
+			continue;
+		}
 
-	std::vector<std::string> joint_interfaces = transmissions[j].joints_[0].hardware_interfaces_;
+		std::vector<std::string> joint_interfaces = transmissions[j].joints_[0].hardware_interfaces_;
 
-	if( joint_interfaces.empty() )
-	{
-	    ROS_WARN_STREAM("Joint " << transmissions[j].joints_[0].name_ <<
-		" of transmission " << transmissions[j].name_ << " does not specify any hardware interface. " <<
-		"You need to, otherwise the joint can't be controlled." << std::endl);
-	    continue;
-	}
+		if( joint_interfaces.empty() )
+		{
+			ROS_WARN_STREAM("Joint " << transmissions[j].joints_[0].name_ <<
+			" of transmission " << transmissions[j].name_ << " does not specify any hardware interface. " <<
+			"You need to, otherwise the joint can't be controlled." << std::endl);
+			continue;
+		}
 
-	const std::string& hardware_interface = joint_interfaces.front();
+		const std::string& hardware_interface = joint_interfaces.front();
 
-	// Debug //FIXME
-	std::cout << "\x1B[37m" << "lwr_hw: " << "Loading joint '" << joint_names_[j]
-	    << "' of type '" << hardware_interface << "'" << "\x1B[0m" << std::endl;
+		// Debug //FIXME
+		std::cout << "\x1B[37m" << "lwr_hw: " << "Loading joint '" << joint_names_[j]
+			<< "' of type '" << hardware_interface << "'" << "\x1B[0m" << std::endl;
 
-	// Create joint state interface for all joints
-	state_interface_.registerHandle(hardware_interface::JointStateHandle(
-		    joint_names_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]));
+		// Create joint state interface for all joints
+		state_interface_.registerHandle(hardware_interface::JointStateHandle(
+				joint_names_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]));
 
-	//No control in effort space at the moment TODO
-	// Decide what kind of command interface this actuator/joint has
-	/*	hardware_interface::JointHandle joint_handle_effort;
-	joint_handle_effort = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
-		&joint_effort_command_[j]);
-	effort_interface_.registerHandle(joint_handle_effort); */
+		//No control in effort space at the moment TODO
+		// Decide what kind of command interface this actuator/joint has
+		/*	hardware_interface::JointHandle joint_handle_effort;
+		joint_handle_effort = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
+			&joint_effort_command_[j]);
+		effort_interface_.registerHandle(joint_handle_effort); */
 
-	// position handle
-	hardware_interface::JointHandle joint_handle_position;
-	joint_handle_position = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
-		&joint_position_command_[j]);
-	position_interface_.registerHandle(joint_handle_position);
+		// position handle
+		hardware_interface::JointHandle joint_handle_position;
+		joint_handle_position = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
+			&joint_position_command_[j]);
+		position_interface_.registerHandle(joint_handle_position);
 
-	// velocity command handle
-	hardware_interface::JointHandle joint_handle_velocity;
-	joint_handle_velocity = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
-		&joint_velocity_command_[j]);
-	velocity_interface_.registerHandle(joint_handle_velocity);
+		// velocity command handle
+		hardware_interface::JointHandle joint_handle_velocity;
+		joint_handle_velocity = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
+			&joint_velocity_command_[j]);
+		velocity_interface_.registerHandle(joint_handle_velocity);
 
-	registerJointLimits(joint_names_[j],
-		//joint_handle_effort,
-		joint_handle_position,
-		joint_handle_velocity,
-		urdf_model,
-		&joint_lower_limits_[j], &joint_upper_limits_[j]);
+		registerJointLimits(joint_names_[j],
+			//joint_handle_effort,
+			joint_handle_position,
+			joint_handle_velocity,
+			urdf_model,
+			&joint_lower_limits_[j], &joint_upper_limits_[j]);
     }
 
     // Register interfaces
@@ -237,17 +237,17 @@ bool YumiHW::parseTransmissionsFromURDF(const std::string& urdf_string)
     // Now iterate and save only transmission from this robot
     for (int j = 0; j < n_joints_; ++j)
     {
-	// std::cout << "Check joint " << joint_names_[j] << std::endl;
-	std::vector<transmission_interface::TransmissionInfo>::iterator it = transmissions.begin();
-	for(; it != transmissions.end(); ++it)
-	{
-	    // std::cout << "With transmission " << it->name_ << std::endl;
-	    if (joint_names_[j].compare(it->joints_[0].name_) == 0)
-	    {
-		transmissions_.push_back( *it );
-		// std::cout << "Found a match for transmission " << it->name_ << std::endl;
-	    }
-	}
+		// std::cout << "Check joint " << joint_names_[j] << std::endl;
+		std::vector<transmission_interface::TransmissionInfo>::iterator it = transmissions.begin();
+		for(; it != transmissions.end(); ++it)
+		{
+			// std::cout << "With transmission " << it->name_ << std::endl;
+			if (joint_names_[j].compare(it->joints_[0].name_) == 0)
+			{
+				transmissions_.push_back( *it );
+				// std::cout << "Found a match for transmission " << it->name_ << std::endl;
+			}
+		}
     }
 
     if( transmissions_.empty() )

@@ -10,6 +10,7 @@ controller_list:
       - yumi_joint_4_l
       - yumi_joint_5_l
       - yumi_joint_6_l
+      - gripper_l_joint_r
   - name: "right_arm"
     action_ns: joint_trajectory_action
     type: FollowJointTrajectory
@@ -21,3 +22,4 @@ controller_list:
       - yumi_joint_4_r
       - yumi_joint_5_r
       - yumi_joint_6_r
+      - gripper_r_joint_r

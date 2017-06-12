@@ -8,7 +8,7 @@
   <xacro:include filename="$(find yumi_description)/urdf/yumi.xacro"/>
   <!--Import the yumi servo gripper macro -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.xacro"/>
- <!-- Import Gazebo plugins -->
+  <!-- Import Gazebo plugins -->
   <xacro:include filename="$(find yumi_description)/gazebo/gazebo.urdf.xacro"/>
 
   <!-- Fix to world just for testing -->

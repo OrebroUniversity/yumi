@@ -4,7 +4,7 @@
 	<!-- Load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 	<arg name="controllers" default="joint_state_controller joint_trajectory_vel_controller yumi_gripper_r_effort_position_controller yumi_gripper_l_effort_position_controller"/>
-	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi" />
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 	<arg name="hardware_interface" default="VelocityJointInterface"/>
 
 
@@ -36,7 +36,7 @@
 	</node>
 
 
-	<!-- Show in Rviz   -->
+	<!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
 </launch>
