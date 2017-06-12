@@ -67,13 +67,13 @@ void YumiHW::reset()
 {
     for (int j = 0; j < n_joints_; ++j)
     {
-	joint_position_[j] = 0.0;
-	joint_position_prev_[j] = 0.0;
-	joint_velocity_[j] = 0.0;
-	joint_effort_[j] = 0.0;
+		joint_position_[j] = 0.0;
+		joint_position_prev_[j] = 0.0;
+		joint_velocity_[j] = 0.0;
+		joint_effort_[j] = 0.0;
 
-	joint_position_command_[j] = 0.0;
-	joint_velocity_command_[j] = 0.0;
+		joint_position_command_[j] = 0.0;
+		joint_velocity_command_[j] = 0.0;
     }
 
     current_strategy_ = JOINT_POSITION;
@@ -89,8 +89,8 @@ void YumiHW::registerInterfaces(const urdf::Model *const urdf_model,
     // Check that this transmission has one joint
     if( transmissions.empty() )
     {
-	ROS_ERROR("No drivable joints in urdf");
-	return;
+		ROS_ERROR("No drivable joints in urdf");
+		return;
     }
 
     // Initialize values
@@ -185,44 +185,43 @@ void YumiHW::registerJointLimits(const std::string& joint_name,
 
     if (urdf_model != NULL)
     {
-	const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
-	const boost::shared_ptr<const urdf::Joint> urdf_joint_sitffness = urdf_model->getJoint(joint_name + std::string("_stiffness"));
-	if (urdf_joint != NULL)
-	{
-	    // Get limits from the URDF file.
-	    if (joint_limits_interface::getJointLimits(urdf_joint, limits))
-		has_limits = true;
-	    if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits))
-		has_soft_limits = true;
-	}
+		const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
+		const boost::shared_ptr<const urdf::Joint> urdf_joint_sitffness = urdf_model->getJoint(joint_name + std::string("_stiffness"));
+		if (urdf_joint != NULL)
+		{
+			// Get limits from the URDF file.
+			if (joint_limits_interface::getJointLimits(urdf_joint, limits))
+			has_limits = true;
+			if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits))
+			has_soft_limits = true;
+		}
     }
 
     if (!has_limits)
     {
-	return;
+		return;
     }
 
     if (limits.has_position_limits)
     {
-	*lower_limit = limits.min_position;
-	*upper_limit = limits.max_position;
+		*lower_limit = limits.min_position;
+		*upper_limit = limits.max_position;
     }
 
 
     if (has_soft_limits)
     {
-	const joint_limits_interface::PositionJointSoftLimitsHandle limits_handle_position(joint_handle_position, limits, soft_limits);
-	pj_limits_interface_.registerHandle(limits_handle_position);
-	const joint_limits_interface::VelocityJointSoftLimitsHandle limits_handle_velocity(joint_handle_velocity, limits, soft_limits);
-	vj_limits_interface_.registerHandle(limits_handle_velocity);
-
+		const joint_limits_interface::PositionJointSoftLimitsHandle limits_handle_position(joint_handle_position, limits, soft_limits);
+		pj_limits_interface_.registerHandle(limits_handle_position);
+		const joint_limits_interface::VelocityJointSoftLimitsHandle limits_handle_velocity(joint_handle_velocity, limits, soft_limits);
+		vj_limits_interface_.registerHandle(limits_handle_velocity);
     }
     else
     {
-	const joint_limits_interface::PositionJointSaturationHandle sat_handle_position(joint_handle_position, limits);
-	pj_sat_interface_.registerHandle(sat_handle_position);
-	const joint_limits_interface::VelocityJointSaturationHandle sat_handle_velocity(joint_handle_velocity, limits);
-	vj_sat_interface_.registerHandle(sat_handle_velocity);
+		const joint_limits_interface::PositionJointSaturationHandle sat_handle_position(joint_handle_position, limits);
+		pj_sat_interface_.registerHandle(sat_handle_position);
+		const joint_limits_interface::VelocityJointSaturationHandle sat_handle_velocity(joint_handle_velocity, limits);
+		vj_sat_interface_.registerHandle(sat_handle_velocity);
     }
 
 }
@@ -252,7 +251,10 @@ bool YumiHW::parseTransmissionsFromURDF(const std::string& urdf_string)
     }
 
     if( transmissions_.empty() )
-	return false;
+	{
+		return false;
+	}
+	
 
     return true;
 }
@@ -318,32 +320,32 @@ bool YumiHW::canSwitch(const std::list<hardware_interface::ControllerInfo> &star
 
     for ( std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it )
     {
-	if( it->type.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
-	{
-	    desired_strategies.push_back( JOINT_VELOCITY );
-	    ROS_WARN("Uncharted teritories here: switching to VelocityInterface\n");
-	}
-	else if( it->type.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
-	{
-	    desired_strategies.push_back( JOINT_POSITION );
-	    ROS_INFO("Switching to Positon Control mode");
-	}
-	else if( it->type.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
-	{
-	    ROS_WARN("Effort not implemented!");
-	}
-	else
-	{
-	    ROS_INFO("Controller of type %s?", it->type.c_str());
-	    // Debug
-	    // std::cout << "This controller does not use any command interface, so it is only sensing, no problem" << std::endl;
-	}
+		if( it->type.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+		{
+			desired_strategies.push_back( JOINT_VELOCITY );
+			ROS_WARN("Uncharted teritories here: switching to VelocityInterface\n");
+		}
+		else if( it->type.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+		{
+			desired_strategies.push_back( JOINT_POSITION );
+			ROS_INFO("Switching to Positon Control mode");
+		}
+		else if( it->type.compare( std::string("hardware_interface::EffortJointInterface") ) == 0 )
+		{
+			ROS_WARN("Effort not implemented!");
+		}
+		else
+		{
+			ROS_INFO("Controller of type %s?", it->type.c_str());
+			// Debug
+			// std::cout << "This controller does not use any command interface, so it is only sensing, no problem" << std::endl;
+		}
     }
 
     if( desired_strategies.size() > 1 )
     {
-	ROS_ERROR("Only a single controller can be active at a time. Choose one control strategy only");
-	return false;
+		ROS_ERROR("Only a single controller can be active at a time. Choose one control strategy only");
+		return false;
     }
 
     return true;
@@ -395,45 +397,48 @@ void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start
 	    }
 #endif
     }
-    if(wantsPosition) {		
-	desired_strategy = JOINT_POSITION;
+    if(wantsPosition) 
+	{		
+		desired_strategy = JOINT_POSITION;
     }
-    if(wantsVelocity) {
-	desired_strategy = JOINT_VELOCITY;
+    if(wantsVelocity)
+	{
+		desired_strategy = JOINT_VELOCITY;
     }
 
-    if(wantsPosition && wantsVelocity) {
-	ROS_ERROR("Cannot have both position and velocity interface. Will assume Velocity. Beware!");
+    if(wantsPosition && wantsVelocity) 
+	{
+		ROS_ERROR("Cannot have both position and velocity interface. Will assume Velocity. Beware!");
     }
 
     for (int j = 0; j < n_joints_; ++j)
     {
-	///semantic Zero
-	joint_position_command_[j] = joint_position_[j];
-	joint_velocity_command_[j] = 0.0;
-	//joint_effort_command_[j] = 0.0;
+		///semantic Zero
+		joint_position_command_[j] = joint_position_[j];
+		joint_velocity_command_[j] = 0.0;
+		//joint_effort_command_[j] = 0.0;
 
-	///call setCommand once so that the JointLimitsInterface receive the correct value on their getCommand()!
-	try{  position_interface_.getHandle(joint_names_[j]).setCommand(joint_position_command_[j]);  }
-	catch(const hardware_interface::HardwareInterfaceException&){}
-	//try{  effort_interface_.getHandle(joint_names_[j]).setCommand(joint_effort_command_[j]);  }
-	//catch(const hardware_interface::HardwareInterfaceException&){}
-	try{  velocity_interface_.getHandle(joint_names_[j]).setCommand(joint_velocity_command_[j]);  }
-	catch(const hardware_interface::HardwareInterfaceException&){}
+		///call setCommand once so that the JointLimitsInterface receive the correct value on their getCommand()!
+		try{  position_interface_.getHandle(joint_names_[j]).setCommand(joint_position_command_[j]);  }
+		catch(const hardware_interface::HardwareInterfaceException&){}
+		//try{  effort_interface_.getHandle(joint_names_[j]).setCommand(joint_effort_command_[j]);  }
+		//catch(const hardware_interface::HardwareInterfaceException&){}
+		try{  velocity_interface_.getHandle(joint_names_[j]).setCommand(joint_velocity_command_[j]);  }
+		catch(const hardware_interface::HardwareInterfaceException&){}
 
-	///reset joint_limit_interfaces
-	pj_sat_interface_.reset();
-	pj_limits_interface_.reset();
+		///reset joint_limit_interfaces
+		pj_sat_interface_.reset();
+		pj_limits_interface_.reset();
     }
 
     if(desired_strategy == getControlStrategy())
     {
-	std::cout << "The ControlStrategy didn't change, it is already: " << getControlStrategy() << std::endl;
+		std::cout << "The ControlStrategy didn't change, it is already: " << getControlStrategy() << std::endl;
     }
     else
     {
-	setControlStrategy(desired_strategy);
-	std::cout << "The ControlStrategy changed to: " << getControlStrategy() << std::endl;
+		setControlStrategy(desired_strategy);
+		std::cout << "The ControlStrategy changed to: " << getControlStrategy() << std::endl;
     }
 }
 
