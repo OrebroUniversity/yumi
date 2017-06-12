@@ -33,20 +33,20 @@ class YumiHWGazebo : public YumiHW
 	{
 	    if( !(parent_set_) )
 	    {
-		ROS_ERROR_STREAM("Did you forget to set the parent model?" << std::endl << "You must do that before init()" << std::endl << "Exiting...");
-		return false;
+			ROS_ERROR_STREAM("Did you forget to set the parent model?" << std::endl << "You must do that before init()" << std::endl << "Exiting...");
+			return false;
 	    }
 
 	    gazebo::physics::JointPtr joint;
 	    for(int j=0; j < n_joints_; j++)
 	    {
-		joint = parent_model_->GetJoint(joint_names_[j]);
-		if (!joint)
-		{
-		    ROS_ERROR_STREAM("This robot has a joint named \"" << joint_names_[j] << "\" which is not in the gazebo model.");
-		    return false;
-		}
-		sim_joints_.push_back(joint);
+			joint = parent_model_->GetJoint(joint_names_[j]);
+			if (!joint)
+			{
+				ROS_ERROR_STREAM("This robot has a joint named \"" << joint_names_[j] << "\" which is not in the gazebo model.");
+				return false;
+			}
+			sim_joints_.push_back(joint);
 	    }
 
 	    return true;
@@ -56,14 +56,14 @@ class YumiHWGazebo : public YumiHW
 	{
 	    for(int j=0; j < n_joints_; ++j)
 	    {
-		joint_position_prev_[j] = joint_position_[j];
-		joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
-			sim_joints_[j]->GetAngle(0).Radian());
-		//joint_position_kdl_(j) = joint_position_[j];
-		// derivate velocity as in the real hardware instead of reading it from simulation
-		joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j] - joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.2);
-		joint_effort_[j] = sim_joints_[j]->GetForce((int)(0));
-		//joint_stiffness_[j] = joint_stiffness_command_[j];
+			joint_position_prev_[j] = joint_position_[j];
+			joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
+				sim_joints_[j]->GetAngle(0).Radian());
+			//joint_position_kdl_(j) = joint_position_[j];
+			// derivate velocity as in the real hardware instead of reading it from simulation
+			joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j] - joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.2);
+			joint_effort_[j] = sim_joints_[j]->GetForce((int)(0));
+			//joint_stiffness_[j] = joint_stiffness_command_[j];
 	    }
 	}
 
@@ -82,9 +82,9 @@ class YumiHWGazebo : public YumiHW
 			// so enable this when I find the SetMaxForce reset.
 			// sim_joints_[j]->SetMaxForce(0, joint_effort_limits_[j]);
 #if GAZEBO_MAJOR_VERSION >= 4
-			sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
+				sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
 #else
-			sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+				sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
 #endif
 		    }
 		    break;
@@ -94,9 +94,9 @@ class YumiHWGazebo : public YumiHW
 		    {
 			//integrate forward to next position
 #if GAZEBO_MAJOR_VERSION >= 4
-			sim_joints_[j]->SetPosition(0, joint_velocity_command_[j]*period.toSec() + joint_position_[j]);
+				sim_joints_[j]->SetPosition(0, joint_velocity_command_[j]*period.toSec() + joint_position_[j]);
 #else
-			sim_joints_[j]->SetAngle(0, joint_velocity_command_[j]*period.toSec() + joint_position_[j]);
+				sim_joints_[j]->SetAngle(0, joint_velocity_command_[j]*period.toSec() + joint_position_[j]);
 #endif
 		    }
 		    break;

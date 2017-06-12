@@ -119,8 +119,8 @@ void YumiEGMInterface::getParams()
 
 bool YumiEGMInterface::init(const std::string& ip, const std::string& port)
 {
-    if (!has_params_){
-
+    if (!has_params_)
+    {
         ROS_ERROR_STREAM(ros::this_node::getName() << ": missing EGM/RWS parameters.");
         return false;
     }
@@ -130,20 +130,35 @@ bool YumiEGMInterface::init(const std::string& ip, const std::string& port)
 
     CURLcode curl_code = curl_global_init(CURL_GLOBAL_DEFAULT);
 
-    if(!curl_code == CURLE_OK) return false;
+    if(!curl_code == CURLE_OK)
+    { 
+        return false;
+    }
 
-    if(!initRWS()) return false;
+    if(!initRWS())
+    {
+        return false;
+    }
 
-    if (!initEGM()) return false;
+    if (!initEGM())
+    {
+        return false;
+    }
 
-    if(!startEGM()) return false;
+    if(!startEGM()) 
+    {
+        return false;
+    }
 
     return true;
 }
 
 bool YumiEGMInterface::stop()
 {
-    if(!stopEGM()) return false;
+    if(!stopEGM()) 
+    {
+        return false;
+    }
 
     io_service_.stop();
     io_service_threads_.join_all();
@@ -183,7 +198,10 @@ void YumiEGMInterface::initEGMJointSpaceMessage(proto::JointSpace *joint_space_m
 void YumiEGMInterface::initEGMJointStateMessage(google::protobuf::RepeatedField<double> *joint_states, google::protobuf::RepeatedField<double> *external_joint_states)
 {
     joint_states->Clear();
-    for (unsigned int i = 0; i < 6; ++i) joint_states->Add(0.0);
+    for (unsigned int i = 0; i < 6; ++i) 
+    {
+        joint_states->Add(0.0);
+    }
 
     external_joint_states->Clear();
     external_joint_states->Add(0.0);
@@ -248,7 +266,10 @@ bool YumiEGMInterface::initRWS()
 
     ros::Duration(rws_delay_time_).sleep();
 
-    if(!sendEGMParams()) return false;
+    if(!sendEGMParams()) 
+    {
+        return false;
+    }
 
     rws_connection_ready_ = true;
     ros::Duration(rws_delay_time_).sleep();
@@ -331,15 +352,15 @@ bool YumiEGMInterface::startEGM()
 
     if(rws_interface_ && rws_connection_ready_)
     {
-      for(int i = 0; i < rws_max_signal_retries_ && !egm_started; ++i)
-      {
-        egm_started = rws_interface_->doEGMStartJoint();
-        if(!egm_started)
+        for(int i = 0; i < rws_max_signal_retries_ && !egm_started; ++i)
         {
-          ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM start signal! [Attempt " << i+1 << "/" <<
-                           rws_max_signal_retries_<< "]");
+            egm_started = rws_interface_->doEGMStartJoint();
+            if(!egm_started)
+            {
+                ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM start signal! [Attempt " << i+1 << "/" <<
+                                rws_max_signal_retries_<< "]");
+            }
         }
-      }
     }
 
     return egm_started;
@@ -351,15 +372,15 @@ bool YumiEGMInterface::stopEGM()
 
     if(rws_interface_ && rws_connection_ready_)
     {
-      for(int i = 0; i < rws_max_signal_retries_ && !egm_stopped; ++i)
-      {
-        egm_stopped = rws_interface_->doEGMStop();
-        if(!egm_stopped)
+        for(int i = 0; i < rws_max_signal_retries_ && !egm_stopped; ++i)
         {
-          ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM stop signal! [Attempt " << i+1 << "/" <<
-                           rws_max_signal_retries_<< "]");
+            egm_stopped = rws_interface_->doEGMStop();
+            if(!egm_stopped)
+            {
+                ROS_ERROR_STREAM(ros::this_node::getName() << ": failed to send EGM stop signal! [Attempt " << i+1 << "/" <<
+                                rws_max_signal_retries_<< "]");
+            }
         }
-      }
     }
 
     return egm_stopped;
@@ -409,11 +430,18 @@ void YumiHWEGM::setup(const std::string& ip, const std::string& port)
 
 bool YumiHWEGM::init()
 {
-    if (is_initialized_) return false;
+    if(is_initialized_) 
+    { 
+        return false;
+    }
     //current_strategy_ = JOINT_VELOCITY;
 
     bool success = yumi_egm_interface_.init(ip_, port_);
-    if(!success) return false;
+    
+    if(!success) 
+    {
+        return false;
+    }
 
     is_initialized_ = true;
     return true;
@@ -421,7 +449,10 @@ bool YumiHWEGM::init()
 
 void YumiHWEGM::read(ros::Time time, ros::Duration period)
 {
-    if(!is_initialized_) return;
+    if(!is_initialized_) 
+    { 
+        return;
+    }
 
     data_buffer_mutex_.lock();
 
@@ -429,18 +460,20 @@ void YumiHWEGM::read(ros::Time time, ros::Duration period)
 
     for (int j = 0; j < n_joints_; j++)
     {
-      joint_position_prev_[j] = joint_position_[j];
-      joint_position_[j] = joint_pos_[j];
-      joint_velocity_[j] = joint_vel_[j];
+        joint_position_prev_[j] = joint_position_[j];
+        joint_position_[j] = joint_pos_[j];
+        joint_velocity_[j] = joint_vel_[j];
     }
 
     data_buffer_mutex_.unlock();
-
 }
 
 void YumiHWEGM::write(ros::Time time, ros::Duration period)
 {
-    if(!is_initialized_) return;
+    if(!is_initialized_) 
+    { 
+        return;
+    }
 
     enforceLimits(period);
 
@@ -448,7 +481,7 @@ void YumiHWEGM::write(ros::Time time, ros::Duration period)
 
     for (int j = 0; j < n_joints_; j++)
     {
-      joint_vel_targets_[j] = joint_velocity_command_[j];
+        joint_vel_targets_[j] = joint_velocity_command_[j];
     }
 
     yumi_egm_interface_.setJointVelTargets(joint_vel_targets_);

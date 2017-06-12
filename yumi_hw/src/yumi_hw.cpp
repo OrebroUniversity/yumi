@@ -46,8 +46,8 @@ void YumiHW::create(std::string name, std::string urdf_string)
     // GET TRANSMISSIONS THAT BELONG TO THIS LWR 4+ ARM
     if (!parseTransmissionsFromURDF(urdf_string_))
     {
-	ROS_ERROR("Error parsing URDF in yumi_hw.");
-	return;
+		ROS_ERROR("Error parsing URDF in yumi_hw.");
+		return;
     }
 
     ROS_INFO("Registering interfaces...");
