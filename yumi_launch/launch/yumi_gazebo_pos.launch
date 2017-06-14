@@ -5,12 +5,13 @@
 	<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 	<arg name="controllers" default="joint_state_controller joint_trajectory_pos_controller yumi_gripper_r_effort_position_controller yumi_gripper_l_effort_position_controller"/>
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi" />
-	<arg name="hardware_interface" default="PositionJointInterface"/>
+    <arg name="arms_hardware_interface" default="PositionJointInterface"/>
+    <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
 
 	<!-- URDF / SRDF parameters -->
 	<!-- <param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/> -->
-	<param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
 	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
 
 

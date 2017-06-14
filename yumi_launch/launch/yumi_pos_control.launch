@@ -3,15 +3,18 @@
 
 	<arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
 
-	<!-- ROS-control parameters -->
+
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 	<arg name="controllers" default="joint_state_controller joint_trajectory_pos_controller"/>
-	<arg name="hardware_interface" default="PositionJointInterface"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+    <arg name="arms_hardware_interface" default="PositionJointInterface"/>
+    <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
-	<!-- Load joint controller configurations from YAML file to parameter server -->
-	<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
 
-	<!-- Load the controllers -->
-	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+	<!-- URDF / SRDF parameters -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
 
 
 	<!-- Network parameters -->
@@ -21,41 +24,36 @@
 
 
     <!-- EGM parameters -->
-    <arg name="egm" default="false"/>
+    <arg name="egm" default="true"/>
     <rosparam file="$(find yumi_hw)/config/egm_rws_config.yaml" command="load" ns="/yumi/yumi_hw" if="$(arg egm)"/>
 
 
-	<!-- The URDF / SDF parameters -->
-	<param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi_pos.urdf.xacro' prefix:=$(arg hardware_interface)"/>
+    <!-- Calls to yumi_hw members -->
+	<!-- The real hardware interface /-->
+	<node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_node" respawn="false" ns="/yumi" output="screen"> 
+	    <param name="name" value="$(arg name)" />
+	    <param name="ip" value="$(arg ip)"/>
+	    <param name="port" value="$(arg port)"/>
+	    <param name="use_egm" value="$(arg egm)"/>
+	</node>
+
+
+ 	<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen">
+        <param name="ip" value="$(arg ip)"/>	
+	</node>
+
 
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
 	    <remap from="/joint_states" to="/yumi/joint_states" />
 	</node>
 
 
-    <!-- Calls to yumi_hw members -->
-	<!-- The real hardware interface /-->
-	<node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_node" respawn="false" ns="/yumi" output="screen"> <!--launch-prefix="xterm -e gdb - -args"-->
-	    <!-- addresses /-->
-	    <param name="name" value="$(arg name)" />
-	    <param name="ip" value="$(arg ip)"/>
-	    <!-- <param name="port" value="$(arg port)"/> -->
-	    <param name="use_egm" value="$(arg egm)"/>
-	</node>
-
-
- 	<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen">
-	    <!-- IP address provided as a parameter to yumi_gripper_node / -->
-        <param name="ip" value="$(arg ip)"/>	
-	</node>
-
-
-	<node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action" ns="yumi">
+<!-- 	<node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action" ns="yumi">
 	    <remap from="/joint_trajectory_action" to="/yumi/joint_trajectory_action" />
 	</node>
 	
 	<node pkg="topic_tools" type="relay" name="yumi_joints_relay" args="/yumi/joint_states /joint_states"/>
-	
+ -->	
 
     <!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
