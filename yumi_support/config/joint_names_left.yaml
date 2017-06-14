@@ -6,3 +6,4 @@ controller_joint_names:
   - yumi_joint_5_l
   - yumi_joint_6_l
   - yumi_joint_7_l
+  - gripper_l_joint_r
