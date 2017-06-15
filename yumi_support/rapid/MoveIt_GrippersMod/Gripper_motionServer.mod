@@ -1,4 +1,4 @@
-MODULE Gripper_stateServer
+MODULE ROS_motionServer
 
 ! Software License Agreement (BSD License)
 !
@@ -28,51 +28,46 @@ MODULE Gripper_stateServer
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST num server_port := 13002;
-LOCAL CONST num update_rate := 0.10;  ! broadcast rate (sec)
+LOCAL CONST num server_port := 13000;
 
 LOCAL VAR socketdev server_socket;
 LOCAL VAR socketdev client_socket;
 
-PROC main()
 
-    TPWrite "StateServer: Waiting for connection.";
+PROC main()
+    VAR ROS_msg_gripper_target message;
+
+    TPWrite "GripperMotionServer: Waiting for connection.";
 	ROS_init_socket server_socket, server_port;
     ROS_wait_for_client server_socket, client_socket;
-    
-	WHILE (TRUE) DO
-		send_hand_status;
-		WaitTime update_rate;
-    ENDWHILE
+
+    WHILE ( true ) DO
+		! Recieve Gripper Trajectory Pt Message
+        ROS_receive_msg_gripper_data client_socket, message;
+        WaitTestAndSet ROS_gripper_left_lock;
+        ROS_new_gripper_left := TRUE;
+        next_grasp_target.left := message.left;
+        ROS_gripper_left_lock := FALSE;
+        
+        WaitTestAndSet ROS_gripper_right_lock;
+        ROS_new_gripper_right := TRUE;
+        next_grasp_target.right := message.right;
+        ROS_gripper_right_lock := FALSE;
+        
+	ENDWHILE
 
 ERROR (ERR_SOCK_TIMEOUT, ERR_SOCK_CLOSED)
 	IF (ERRNO=ERR_SOCK_TIMEOUT) OR (ERRNO=ERR_SOCK_CLOSED) THEN
         SkipWarn;  ! TBD: include this error data in the message logged below?
-        ErrWrite \W, "ROS StateServer disconnect", "Connection lost.  Waiting for new connection.";
-        ExitCycle;  ! restart program
+        ErrWrite \W, "ROS MotionServer disconnect", "Connection lost.  Resetting socket.";
+		ExitCycle;  ! restart program
 	ELSE
 		TRYNEXT;
 	ENDIF
 UNDO
+	IF (SocketGetStatus(client_socket) <> SOCKET_CLOSED) SocketClose client_socket;
+	IF (SocketGetStatus(server_socket) <> SOCKET_CLOSED) SocketClose server_socket;
 ENDPROC
 
-LOCAL PROC send_hand_status()
-	VAR ROS_msg_gripper_target message;
-    
-    ! get current joint position (centimeters)
-	message.left := current_gripper_left;
-    message.right := current_gripper_right;
-    
-    ! create message
-    message.header := [ROS_GRIPPER_STATUS, ROS_COM_TYPE_TOPIC, ROS_REPLY_TYPE_INVALID];
-    message.sequence_id := 0;
-         
-    ! send message to client
-    ROS_send_msg_gripper_data client_socket, message;
-
-ERROR
-    RAISE;  ! raise errors to calling code
-ENDPROC
-
-
+	
 ENDMODULE

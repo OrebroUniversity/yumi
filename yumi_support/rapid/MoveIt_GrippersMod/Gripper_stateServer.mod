@@ -59,7 +59,7 @@ ENDPROC
 LOCAL PROC send_hand_status()
 	VAR ROS_msg_gripper_target message;
     
-    ! get current joint position (centimeters)
+    ! get current joint position (degrees)
 	message.left := current_gripper_left;
     message.right := current_gripper_right;
     
