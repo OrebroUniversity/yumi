@@ -1,4 +1,4 @@
-MODULE ROS_motionServer
+MODULE ROS_motionServer_right
 
 ! Software License Agreement (BSD License)
 !
