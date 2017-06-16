@@ -1,4 +1,4 @@
-MODULE HandDriver(SYSMODULE)
+MODULE HandDriver_left(SYSMODULE)
 ! **************************************************** Start of description ****************************************************
 ! This file provides driver function and interface to operate the Hand via RAPID programming.
 ! This driver only work with EIO_H43_v3. Check the EIO version when loading it.

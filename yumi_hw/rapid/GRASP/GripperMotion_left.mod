@@ -51,13 +51,13 @@ PROC main()
         ROS_gripper_left_lock := FALSE;        ! release data-lock
         
         !gripper target received
-        IF(grasp_force > 0 ) THEN
-            TPWrite "Grasping with left";
-            Hand_GripInward \holdForce:=grasp_force;
-        ELSEIF (grasp_force < 0 ) THEN
-            Hand_GripOutward \holdForce:=-grasp_force;
-        ELSE
-            !do nothing
+        IF(grasp_force <> 0) THEN
+            IF(grasp_force > 0 ) THEN
+                Hand_GripInward \holdForce:=grasp_force;
+            ELSEIF (grasp_force < 0 ) THEN
+                Hand_GripOutward \holdForce:=-grasp_force;
+            ENDIF
+            TPWrite "Grasping with left. Force="\num:=grasp_force;
         ENDIF
         WaitTime 0.1;
     ENDWHILE
