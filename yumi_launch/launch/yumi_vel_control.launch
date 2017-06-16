@@ -48,12 +48,6 @@
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
 
-<!-- 
-    <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action" ns="yumi">
-        <remap from="/joint_trajectory_action" to="/yumi/joint_trajectory_action" />
-    </node>
-    
-    <node pkg="topic_tools" type="relay" name="yumi_joints_relay" args="/yumi/joint_states /joint_states"/> -->
 
 
     <!-- Show robot in Rviz   -->
