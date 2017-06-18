@@ -7,41 +7,33 @@ joint_state_controller:
 
 
 # Effort gripper position controllers ---------------------------------------
-yumi_gripper_r_effort_position_controller:
+gripper_effort_pos_controller_r:
   type: effort_controllers/JointPositionController
   joint: gripper_r_joint
   pid: {p: 5.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
 
-yumi_gripper_l_effort_position_controller:
+gripper_effort_pos_controller_l:
   type: effort_controllers/JointPositionController
   joint: gripper_l_joint
   pid: {p: 5.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+
 
 
 # Forward gripper position controllers ---------------------------------------
-yumi_gripper_r_forward_position_controller:
+gripper_joint_pos_controller_r:
   type: position_controllers/JointPositionController
   joint: gripper_r_joint
 
-yumi_gripper_l_forward_position_controller:
+gripper_joint_pos_controller_l:
   type: position_controllers/JointPositionController
-  joint: gripper_l_joint
-
-# Forward gripper velocity controllers ---------------------------------------
-yumi_gripper_r_forward_velocity_controller:
-  type: velocity_controllers/JointVelocityController
-  joint: gripper_r_joint
-
-yumi_gripper_l_forward_velocity_controller:
-  type: velocity_controllers/JointVelocityController
   joint: gripper_l_joint
 
 
 
-
-# Joint Trajectory Position Controller ----------------------------------------
-joint_trajectory_pos_controller:
+# Joint Trajectory Position Controlles ----------------------------------------
+joint_traj_pos_controller_l:
   type: "position_controllers/JointTrajectoryController"
+  # topic: yumi/left_arm/joint_trajectory_pos_controller
   joints:
     - yumi_joint_1_l
     - yumi_joint_2_l
@@ -50,6 +42,10 @@ joint_trajectory_pos_controller:
     - yumi_joint_4_l
     - yumi_joint_5_l
     - yumi_joint_6_l
+
+joint_traj_pos_controller_r:
+  type: "position_controllers/JointTrajectoryController"
+  joints:
     - yumi_joint_1_r
     - yumi_joint_2_r
     - yumi_joint_7_r
@@ -58,8 +54,9 @@ joint_trajectory_pos_controller:
     - yumi_joint_5_r
     - yumi_joint_6_r
 
+
 # Joint Trajectory Velocity Controller ----------------------------------------
-joint_trajectory_vel_controller:
+joint_traj_vel_controller_l:
   type: "velocity_controllers/JointTrajectoryController"
   joints:
     - yumi_joint_1_l
@@ -69,6 +66,11 @@ joint_trajectory_vel_controller:
     - yumi_joint_4_l
     - yumi_joint_5_l
     - yumi_joint_6_l
+
+
+joint_traj_vel_controller_r:
+  type: "velocity_controllers/JointTrajectoryController"
+  joints:
     - yumi_joint_1_r
     - yumi_joint_2_r
     - yumi_joint_7_r
@@ -76,6 +78,7 @@ joint_trajectory_vel_controller:
     - yumi_joint_4_r
     - yumi_joint_5_r
     - yumi_joint_6_r
+
 
   gains:
     yumi_joint_1_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
