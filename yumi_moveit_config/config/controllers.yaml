@@ -1,5 +1,6 @@
+# controller_manager_ns: /yumi/controller_manager
 controller_list:
-  - name: "left_arm"
+  - name: "yumi"
     action_ns: joint_trajectory_action
     type: FollowJointTrajectory
     joints:
@@ -11,7 +12,8 @@ controller_list:
       - yumi_joint_5_l
       - yumi_joint_6_l
       # - gripper_l_joint_r
-  - name: "right_arm"
+
+  - name: "yumi"
     action_ns: joint_trajectory_action
     type: FollowJointTrajectory
     joints:

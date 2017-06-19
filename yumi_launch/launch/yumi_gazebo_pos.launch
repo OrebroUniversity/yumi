@@ -58,7 +58,8 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
 
-	<node pkg="topic_tools" type="relay" name="joints_relay" args="/yumi/joint_states /joint_states"/>
+    <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action" ns="yumi"/>
+	<node pkg="topic_tools" type="relay" name="joints_relay" args="/yumi/joint_states /joint_states" ns="yumi"/>
 
 </launch>
 
