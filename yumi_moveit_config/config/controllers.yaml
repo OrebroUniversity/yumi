@@ -1,7 +1,6 @@
-# controller_manager_ns: /yumi/controller_manager
 controller_list:
-  - name: "yumi"
-    action_ns: joint_trajectory_action
+  - name: yumi/joint_traj_pos_controller_l
+    action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     joints:
       - yumi_joint_1_l
@@ -11,10 +10,10 @@ controller_list:
       - yumi_joint_4_l
       - yumi_joint_5_l
       - yumi_joint_6_l
-      # - gripper_l_joint_r
+      # - gripper_l_joint
 
-  - name: "yumi"
-    action_ns: joint_trajectory_action
+  - name: yumi/joint_traj_pos_controller_r
+    action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     joints:
       - yumi_joint_1_r
@@ -24,4 +23,4 @@ controller_list:
       - yumi_joint_4_r
       - yumi_joint_5_r
       - yumi_joint_6_r
-      # - gripper_r_joint_r
+      # - gripper_r_joint
