@@ -3,9 +3,8 @@
 	
 	<!-- Load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
-
 	<arg name="controllers" default="joint_state_controller joint_traj_pos_controller_l joint_traj_pos_controller_r gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
-	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi" />
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->
     <arg name="arms_hardware_interface" default="PositionJointInterface"/>
@@ -40,9 +39,7 @@
 	<node name="joint_remapper" pkg="yumi_test_controllers" type="joints_remap.py" />
 
 
-	<!-- Show in Rviz   -->
+	<!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
-
 </launch>
-

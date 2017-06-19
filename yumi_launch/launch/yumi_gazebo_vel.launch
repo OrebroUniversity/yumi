@@ -3,14 +3,15 @@
 
 	<!-- Load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
-	<arg name="controllers" default="joint_state_controller joint_trajectory_vel_controller yumi_gripper_r_effort_position_controller yumi_gripper_l_effort_position_controller"/>
+	<arg name="controllers" default="joint_state_controller joint_traj_vel_controller_l joint_traj_vel_controller_r gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+
+	<!--  Hardware interfaces for the joints and grippers -->
     <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
 
 	<!-- URDF / SRDF parameters -->
-	<!-- <param name="robot_description" command="$(find xacro)/xacro.py $(find yumi_description)/urdf/yumi_nogrippers.urdf.xacro prefix:=$(arg hardware_interface)"/> -->
     <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
 	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
 
@@ -35,9 +36,10 @@
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
 	    <remap from="/joint_states" to="/yumi/joint_states" />
 	</node>
+	<node name="joint_remapper" pkg="yumi_test_controllers" type="joints_remap.py" />
+
 
 	<!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
 
 </launch>
-
