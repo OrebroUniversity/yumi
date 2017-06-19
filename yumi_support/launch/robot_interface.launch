@@ -60,7 +60,7 @@
 
 
 	<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen">
-		<param name="ip" value="$(arg robot_ip)"/>	
+		<param name="ip" value="$(arg robot_ip)"/>
 	</node>
 
 
