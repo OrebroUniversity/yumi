@@ -4,13 +4,13 @@ void YumiHW::create(std::string name, std::string urdf_string)
 {
     ROS_INFO_STREAM("Creating a Yumi HW interface for: " << name <<" with "<<n_joints_<<" joints");
 
-    // SET NAME AND MODEL
+    /* SET NAME AND MODEL */
     robot_namespace_ = name;
     urdf_string_ = urdf_string;
 
-    // ALLOCATE MEMORY
+    /* ALLOCATE MEMORY */
 
-    // JOINT NAMES ARE TAKEN FROM URDF NAME CONVENTION
+    /* JOINT NAMES ARE TAKEN FROM URDF NAME CONVENTION */
     joint_names_.push_back( robot_namespace_ + std::string("_joint_1_l") );
     joint_names_.push_back( robot_namespace_ + std::string("_joint_2_l") );
     joint_names_.push_back( robot_namespace_ + std::string("_joint_3_l") );
@@ -27,7 +27,7 @@ void YumiHW::create(std::string name, std::string urdf_string)
     joint_names_.push_back( robot_namespace_ + std::string("_joint_6_r") );
     joint_names_.push_back( robot_namespace_ + std::string("_joint_7_r") );
     
-    // VARIABLES
+    /* VARIABLES */
     joint_position_.resize(n_joints_);
     joint_position_prev_.resize(n_joints_);
     joint_velocity_.resize(n_joints_);
@@ -38,12 +38,12 @@ void YumiHW::create(std::string name, std::string urdf_string)
     joint_lower_limits_.resize(n_joints_);
     joint_upper_limits_.resize(n_joints_);
 
-    // RESET VARIABLES
+    /* RESET VARIABLES */
     reset();
 
     ROS_INFO("Parsing transmissions from the URDF...");
 
-    // GET TRANSMISSIONS THAT BELONG TO THIS LWR 4+ ARM
+    /* GET TRANSMISSIONS THAT BELONG TO YUMI */
     if (!parseTransmissionsFromURDF(urdf_string_))
     {
 		ROS_ERROR("Error parsing URDF in yumi_hw.");
@@ -82,8 +82,7 @@ void YumiHW::reset()
 }
 
 
-void YumiHW::registerInterfaces(const urdf::Model *const urdf_model,
-	std::vector<transmission_interface::TransmissionInfo> transmissions)
+void YumiHW::registerInterfaces(const urdf::Model *const urdf_model, std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
 
     // Check that this transmission has one joint
@@ -124,7 +123,7 @@ void YumiHW::registerInterfaces(const urdf::Model *const urdf_model,
 		const std::string& hardware_interface = joint_interfaces.front();
 
 		// Debug //FIXME
-		std::cout << "\x1B[37m" << "lwr_hw: " << "Loading joint '" << joint_names_[j]
+		std::cout << "\x1B[37m" << "yumi_hw: " << "Loading joint '" << joint_names_[j]
 			<< "' of type '" << hardware_interface << "'" << "\x1B[0m" << std::endl;
 
 		// Create joint state interface for all joints
@@ -140,25 +139,23 @@ void YumiHW::registerInterfaces(const urdf::Model *const urdf_model,
 
 		// position handle
 		hardware_interface::JointHandle joint_handle_position;
-		joint_handle_position = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
-			&joint_position_command_[j]);
+		joint_handle_position = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]), &joint_position_command_[j]);
 		position_interface_.registerHandle(joint_handle_position);
 
 		// velocity command handle
 		hardware_interface::JointHandle joint_handle_velocity;
-		joint_handle_velocity = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]),
-			&joint_velocity_command_[j]);
+		joint_handle_velocity = hardware_interface::JointHandle(state_interface_.getHandle(joint_names_[j]), &joint_velocity_command_[j]);
 		velocity_interface_.registerHandle(joint_handle_velocity);
 
-		registerJointLimits(joint_names_[j],
+		registerJointLimits( joint_names_[j],
 			//joint_handle_effort,
 			joint_handle_position,
 			joint_handle_velocity,
 			urdf_model,
-			&joint_lower_limits_[j], &joint_upper_limits_[j]);
+			&joint_lower_limits_[j], &joint_upper_limits_[j] );
     }
 
-    // Register interfaces
+    /* Register interfaces */
     registerInterface(&state_interface_);
     //registerInterface(&effort_interface_);
     registerInterface(&position_interface_);
@@ -260,56 +257,6 @@ bool YumiHW::parseTransmissionsFromURDF(const std::string& urdf_string)
 }
 
 #if 0
-// Init KDL stuff
-bool YumiHW::initKDLdescription(const urdf::Model *const urdf_model)
-{
-    // KDL code to compute f_dyn(q)
-    KDL::Tree kdl_tree;
-    if (!kdl_parser::treeFromUrdfModel(*urdf_model, kdl_tree))
-    {
-	ROS_ERROR("Failed to construct kdl tree");
-	return false;
-    }
-
-    std::cout << "LWR kinematic successfully parsed with "
-	<< kdl_tree.getNrOfJoints()
-	<< " joints, and "
-	<< kdl_tree.getNrOfJoints()
-	<< " segments." << std::endl;
-
-    // Get the info from parameters
-    std::string root_name;
-    ros::param::get(std::string("/") + robot_namespace_ + std::string("/root"), root_name);
-    if( root_name.empty() )
-	root_name = kdl_tree.getRootSegment()->first; // default
-
-    std::string tip_name;
-    ros::param::get(std::string("/") + robot_namespace_ + std::string("/tip"), tip_name);
-    if( tip_name.empty() )
-	tip_name = robot_namespace_ + std::string("_7_link"); ; // default
-
-    std::cout << "Using root: " << root_name << " and tip: " << tip_name << std::endl;
-
-    // this depends on how the world frame is set, in all our setups, world has always positive z pointing up.
-    gravity_ = KDL::Vector::Zero();
-    gravity_(2) = -9.81;
-
-    // Extract the chain from the tree
-    if(!kdl_tree.getChain(root_name, tip_name, lwr_chain_))
-    {
-	ROS_ERROR("Failed to get KDL chain from tree: ");
-	return false;
-    }
-
-    ROS_INFO("Number of segments: %d", lwr_chain_.getNrOfSegments());
-    ROS_INFO("Number of joints in chain: %d", lwr_chain_.getNrOfJoints());
-
-    f_dyn_solver_.reset(new KDL::ChainDynParam(lwr_chain_,gravity_));
-
-    joint_position_kdl_ = KDL::JntArray(lwr_chain_.getNrOfJoints());
-    gravity_effort_ = KDL::JntArray(lwr_chain_.getNrOfJoints());
-
-    return true;
 }
 #endif
 
@@ -361,39 +308,39 @@ void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start
     for ( std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it )
     {
 #if ROS_VERSION_MINIMUM(1,12,0)
-	    //jade and karmic
-	    for(int i=0; i<it->claimed_resources.size(); i++) {
-
-		if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+	    //jade and kinetic
+	    for(int i=0; i<it->claimed_resources.size(); i++) 
 		{
-		    ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
-		    wantsPosition = true;
-		}
-		else if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
-		{
-		    ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
-		    wantsVelocity = true;
-		} 
-		else
-		{
-		    ROS_INFO("Controller of type %s, requested interface of type %s. Impossible, sorry.\n", 
-			    it->type.c_str(), it->claimed_resources[i].hardware_interface.c_str());
-		}
+			if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
+			{
+				ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
+				wantsPosition = true;
+			}
+			else if( it->claimed_resources[i].hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
+			{
+				ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
+				wantsVelocity = true;
+			} 
+			else
+			{
+				ROS_INFO("Controller of type %s, requested interface of type %s. Impossible, sorry.\n", 
+					it->type.c_str(), it->claimed_resources[i].hardware_interface.c_str());
+			}
 	    }
 #else
 
 	    //indigo and below
 	    if( it->hardware_interface.compare( std::string("hardware_interface::PositionJointInterface") ) == 0 )
 	    {
-		ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
-		desired_strategy = JOINT_POSITION;
-		break;
+			ROS_INFO("Request to switch to hardware_interface::PositionJointInterface (JOINT_POSITION)");
+			desired_strategy = JOINT_POSITION;
+			break;
 	    }
 	    else if( it->hardware_interface.compare( std::string("hardware_interface::VelocityJointInterface") ) == 0 )
 	    {
-		ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
-		desired_strategy = JOINT_VELOCITY;
-		break;
+			ROS_INFO("Request to switch to hardware_interface::VelocityJointInterface (JOINT_VELOCITY)");
+			desired_strategy = JOINT_VELOCITY;
+			break;
 	    }
 #endif
     }

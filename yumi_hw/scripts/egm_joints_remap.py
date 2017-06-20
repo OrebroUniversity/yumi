@@ -7,9 +7,9 @@ from control_msgs.msg import FollowJointTrajectoryActionResult
 import threading
 
 
-grippers_indices = []
-left_arm_indices = [0, 2, 4, 6, 8, 10, 12]
-right_arm_indices = [1, 3, 5, 7, 9, 11, 13]
+grippers_indices = [14, 15]
+left_arm_indices = [0, 2, 4, 6, 8, 10, 12, 14]
+right_arm_indices = [1, 3, 5, 7, 9, 11, 13, 15]
 right_pub = None
 left_pub = None
 
