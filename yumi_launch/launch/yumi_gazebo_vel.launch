@@ -38,7 +38,7 @@
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
 	    <remap from="/joint_states" to="/yumi/joint_states" />
 	</node>
-	<node name="joint_remapper" pkg="yumi_test_controllers" type="gazebo_joints_remap.py" />
+	<node name="joint_remapper" pkg="yumi_hw" type="gazebo_joints_remap.py" />
 
 
 	<!-- Show robot in Rviz   -->
