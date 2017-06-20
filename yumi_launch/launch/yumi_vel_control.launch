@@ -3,12 +3,13 @@
 
     <arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
 
-
     <!-- Load joint controller configurations from YAML file to parameter server -->
     <rosparam file="$(find yumi_control)/config/controllers.yaml" command="load" ns="/yumi"/>
-    <arg name="controllers" default="joint_state_controller joint_trajectory_vel_controller"/>
+    <arg name="controllers" default="joint_state_controller joint_traj_vel_controller_l joint_traj_vel_controller_r gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
-    <arg name="arms_hardware_interface" default="PositionJointInterface"/>
+
+	<!--  Hardware interfaces for the joints and grippers -->    
+    <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
 
@@ -47,6 +48,7 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
+    <node name="joint_remapper" pkg="yumi_test_controllers" type="egm_joints_remap.py" />
 
 
 
