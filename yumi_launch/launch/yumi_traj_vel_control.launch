@@ -4,23 +4,8 @@
     <arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
 
     <!-- Load joint controller configurations from YAML file to parameter server -->
-    <rosparam file="$(find yumi_control)/config/velocity_controllers.yaml" command="load" ns="/yumi"/>
-    <arg name="controllers" default="joint_state_controller 
-                                     joint_1_vel_controller_r
-                                     joint_2_vel_controller_r
-                                     joint_7_vel_controller_r
-                                     joint_3_vel_controller_r
-                                     joint_4_vel_controller_r
-                                     joint_5_vel_controller_r
-                                     joint_6_vel_controller_r
-                                     joint_1_vel_controller_l
-                                     joint_2_vel_controller_l
-                                     joint_7_vel_controller_l
-                                     joint_3_vel_controller_l
-                                     joint_4_vel_controller_l
-                                     joint_5_vel_controller_l
-                                     joint_6_vel_controller_l
-                                     gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
+    <rosparam file="$(find yumi_control)/config/traj_controllers.yaml" command="load" ns="/yumi"/>
+    <arg name="controllers" default="joint_state_controller joint_traj_vel_controller_l joint_traj_vel_controller_r gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->    
@@ -55,7 +40,6 @@
      
 
     <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> 
-        <!-- IP address provided as a parameter to yumi_gripper_node / -->
         <param name="ip" value="$(arg ip)"/>
     </node>
 
@@ -64,7 +48,6 @@
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
     <node name="joint_remapper" pkg="yumi_hw" type="egm_joints_remap.py" />
-
 
 
     <!-- Show robot in Rviz   -->

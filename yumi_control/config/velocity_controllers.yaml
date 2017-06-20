@@ -1,0 +1,71 @@
+# Publish all joint states -----------------------------------
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 500
+
+  # Motivation for the extra joints added to the joint_state_controller: https://github.com/ros-controls/ros_controllers/issues/87
+  extra_joints:
+    - name: gripper_r_joint
+      position: 0.0
+    - name: gripper_l_joint
+      position: 0.0
+
+      
+
+# Effort gripper position controllers ---------------------------------------
+gripper_effort_pos_controller_r:
+  type: effort_controllers/JointPositionController
+  joint: gripper_r_joint
+  pid: {p: 5.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+
+gripper_effort_pos_controller_l:
+  type: effort_controllers/JointPositionController
+  joint: gripper_l_joint
+  pid: {p: 5.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+
+
+
+joint_1_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_1_l
+joint_2_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_2_l
+joint_7_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_7_l
+joint_3_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_3_l
+joint_4_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_4_l
+joint_5_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_5_l
+joint_6_vel_controller_l:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_6_l
+joint_1_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_1_r
+joint_2_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_2_r
+joint_7_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_7_r
+joint_3_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_3_r
+joint_4_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_4_r
+joint_5_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_5_r
+joint_6_vel_controller_r:
+  type: "velocity_controllers/JointVelocityController"
+  joint: yumi_joint_6_r
+
+

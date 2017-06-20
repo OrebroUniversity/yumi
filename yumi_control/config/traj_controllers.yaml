@@ -25,16 +25,6 @@ gripper_effort_pos_controller_l:
 
 
 
-# Forward gripper position controllers ---------------------------------------
-gripper_joint_pos_controller_r:
-  type: position_controllers/JointPositionController
-  joint: gripper_r_joint
-
-gripper_joint_pos_controller_l:
-  type: position_controllers/JointPositionController
-  joint: gripper_l_joint
-
-
 
 # Joint Trajectory Position Controlles ----------------------------------------
 joint_traj_pos_controller_l:
