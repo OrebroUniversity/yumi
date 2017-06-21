@@ -431,7 +431,7 @@ void YumiHWEGM::setup(const std::string& ip, const std::string& port)
 bool YumiHWEGM::init()
 {
     if(is_initialized_) 
-    { 
+    {
         return false;
     }
     //current_strategy_ = JOINT_VELOCITY;
@@ -447,7 +447,8 @@ bool YumiHWEGM::init()
     return true;
 }
 
-void YumiHWEGM::read(ros::Time time, ros::Duration period)
+
+void YumiHWEGM::read(ros::Time time, ros::Duration period) 
 {
     if(!is_initialized_) 
     { 
@@ -467,6 +468,7 @@ void YumiHWEGM::read(ros::Time time, ros::Duration period)
 
     data_buffer_mutex_.unlock();
 }
+
 
 void YumiHWEGM::write(ros::Time time, ros::Duration period)
 {
