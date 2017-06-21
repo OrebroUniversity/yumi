@@ -298,6 +298,8 @@ bool YumiHW::canSwitch(const std::list<hardware_interface::ControllerInfo> &star
     return true;
 }
 
+
+
 void YumiHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start_list, const std::list<hardware_interface::ControllerInfo> &stop_list)
 {
     ControlStrategy desired_strategy = JOINT_POSITION; // default

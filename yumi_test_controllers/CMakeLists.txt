@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(yumi_test_controllers)
 
+add_compile_options(-std=c++11)
+
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   angles
@@ -29,8 +31,12 @@ catkin_package(
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 
-add_executable(test_joint_vel_control src/test_joint_vel_control.cpp)
-target_link_libraries(test_joint_vel_control ${catkin_LIBRARIES})
+add_executable(test_traj_vel_control src/test_traj_vel_control.cpp)
+target_link_libraries(test_traj_vel_control ${catkin_LIBRARIES})
+
+
+add_executable(test_vel_control src/test_vel_control.cpp)
+target_link_libraries(test_vel_control ${catkin_LIBRARIES})
 
 
 add_executable(test_grippers_control src/test_grippers_control.cpp)

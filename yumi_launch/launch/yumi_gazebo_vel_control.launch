@@ -5,7 +5,7 @@
 	
 	<!-- Load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find yumi_control)/config/velocity_controllers.yaml" command="load" ns="/yumi"/>
-	<arg name="controllers" default="joint_state_controller 
+<!-- 	<arg name="controllers" default="joint_state_controller 
 									 joint_vel_controller_1_r
 									 joint_vel_controller_2_r
 									 joint_vel_controller_7_r
@@ -20,7 +20,11 @@
 									 joint_vel_controller_4_l
 									 joint_vel_controller_5_l
 									 joint_vel_controller_6_l
-									 gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
+									 gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/> -->
+    <arg name="controllers" default="joint_state_controller 
+                                     joint_group_vel_controller_l
+                                     joint_group_vel_controller_r
+                                     gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->
