@@ -4,7 +4,7 @@
 
   <xacro:macro name="yumi_gazebo" params="name">
 
-    <!-- body -->
+    <!-- Gazebo reference frame -->
     <gazebo reference="${name}_body">
       <material>Gazebo/Ivory</material>
       <mu1>0.2</mu1>

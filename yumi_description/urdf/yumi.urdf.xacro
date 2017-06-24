@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- Import Rviz colors -->
-  <xacro:include filename="$(find yumi_description)/urdf/materials.xacro" />
+  <xacro:include filename="$(find yumi_description)/urdf/Util/materials.xacro" />
   <!-- Import utilities -->
-  <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
+  <xacro:include filename="$(find yumi_description)/urdf/Util/utilities.xacro" />
   <!--Import the yumi macro -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi.xacro"/>
   <!--Import the yumi servo gripper macro -->
-  <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.xacro"/>
+  <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.xacro"/>
   <!-- Import Gazebo plugins -->
-  <xacro:include filename="$(find yumi_description)/gazebo/gazebo.urdf.xacro"/>
+  <xacro:include filename="$(find yumi_description)/urdf/Gazebo/gazebo.urdf.xacro"/>
 
   <!-- Fix to world just for testing -->
   <link name="world"/>

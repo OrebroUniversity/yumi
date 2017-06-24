@@ -4,7 +4,7 @@
   <version>0.0.4</version>
   <description>Hardware interface for YuMi, for use in roscontrol</description>
 
-  <maintainer email="todor.stoyanov@oru.se">Todor Stoyanov</maintainer>
+  <maintainer email="yoshua.nava@kth.se">Yoshua Nava</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->

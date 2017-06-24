@@ -2,11 +2,9 @@
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
-  <xacro:include filename="$(find yumi_description)/urdf/yumi.gazebo.xacro" />
+  <xacro:include filename="$(find yumi_description)/urdf/Gazebo/yumi.gazebo.xacro" />
   <!-- Import Transmissions -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi.transmission.xacro" />
-  <!-- Include Utilities -->
-  <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
 
   <!-- some constants -->
  <!-- <xacro:property name="safety_controller_k_pos" value="100" />
@@ -14,7 +12,7 @@
   <xacro:property name="joint_damping" value="0.5" />
   <xacro:property name="max_effort" value="300"/>
  
-  <xacro:macro name="yumi" params="parent name hardware_interface *origin">
+  <xacro:macro name="yumi" params="name parent hardware_interface *origin">
 
     <!--joint between {parent} and body-->
     <joint name="${parent}_joint" type="fixed">

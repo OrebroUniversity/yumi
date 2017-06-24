@@ -40,6 +40,6 @@
 
 
 	<!-- Show robot in Rviz   -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/launch/yumi.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/yumi.rviz"/>
 
 </launch>

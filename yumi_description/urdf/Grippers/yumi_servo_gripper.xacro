@@ -2,17 +2,18 @@
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- Import all Gazebo-customization elements, including Gazebo colors -->
-    <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.gazebo.xacro" />
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.gazebo.xacro" />
     <!-- Import Transmissions -->
-    <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.transmission.xacro" />
-    <!-- Include Utilities -->
-    <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.transmission.xacro" />
+
+
 
     <!-- some constants -->
     <xacro:property name="joint_damping" value="0.5" />
     <xacro:property name="gripper_joint_damping" value="1.0" />
     <xacro:property name="max_gripper_effort" value="50"/>
     <xacro:property name="max_gripper_velocity" value="2"/>
+ 
  
   <xacro:macro name="yumi_servo_gripper" params="parent name hardware_interface *origin">
 
