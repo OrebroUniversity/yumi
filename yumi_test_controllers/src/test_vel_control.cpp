@@ -70,7 +70,7 @@ void joint_states_callback(const sensor_msgs::JointState &msg)
 
 	if(!right_command_sent)
 	{
-		std::vector<double> right_vel = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+		std::vector<double> right_vel = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 		right_command.layout.dim.push_back(std_msgs::MultiArrayDimension());
 		right_command.layout.dim[0].size = right_vel.size();
