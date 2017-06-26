@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <chrono>
 #include <iostream>
+#include <signal.h>
+
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread.hpp>
