@@ -5,8 +5,8 @@
 sensor_msgs::JointState joints_state;
 trajectory_msgs::JointTrajectory left_traj;
 trajectory_msgs::JointTrajectory right_traj;
-std_msgs::Float64 left_command;
-std_msgs::Float64 right_command;
+std_msgs::Float64MultiArray left_command;
+std_msgs::Float64MultiArray right_command;
 
 
 int numSubscribersConnected = 0;
@@ -61,13 +61,33 @@ void joint_states_callback(const sensor_msgs::JointState &msg)
 	cout << "Time since last joint state received = " << elapsed.count() << endl;
 	cout << "Sine value = " << sin_val << endl;
 
-	left_command.data = sin_val;
+	std::vector<double> left_multiplier = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+	left_command.layout.dim.push_back(std_msgs::MultiArrayDimension());
+	left_command.layout.dim[0].size = left_multiplier.size();
+	left_command.layout.dim[0].stride = 1;
+	left_command.layout.dim[0].label = "v";	
+	left_command.data.clear();
+	left_command.data.resize(num_joints_arm);
 
-	right_command.data = sin_val;
+
+	std::vector<double> right_multiplier = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+	right_command.layout.dim.push_back(std_msgs::MultiArrayDimension());
+	right_command.layout.dim[0].size = right_multiplier.size();
+	right_command.layout.dim[0].stride = 1;
+	right_command.layout.dim[0].label = "v";	
+	right_command.data.clear();
+	right_command.data.resize(num_joints_arm);
+
+
+	for (int i = 0; i < num_joints_arm; i++)
+	{
+		left_command.data[i] = sin_val * left_multiplier[i];
+		right_command.data[i] = sin_val * right_multiplier[i];
+	}
 
 	cout << "Publishing command" << endl;
 	left_pub.publish(left_command);
-	// right_pub.publish(right_command);
+	right_pub.publish(right_command);
 
 
 	if(elapsed.count() >= sine_period)
@@ -88,9 +108,8 @@ int main( int argc, char* argv[] )
     sub = nh.subscribe("/yumi/joint_states", 1000, joint_states_callback);
 
 	vel_signal_pub = nh.advertise<std_msgs::Float64>("/yumi/vel_signal", 250);
-	int join_number = 5;
-    left_pub = nh.advertise<std_msgs::Float64>("/yumi/joint_vel_controller_5_l/command", 1000);
-	right_pub = nh.advertise<std_msgs::Float64>("/yumi/joint_vel_controller_5_r/command", 1000);
+    left_pub = nh.advertise<std_msgs::Float64MultiArray>("/yumi/joint_group_vel_controller_l/command", 1000);
+	right_pub = nh.advertise<std_msgs::Float64MultiArray>("/yumi/joint_group_vel_controller_r/command", 1000);
 
 	ros::spin();
 
