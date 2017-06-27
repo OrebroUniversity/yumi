@@ -7,6 +7,7 @@
 
 /* ROS headers */
 #include <ros/ros.h>
+#include <std_msgs/Float64.h>
 #include <controller_manager/controller_manager.h>
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
@@ -119,29 +120,30 @@ int main( int argc, char** argv )
   ros::Time last(ts.tv_sec, ts.tv_nsec), now(ts.tv_sec, ts.tv_nsec);
   ros::Duration period(1.0);
 
-
   /* The controller manager */
   controller_manager::ControllerManager manager(yumi_robot);
 
-
+  /* Publisher of the control loop period */
+  ros::Publisher control_period_pub;
+  control_period_pub = yumi_nh.advertise<std_msgs::Float64>("/yumi/egm_control_period", 1000);
 
   /* Main control loop */
   while( !g_quit )
   {
     // get the time / period
-    //if (!clock_gettime(CLOCK_MONOTONIC, &ts))
-    //{
-    now = ros::Time::now();	
-    //now.sec = ts.tv_sec;
-    //now.nsec = ts.tv_nsec;
-    period = now - last;
-    last = now;
-    //} 
-    //else
-    //{
-    //  ROS_FATAL("Failed to poll realtime clock!");
-    //  break;
-    //}
+    if (!clock_gettime(CLOCK_MONOTONIC, &ts))
+    {
+      now = ros::Time::now();	
+      now.sec = ts.tv_sec;
+      now.nsec = ts.tv_nsec;
+      period = now - last;
+      last = now;
+    } 
+    else
+    {
+      ROS_FATAL("Failed to poll realtime clock!");
+      break;
+    }
 
     /* Read the state from YuMi */
     yumi_robot->read(now, period);
@@ -152,7 +154,9 @@ int main( int argc, char** argv )
     /* Write the command to YuMi */
     yumi_robot->write(now, period);
 
-    //std::cout<<"Period is "<<period.toSec()<<std::endl;
+    // std::cout << "Control loop period is " << period.toSec() * 1000 << " ms" << std::endl;
+    control_period_pub.publish(period.toSec());
+
     //ros::Duration(sampling_time).sleep();
   }
 

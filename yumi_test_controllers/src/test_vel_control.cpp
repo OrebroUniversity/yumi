@@ -20,7 +20,9 @@ auto curr_call_time = std::chrono::high_resolution_clock::now();;
 double sine_period = 1.0;
 double sine_freq = 1 / sine_period;
 double sine_amp = 0.3;
-double sampling_period = 0.05;
+
+double sampling_freq = 200;
+double sampling_period = 1/sampling_freq;
 
 ros::Publisher left_controller_pub;
 ros::Publisher right_controller_pub;
@@ -83,9 +85,10 @@ void joint_states_callback(const sensor_msgs::JointState &msg)
 	joints_state.name = msg.name;
 	joints_state.position = msg.position;
 	joints_state.velocity = msg.velocity;
+	joints_state.effort = msg.effort;
 
-	left_state_pub.publish(joints_state.velocity[6]);
-	right_state_pub.publish(joints_state.velocity[7]);
+	left_state_pub.publish(joints_state.position[6]);
+	right_state_pub.publish(joints_state.position[7]);
 }
 
 

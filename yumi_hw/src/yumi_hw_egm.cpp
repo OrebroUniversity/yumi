@@ -219,7 +219,7 @@ void YumiEGMInterface::copyEGMJointStateToArray(const google::protobuf::Repeated
     joint_array[5] = (float)external_joint_states.Get(0)*M_PI/180.0;
     joint_array[6] = (float)joint_states.Get(2)*M_PI/180.0;
 
-    std::cout << "joint 4" << joint_array[4] << std::endl;
+    // std::cout << "joint 4 " << joint_array[4] << std::endl;
 }
 
 void YumiEGMInterface::copyEGMJointSpaceToArray(const proto::JointSpace &joint_space,
