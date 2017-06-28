@@ -157,7 +157,6 @@ int main( int argc, char** argv )
     // std::cout << "Control loop period is " << period.toSec() * 1000 << " ms" << std::endl;
     control_period_pub.publish(period.toSec());
 
-    //ros::Duration(sampling_time).sleep();
   }
 
   delete yumi_robot;

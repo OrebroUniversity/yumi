@@ -1,10 +1,19 @@
-#ifndef YUMI_GRIPPER_NODE_H
-#define YUMI_GRIPPER_NODE_H
 
+#include <signal.h>
+
+
+#include <ros/ros.h>
+
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread.hpp>
 
-#include <ros/ros.h>
+
+#include <hardware_interface/robot_hw.h>
+#include <hardware_interface/joint_command_interface.h>
+#include <hardware_interface/joint_state_interface.h>
+#include <controller_manager/controller_manager.h>
+
 #include "simple_message/message_handler.h"
 #include "simple_message/message_manager.h"
 #include "simple_message/messages/joint_message.h"
@@ -14,12 +23,10 @@
 #include <sensor_msgs/JointState.h>
 
 #include <yumi_hw/YumiGrasp.h>
+#include <urdf/model.h>
 
 #define MSG_TYPE_GRIPPER_COMMAND 8008
 #define MSG_TYPE_GRIPPER_STATE 8009
-
-// #define DEFAULT_STATE_PORT 12002
-// #define DEFAULT_COMMAND_PORT 12000
 
 #define DEFAULT_STATE_PORT 13002
 #define DEFAULT_COMMAND_PORT 13000
@@ -196,39 +203,89 @@ class YumiGripperStateInterface {
 	
 };
 
-class YumiGripperNode
+
+
+bool g_quit = false;
+
+void quitRequested(int sig)
+{
+  g_quit = true;
+}
+
+class YumiGrippersHW : public hardware_interface::RobotHW
 {
     public:
-		YumiGripperNode() 
-		{
+        YumiGrippersHW(std::string name)
+        {
+            nh_.param<std::string>("joint_state_topic", gripper_state_topic, "gripper_states");
+            nh_.param<std::string>("grasp_request_topic", grasp_request_topic, "do_grasp");
+            nh_.param<std::string>("grasp_release_topic", grasp_release_topic, "release_grasp");
+            nh_.param<double>("publish_period", js_rate, 0.1);
+            nh_.param("port_stream", port_s, DEFAULT_STATE_PORT);
+            nh_.param("port_command", port_c,DEFAULT_COMMAND_PORT);
+            nh_.param("grasp_force", default_force, 5);
+            nh_.param("ip", ip, std::string("192.168.125.1") );
 
-			ROS_INFO("YumiGrippers: starting node");
-			nh_ = ros::NodeHandle("~");
+            heartbeat_ = nh_.createTimer(ros::Duration(js_rate), &YumiGrippersHW::publishState, this);
+            request_grasp_ = nh_.advertiseService(grasp_request_topic, &YumiGrippersHW::request_grasp, this);;
+            request_release_ = nh_.advertiseService(grasp_release_topic, &YumiGrippersHW::request_release, this);;
+            gripper_status_publisher_ = ros::NodeHandle().advertise<sensor_msgs::JointState>(gripper_state_topic, 10); 
 
-			//read in parameters
-				nh_.param<std::string>("joint_state_topic", gripper_state_topic,"gripper_states");
-			nh_.param<std::string>("grasp_request_topic", grasp_request_topic,"do_grasp");
-			nh_.param<std::string>("grasp_release_topic", grasp_release_topic,"release_grasp");
-			nh_.param<double>("publish_period", js_rate, 0.1);
-			nh_.param("port_stream", port_s, DEFAULT_STATE_PORT);
-			nh_.param("port_command", port_c, DEFAULT_COMMAND_PORT);
-			nh_.param("grasp_force", default_force, 5);
-			nh_.param("ip", ip, std::string("192.168.125.1") );
-
-			heartbeat_ = nh_.createTimer(ros::Duration(js_rate), &YumiGripperNode::publishState, this);
-			request_grasp_ = nh_.advertiseService(grasp_request_topic, &YumiGripperNode::request_grasp, this);;
-			request_release_ = nh_.advertiseService(grasp_release_topic, &YumiGripperNode::request_release, this);;
-			gripper_status_publisher_ = ros::NodeHandle().advertise<sensor_msgs::JointState>(gripper_state_topic, 10); 
-
-			gripper_interface.init(ip, port_s);
-			gripper_interface.startThreads();
+            gripper_interface.init(ip, port_s, port_c);
+            gripper_interface.startThreads();
 
 
-		}
+            ROS_INFO_STREAM("Creating a YumiGrippers HW interface");
+            hardware_interface::JointStateHandle state_handle_l("gripper_l_joint", &pos[0], &vel[0], &eff[0]);
+            grippers_state_interface.registerHandle(state_handle_l);
+            hardware_interface::JointStateHandle state_handle_r("gripper_r_joint", &pos[1], &vel[1], &eff[1]);
+            grippers_state_interface.registerHandle(state_handle_r);
+            registerInterface(&grippers_state_interface);
 
-		virtual ~YumiGripperNode() 
-		{
-		}
+            hardware_interface::JointHandle effort_handle_l(grippers_state_interface.getHandle("gripper_l_joint"), &cmd[0]);
+            grippers_effort_interface.registerHandle(effort_handle_l);
+            hardware_interface::JointHandle effort_handle_r(grippers_state_interface.getHandle("gripper_r_joint"), &cmd[1]);
+            grippers_effort_interface.registerHandle(effort_handle_r);
+            registerInterface(&grippers_effort_interface);
+        }
+
+        ~YumiGrippersHW()
+        { }
+
+
+        void read(ros::Time time, ros::Duration period) 
+        {
+            // data_buffer_mutex.lock();
+            float left, right;
+            gripper_interface.getCurrentJointStates(left, right);
+
+            pos[0] = left;
+            pos[1] = right;
+
+            // data_buffer_mutex.unlock();
+        }
+
+
+        void write(ros::Time time, ros::Duration period)
+        {
+
+            // enforceLimits(period);
+
+            // data_buffer_mutex.lock();
+
+            float left, right;
+            left = cmd[0];
+            right = cmd[1];
+
+            std::cout << "Gripper commands (left and right):" << std::endl;
+            std::cout << left << std::endl;
+            std::cout << right << std::endl;
+
+            gripper_interface.setGripperEfforts(left, right);
+
+            // data_buffer_mutex.unlock();
+        }
+
 
     private:
 		ros::NodeHandle nh_;
@@ -242,8 +299,15 @@ class YumiGripperNode
 		int port_s, port_c;
 		double js_rate;
 		int default_force;
-
+        boost::mutex data_buffer_mutex;
 		ros::Timer heartbeat_;
+
+        hardware_interface::JointStateInterface grippers_state_interface;
+        hardware_interface::EffortJointInterface grippers_effort_interface;
+        double cmd[2];
+        double pos[2];
+        double vel[2];
+        double eff[2];
 
 		bool request_grasp(yumi_hw::YumiGrasp::Request  &req, yumi_hw::YumiGrasp::Response &res)
 		{
@@ -286,11 +350,10 @@ class YumiGripperNode
 		}
 
 
-		//callbacks
 		void publishState(const ros::TimerEvent& event)
 		{
 			float left, right;
-			gripper_interface.getCurrentJointStates(left,right);
+			gripper_interface.getCurrentJointStates(left, right);
 
 			//to mm
 			left *= 1e-3;
@@ -307,8 +370,72 @@ class YumiGripperNode
 			gripper_status_publisher_.publish(js);
 
 		}
+
+
+
 };
 
 
 
-#endif
+
+int main( int argc, char** argv )
+{
+    signal(SIGTERM, quitRequested);
+    signal(SIGINT, quitRequested);
+    signal(SIGHUP, quitRequested);
+
+    /* Init ROS node */
+    ros::init(argc, argv, "grippers_hw_interface", ros::init_options::NoSigintHandler);
+
+    /* ROS spinner */
+    ros::AsyncSpinner spinner(4);
+    spinner.start();
+
+    ros::NodeHandle grippers_nh ("~");
+
+    std::string name = "/yumi_grippers";
+
+    YumiGrippersHW* yumi_grippers = new YumiGrippersHW(name);
+    ROS_INFO("YummiGrippersHW interface is up!");
+
+    controller_manager::ControllerManager manager(yumi_grippers);
+
+    struct timespec ts = {0, 0};
+    ros::Time last(ts.tv_sec, ts.tv_nsec), now(ts.tv_sec, ts.tv_nsec);
+    ros::Duration period(1.0);
+
+    ros::Duration(5.0).sleep();
+
+
+    while( !g_quit )
+    {
+        // get the time / period
+        if (!clock_gettime(CLOCK_MONOTONIC, &ts))
+        {
+            now = ros::Time::now();	
+            now.sec = ts.tv_sec;
+            now.nsec = ts.tv_nsec;
+            period = now - last;
+            last = now;
+        } 
+        else
+        {
+            ROS_FATAL("Failed to poll realtime clock!");
+            break;
+        }
+
+        /* Read the state from YuMi */
+        yumi_grippers -> read(now, period);
+        
+        /* Update the controllers */
+        manager.update(now, period);
+
+        /* Write the command to YuMi */
+        // yumi_grippers -> write(now, period);
+
+        std::cout << "Hola" << std::endl;
+    }
+
+
+    return EXIT_SUCCESS;
+}
