@@ -36,6 +36,11 @@
     </group>
 
 
+    <group name="both_arms">
+    	<group name="left_arm" />
+		<group name="right_arm" />
+    </group>
+
     
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="world_joint" type="fixed" parent_frame="world" child_link="yumi_body" />

@@ -10,14 +10,16 @@ std_msgs::Float64 right_command;
 
 int num_joints = 14;
 int num_joints_arm = 7;
-int test_joint_number = 4;
+int test_joint_number = 3;
+int left_joint_state_idx = 4;
+int right_joint_state_idx = 4;
 
 
 auto last_sample_time = std::chrono::high_resolution_clock::now();
 auto last_call_time = std::chrono::high_resolution_clock::now();
 auto curr_call_time = std::chrono::high_resolution_clock::now();;
 
-double sine_period = 1.0;
+double sine_period = 10.0;
 double sine_freq = 1 / sine_period;
 double sine_amp = 0.3;
 
@@ -87,8 +89,8 @@ void joint_states_callback(const sensor_msgs::JointState &msg)
 	joints_state.velocity = msg.velocity;
 	joints_state.effort = msg.effort;
 
-	left_state_pub.publish(joints_state.position[6]);
-	right_state_pub.publish(joints_state.position[7]);
+	left_state_pub.publish(joints_state.position[left_joint_state_idx]);
+	right_state_pub.publish(joints_state.position[right_joint_state_idx]);
 }
 
 

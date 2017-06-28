@@ -57,10 +57,6 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
@@ -96,10 +92,6 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-143.5 * PI / 180}" upper="${43.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
