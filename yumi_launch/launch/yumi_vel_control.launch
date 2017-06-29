@@ -19,34 +19,28 @@
                                      joint_vel_controller_3_l
                                      joint_vel_controller_4_l
                                      joint_vel_controller_5_l
-                                     joint_vel_controller_6_l
-                                     gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
+                                     joint_vel_controller_6_l"/>
 <!--     <arg name="controllers" default="joint_state_controller 
                                      joint_group_vel_controller_l
-                                     joint_group_vel_controller_r
-                                     gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/> -->
+                                     joint_group_vel_controller_r"/> -->
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->    
     <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
-
     <!-- URDF / SRDF parameters -->
     <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
-
 
     <!-- Network parameters -->
     <!--arg name="ip" default="192.168.1.1"/--> <!--when talking to a virtual controller -->
     <arg name="ip" default="192.168.125.1"/> <!--when talking to the real robot controller -->
     <arg name="port" default="80"/>
 
-
     <!-- EGM parameters -->
     <arg name="egm" default="true"/>
     <rosparam file="$(find yumi_hw)/config/egm_rws_config.yaml" command="load" ns="/yumi/yumi_hw" if="$(arg egm)"/>
-
 
     <!-- Calls to yumi_hw members -->
     <!-- The real hardware interface -->
@@ -57,19 +51,15 @@
         <param name="use_egm" value="$(arg egm)"/>
     </node>
      
-
+    <!-- The grippers hardware interface -->
     <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> 
-        <!-- IP address provided as a parameter to yumi_gripper_node / -->
         <param name="ip" value="$(arg ip)"/>
     </node>
-
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
     <node name="joint_remapper" pkg="yumi_hw" type="egm_joints_remap.py" />
-
-
 
     <!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/yumi.rviz"/>
