@@ -32,6 +32,7 @@ MODULE GripperMotion_right
 PROC main()
     VAR num grasp_force;
     VAR num prev_grasp_force;
+    VAR num default_hold_force:=20;
     
     Hand_JogOutward;
     WaitTime 4;
@@ -40,26 +41,32 @@ PROC main()
     Hand_DoCalibrate;
     Hand_Initialize \maxSpd:=20, \holdForce:=5;
     Hand_MoveTo(10);
+    prev_grasp_force:=5;
+    
     
     WHILE true DO
         ! Check for an updated setpoint. 
         grasp_force := next_grasp_target.right;
         current_gripper_right := Hand_GetActualPos();
-        TPWrite "Right gripper pos. Force="\num:=current_gripper_right;
-        IF (NOT (grasp_force = prev_grasp_force)) THEN
-            ! Gripper effort target received
-            IF(grasp_force <> 0) THEN
-                IF(grasp_force > 0 ) THEN
-                    Hand_GripInward \holdForce:=grasp_force;
-                ELSEIF (grasp_force < 0 ) THEN
-                    Hand_GripOutward \holdForce:=-grasp_force;
-                ENDIF
-                TPWrite "Grasping with right. Force="\num:=grasp_force;
+        
+!        IF (NOT (grasp_force = prev_grasp_force)) THEN
+!            TPWrite "Right gripper. Pos="\num:=current_gripper_right;
+!            prev_grasp_force := grasp_force;
+!        ENDIF
+            IF(grasp_force < 0) THEN
+                TPWrite "Inward grip. Right gripper. Force="\num:=-grasp_force;
+                Hand_GripInward \holdForce:=-grasp_force, \NoWait;
+            ELSEIF (grasp_force > 0) THEN
+!                TPWrite "Outward grip";
+                TPWrite "Inward grip. Right gripper. Force="\num:=grasp_force;
+                Hand_GripOutward \holdForce:=grasp_force, \NoWait;
+            ELSE
+                !do nothing
             ENDIF
-            prev_grasp_force := grasp_force;
-        ENDIF
+        !    prev_grasp_force := grasp_force;
+        !ENDIF
 
-        WaitTime 0.1;
+        !WaitTime 0.1;
     ENDWHILE
 ERROR
     ErrWrite \W, "Gripper Motion Error", "Error executing motion.  Aborting trajectory.";
