@@ -30,7 +30,7 @@ MODULE GripperMotion_right
 
 
 PROC main()
-    VAR num grasp_pos;
+    VAR num grasp_force;
     
     Hand_JogOutward;
     WaitTime 4;
@@ -39,20 +39,24 @@ PROC main()
     Hand_DoCalibrate;
     Hand_Initialize \maxSpd:=20, \holdForce:=10;
     Hand_MoveTo(10);
-    grasp_pos:=5;
+    grasp_force:=0;
     
     
     WHILE true DO
         ! Check for an updated setpoint. 
-        grasp_pos := next_grasp_target.right;
+        grasp_force := next_grasp_target.right;
         current_gripper_right := Hand_GetActualPos();
         
-        IF(grasp_pos >= 0) THEN
-            TPWrite "Right gripper goal = "\num:=grasp_pos;
-            Hand_MoveTo grasp_pos\NoWait;
+        IF(grasp_force > 0 ) THEN
+            TPWrite "Grasping with right";
+            Hand_GripInward \holdForce:=grasp_force;
+        ELSEIF (grasp_force < 0 ) THEN
+            Hand_GripOutward \holdForce:=-grasp_force;
+        ELSE
+            !do nothing
         ENDIF
-
-        !WaitTime 0.1;
+        
+        WaitTime 0.1;
     ENDWHILE
 ERROR
     ErrWrite \W, "Gripper Motion Error", "Error executing motion.  Aborting trajectory.";
