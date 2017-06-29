@@ -11,7 +11,7 @@ int main( int argc, char* argv[] )
 {
     ros::init(argc, argv, "yumi_gripper_node");
     YumiGripperNode gripperNode;
-    ros::AsyncSpinner spinner(4); // Use 4 threads
+    ros::AsyncSpinner spinner(6); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();
 

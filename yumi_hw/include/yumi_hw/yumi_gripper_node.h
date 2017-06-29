@@ -12,6 +12,7 @@
 #include "simple_message/socket/tcp_socket.h"
 #include "simple_message/socket/tcp_client.h"
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64.h>
 
 #include <yumi_hw/YumiGrasp.h>
 
@@ -206,7 +207,7 @@ class YumiGripperNode
 			nh_ = ros::NodeHandle("~");
 
 			//read in parameters
-				nh_.param<std::string>("joint_state_topic", gripper_state_topic,"gripper_states");
+			nh_.param<std::string>("joint_state_topic", gripper_state_topic,"gripper_states");
 			nh_.param<std::string>("grasp_request_topic", grasp_request_topic,"do_grasp");
 			nh_.param<std::string>("grasp_release_topic", grasp_release_topic,"release_grasp");
 			nh_.param<double>("publish_period", js_rate, 0.1);
@@ -216,18 +217,47 @@ class YumiGripperNode
 			nh_.param("ip", ip, std::string("192.168.125.1") );
 
 			heartbeat_ = nh_.createTimer(ros::Duration(js_rate), &YumiGripperNode::publishState, this);
-			request_grasp_ = nh_.advertiseService(grasp_request_topic, &YumiGripperNode::request_grasp, this);;
+			request_grasp_ = nh_.advertiseService(grasp_request_topic, &YumiGripperNode::request_grasp, this);
 			request_release_ = nh_.advertiseService(grasp_release_topic, &YumiGripperNode::request_release, this);;
 			gripper_status_publisher_ = ros::NodeHandle().advertise<sensor_msgs::JointState>(gripper_state_topic, 10); 
+
+			left_gripper_cmd = 0;
+			right_gripper_cmd = 15;
+
 
 			gripper_interface.init(ip, port_s);
 			gripper_interface.startThreads();
 
-
+			std::cout << "creating subscribers" << std::endl;
+			left_gripper_cmd_sub = nh_.subscribe("/gripper_l_pos_cmd", 100, &YumiGripperNode::leftGripperCmdCallback, this);
+			right_gripper_cmd_sub = nh_.subscribe("/gripper_r_pos_cmd", 100, &YumiGripperNode::rightGripperCmdCallback, this);
+			std::cout << "subscribers should be ready" << std::endl;
 		}
 
 		virtual ~YumiGripperNode() 
 		{
+		}
+
+
+		float left_gripper_cmd;
+		float right_gripper_cmd;
+
+
+		void leftGripperCmdCallback(const std_msgs::Float64::ConstPtr& msg)
+		{
+			ROS_INFO("Left gripper. I heard: [%f]", msg->data);
+
+			left_gripper_cmd = msg -> data;
+			gripper_interface.setGripperEfforts(left_gripper_cmd, right_gripper_cmd);
+		}
+
+
+		void rightGripperCmdCallback(const std_msgs::Float64::ConstPtr& msg)
+		{
+			ROS_INFO("Right gripper. I heard: [%f]", msg->data);
+
+			right_gripper_cmd = msg -> data;
+			gripper_interface.setGripperEfforts(left_gripper_cmd, right_gripper_cmd);
 		}
 
     private:
@@ -237,6 +267,8 @@ class YumiGripperNode
 		ros::ServiceServer request_grasp_;
 		ros::ServiceServer request_release_;
 		YumiGripperStateInterface gripper_interface;
+		ros::Subscriber left_gripper_cmd_sub;
+		ros::Subscriber right_gripper_cmd_sub;
 
 		std::string gripper_state_topic, grasp_request_topic, grasp_release_topic, ip;
 		int port_s, port_c;
