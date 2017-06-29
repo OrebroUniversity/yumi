@@ -229,8 +229,8 @@ class YumiGripperNode
 			gripper_interface.startThreads();
 
 			std::cout << "creating subscribers" << std::endl;
-			left_gripper_cmd_sub = nh_.subscribe("/gripper_l_pos_cmd", 100, &YumiGripperNode::leftGripperCmdCallback, this);
-			right_gripper_cmd_sub = nh_.subscribe("/gripper_r_pos_cmd", 100, &YumiGripperNode::rightGripperCmdCallback, this);
+			left_gripper_cmd_sub = nh_.subscribe("/yumi/gripper_l_effort_cmd", 100, &YumiGripperNode::leftGripperCmdCallback, this);
+			right_gripper_cmd_sub = nh_.subscribe("/yumi/gripper_r_effort_cmd", 100, &YumiGripperNode::rightGripperCmdCallback, this);
 			std::cout << "subscribers should be ready" << std::endl;
 		}
 
@@ -289,9 +289,9 @@ class YumiGripperNode
 				right = default_force;
 			}
 
-			std::cout << "Gripper commands (left and right):" << std::endl;
-			std::cout << left << std::endl;
-			std::cout << right << std::endl;
+			// std::cout << "Gripper commands (left and right):" << std::endl;
+			// std::cout << left << std::endl;
+			// std::cout << right << std::endl;
 
 			gripper_interface.setGripperEfforts(left,right);
 			return true;
@@ -309,9 +309,9 @@ class YumiGripperNode
 				right = -default_force;
 			}
 
-			std::cout << "Gripper commands (left and right):" << std::endl;
-			std::cout << left << std::endl;
-			std::cout << right << std::endl;
+			// std::cout << "Gripper commands (left and right):" << std::endl;
+			// std::cout << left << std::endl;
+			// std::cout << right << std::endl;
 
 			gripper_interface.setGripperEfforts(left,right);
 			return true;

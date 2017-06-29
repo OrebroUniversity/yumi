@@ -41,10 +41,10 @@
     </node>
      
 
-<!--     <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> 
+    <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> 
         <param name="ip" value="$(arg ip)"/>
     </node>
- -->
+
 
     <node name="yumi_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <remap from="/joint_states" to="/yumi/joint_states" />
