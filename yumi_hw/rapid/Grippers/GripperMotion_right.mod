@@ -31,6 +31,7 @@ MODULE GripperMotion_right
 
 PROC main()
     VAR num grasp_force;
+    VAR num prev_grasp_force;
     
     Hand_JogOutward;
     WaitTime 4;
@@ -42,23 +43,22 @@ PROC main()
     
     WHILE true DO
         ! Check for an updated setpoint. 
-        WaitTestAndSet ROS_gripper_right_lock;
-        IF (ROS_new_gripper_right) THEN          ! a new setpoint is available
-            grasp_force := next_grasp_target.right;    
-        ENDIF
+        grasp_force := next_grasp_target.right;
         current_gripper_right := Hand_GetActualPos();
-        ROS_new_gripper_right := FALSE;
-        ROS_gripper_right_lock := FALSE;        ! release data-lock
-        
-        !gripper target received
-        IF(grasp_force <> 0) THEN
-            IF(grasp_force > 0 ) THEN
-                Hand_GripInward \holdForce:=grasp_force;
-            ELSEIF (grasp_force < 0 ) THEN
-                Hand_GripOutward \holdForce:=-grasp_force;
+        TPWrite "Right gripper pos. Force="\num:=current_gripper_right;
+        IF (NOT (grasp_force = prev_grasp_force)) THEN
+            ! Gripper effort target received
+            IF(grasp_force <> 0) THEN
+                IF(grasp_force > 0 ) THEN
+                    Hand_GripInward \holdForce:=grasp_force;
+                ELSEIF (grasp_force < 0 ) THEN
+                    Hand_GripOutward \holdForce:=-grasp_force;
+                ENDIF
+                TPWrite "Grasping with right. Force="\num:=grasp_force;
             ENDIF
-            TPWrite "Grasping with right. Force="\num:=grasp_force;
+            prev_grasp_force := grasp_force;
         ENDIF
+
         WaitTime 0.1;
     ENDWHILE
 ERROR

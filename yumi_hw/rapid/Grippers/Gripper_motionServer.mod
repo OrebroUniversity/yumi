@@ -44,15 +44,16 @@ PROC main()
     WHILE ( true ) DO
 		! Recieve Gripper Trajectory Pt Message
         ROS_receive_msg_gripper_data client_socket, message;
-        WaitTestAndSet ROS_gripper_left_lock;
-        ROS_new_gripper_left := TRUE;
-        next_grasp_target.left := message.left;
-        ROS_gripper_left_lock := FALSE;
         
-        WaitTestAndSet ROS_gripper_right_lock;
-        ROS_new_gripper_right := TRUE;
+        ! WaitTestAndSet ROS_gripper_left_lock;
+        ! ROS_new_gripper_left := TRUE;
+        next_grasp_target.left := message.left;
+        ! ROS_gripper_left_lock := FALSE;
+        
+        ! WaitTestAndSet ROS_gripper_right_lock;
+        ! ROS_new_gripper_right := TRUE;
         next_grasp_target.right := message.right;
-        ROS_gripper_right_lock := FALSE;
+        ! ROS_gripper_right_lock := FALSE;
         
 	ENDWHILE
 

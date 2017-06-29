@@ -34,6 +34,7 @@ RECORD ROS_joint_trajectory_pt
 	num duration;
 ENDRECORD
 
+CONST num GRIPPER_CLOSE_TOL := 1; ! ! gripper tolerance for assuming closing hand
 CONST num MAX_TRAJ_LENGTH := 100;
 
 
@@ -55,10 +56,10 @@ PERS bool ROS_new_joint_target_left := FALSE;       ! can safely READ, but shoul
 PERS bool ROS_joint_target_right_lock := FALSE;
 PERS bool ROS_new_joint_target_right := FALSE;       ! can safely READ, but should use lock to WRITE
 
-PERS bool ROS_gripper_left_lock := FALSE;
-PERS bool ROS_new_gripper_left := FALSE;       ! can safely READ, but should use lock to WRITE
-PERS bool ROS_gripper_right_lock := FALSE;
-PERS bool ROS_new_gripper_right := FALSE;       ! can safely READ, but should use lock to WRITE
+! PERS bool ROS_gripper_left_lock := FALSE;
+! PERS bool ROS_new_gripper_left := FALSE;       ! can safely READ, but should use lock to WRITE
+! PERS bool ROS_gripper_right_lock := FALSE;
+! PERS bool ROS_new_gripper_right := FALSE;       ! can safely READ, but should use lock to WRITE
 
 PERS ROS_msg_joint_data next_joint_target;
 PERS ROS_msg_gripper_target next_grasp_target;
