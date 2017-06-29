@@ -30,41 +30,27 @@ MODULE GripperMotion_right
 
 
 PROC main()
-    VAR num grasp_force;
-    VAR num prev_grasp_force;
-    VAR num default_hold_force:=20;
+    VAR num grasp_pos;
     
     Hand_JogOutward;
     WaitTime 4;
     Hand_JogInward;
     WaitTime 4;
     Hand_DoCalibrate;
-    Hand_Initialize \maxSpd:=20, \holdForce:=5;
+    Hand_Initialize \maxSpd:=20, \holdForce:=10;
     Hand_MoveTo(10);
-    prev_grasp_force:=5;
+    grasp_pos:=5;
     
     
     WHILE true DO
         ! Check for an updated setpoint. 
-        grasp_force := next_grasp_target.right;
+        grasp_pos := next_grasp_target.right;
         current_gripper_right := Hand_GetActualPos();
         
-!        IF (NOT (grasp_force = prev_grasp_force)) THEN
-!            TPWrite "Right gripper. Pos="\num:=current_gripper_right;
-!            prev_grasp_force := grasp_force;
-!        ENDIF
-            IF(grasp_force < 0) THEN
-                TPWrite "Inward grip. Right gripper. Force="\num:=-grasp_force;
-                Hand_GripInward \holdForce:=-grasp_force, \NoWait;
-            ELSEIF (grasp_force > 0) THEN
-!                TPWrite "Outward grip";
-                TPWrite "Inward grip. Right gripper. Force="\num:=grasp_force;
-                Hand_GripOutward \holdForce:=grasp_force, \NoWait;
-            ELSE
-                !do nothing
-            ENDIF
-        !    prev_grasp_force := grasp_force;
-        !ENDIF
+        IF(grasp_pos >= 0) THEN
+            TPWrite "Right gripper goal = "\num:=grasp_pos;
+            Hand_MoveTo grasp_pos\NoWait;
+        ENDIF
 
         !WaitTime 0.1;
     ENDWHILE
