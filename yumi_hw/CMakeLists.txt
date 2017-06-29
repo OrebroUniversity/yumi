@@ -92,7 +92,7 @@ add_library(${PROJECT_NAME}
 add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 
 add_executable(yumi_gripper_node src/yumi_gripper_node.cpp)
-add_executable(grippers_hw src/grippers_hw.cpp)
+
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -103,7 +103,6 @@ add_dependencies(yumi_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries( ${PROJECT_NAME} ${catkin_LIBRARIES} )
 target_link_libraries( yumi_hw_ifce_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
 target_link_libraries( yumi_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
-target_link_libraries( grippers_hw ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
 
 
 #############
