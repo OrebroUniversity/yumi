@@ -1,52 +1,68 @@
 <?xml version="1.0" ?>
 <launch>
 
-  <!-- This launch file provides a socket-based connection to ABB robots
-       using the standard ROS Industrial simple_message protocol.
-         ** a new parameter is added to control J23-linkage correction **
+	<!-- This launch file provides a socket-based connection to ABB robots
+	   using the standard ROS Industrial simple_message protocol.
+	     ** a new parameter is added to control J23-linkage correction **
 
-       Several nodes are started, to supply both low-level robot communication
-       and higher-level actionlib support:
-         - robot_state : publishes current joint positions and robot state data
-         - motion_download_interface : command robot motion by sending motion points to robot
-         - joint_trajectory_action : actionlib interface to control robot motion
+	   Several nodes are started, to supply both low-level robot communication
+	   and higher-level actionlib support:
+	     - robot_state : publishes current joint positions and robot state data
+	     - motion_download_interface : command robot motion by sending motion points to robot
+	     - joint_trajectory_action : actionlib interface to control robot motion
 
-    Usage:
-      robot_interface.launch robot_ip:=<value> [J23_coupled:=false]
-  -->
+	Usage:
+	  robot_interface.launch robot_ip:=<value> [J23_coupled:=false]
+	-->
 
-  <!-- robot_ip: IP-address of the robot's socket-messaging server -->
-  <arg name="robot_ip" default="192.168.125.1"/>
-  
-  <!-- J23_coupled: set TRUE to apply correction for J2/J3 parallel linkage -->
-  <arg name="J23_coupled" default="false" />
+	<!-- robot_ip: IP-address of the robot's socket-messaging server -->
+	<arg name="robot_ip" default="192.168.125.1"/>
 
-  <group ns="left_arm">
-    <param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
-    <param name="J23_coupled" type="bool" value="$(arg J23_coupled)"/>
+	<!-- J23_coupled: set TRUE to apply correction for J2/J3 parallel linkage -->
+	<arg name="J23_coupled" default="false" />
 
-    <rosparam command="load" file="$(find yumi_support)/config/joint_names_left.yaml" />
-    
-    <node pkg="abb_driver" type="robot_state" name="robot_state"/>
-    <node pkg="abb_driver" type="motion_download_interface" name="motion_download_interface"/>
-    <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
-    <node pkg="topic_tools" type="relay" name="left_joints_relay" args="/left_arm/joint_states /joint_states"/>
-  </group>
+	<group ns="left_arm">
+		<param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
+		<param name="J23_coupled" type="bool" value="$(arg J23_coupled)"/>
 
-  <group ns="right_arm">
-    <param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
-    <param name="J23_coupled" type="bool" value="$(arg J23_coupled)"/>
+		<rosparam command="load" file="$(find yumi_support)/config/joint_names_left.yaml" />
 
-    <rosparam command="load" file="$(find yumi_support)/config/joint_names_right.yaml" />
-    
-    <node pkg="abb_driver" type="robot_state" name="robot_state">
-	<param name="port" value="12002" />
-    </node>
-    <node pkg="abb_driver" type="motion_download_interface" name="motion_download_interface">
-	<param name="port" value="12000" />
-    </node>
-    <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
-    <node pkg="topic_tools" type="relay" name="right_joints_relay" args="/right_arm/joint_states /joint_states"/>
-  </group>
+		<node pkg="abb_driver" type="robot_state" name="robot_state">
+			<param name="port" value="11002" />
+		</node>
+
+		<node pkg="abb_driver" type="motion_download_interface" name="motion_download_interface">
+			<param name="port" value="11000" />
+		</node>
+
+		<node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
+		<node pkg="topic_tools" type="relay" name="left_joints_relay" args="/left_arm/joint_states /joint_states"/>
+	</group>
+
+
+	<group ns="right_arm">
+		<param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
+		<param name="J23_coupled" type="bool" value="$(arg J23_coupled)"/>
+
+		<rosparam command="load" file="$(find yumi_support)/config/joint_names_right.yaml" />
+
+		<node pkg="abb_driver" type="robot_state" name="robot_state">
+			<param name="port" value="12002" />
+		</node>
+
+		<node pkg="abb_driver" type="motion_download_interface" name="motion_download_interface">
+			<param name="port" value="12000" />
+		</node>
+
+		<node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
+		<node pkg="topic_tools" type="relay" name="right_joints_relay" args="/right_arm/joint_states /joint_states"/>
+	</group>
+
+
+	<node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen">
+		<param name="ip" value="$(arg robot_ip)"/>
+	</node>
+
+
 
 </launch>

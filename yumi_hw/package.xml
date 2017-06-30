@@ -4,7 +4,7 @@
   <version>0.0.4</version>
   <description>Hardware interface for YuMi, for use in roscontrol</description>
 
-  <maintainer email="todor.stoyanov@oru.se">Todor Stoyanov</maintainer>
+  <maintainer email="yoshua.nava@kth.se">Yoshua Nava</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -38,6 +38,8 @@
   <build_depend>urdf</build_depend>
   <build_depend>simple_message</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>abb_egm_interface</build_depend>
+  <build_depend>abb_rws_interface</build_depend>
 
   <run_depend>cmake_modules</run_depend>
   <run_depend>control_toolbox</run_depend>
@@ -54,7 +56,8 @@
   <run_depend>urdf</run_depend>
   <run_depend>simple_message</run_depend>
   <run_depend>message_runtime</run_depend>
-
+  <run_depend>abb_egm_interface</run_depend>
+  <run_depend>abb_rws_interface</run_depend>>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

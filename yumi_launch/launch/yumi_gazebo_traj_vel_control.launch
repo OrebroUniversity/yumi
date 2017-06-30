@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch> 
+
+	<arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
+	
+	<!-- Load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find yumi_control)/config/traj_controllers.yaml" command="load" ns="/yumi"/>
+	<arg name="controllers" default="joint_state_controller 
+									 joint_traj_vel_controller_l
+									 joint_traj_vel_controller_r
+									 gripper_effort_pos_controller_r
+									 gripper_effort_pos_controller_l"/>
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+
+	<!--  Hardware interfaces for the joints and grippers -->
+    <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
+    <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
+
+	<!-- URDF / SRDF parameters -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
+
+	<!-- Configuration for debug  -->
+	<arg name="debug" default="false"/>
+	<arg unless="$(arg debug)" name="launch_prefix" value="" />
+	<arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+	<!-- Call Gazebo -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+	    <arg name="paused" value="false"/>
+	    <arg name="use_sim_time" value="true"/>
+	    <arg name="gui" value="false"/>
+	    <arg name="headless" value="false"/>
+	    <arg name="debug" value="$(arg debug)" />
+	</include>
+
+	<node name="yumi_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+	    <remap from="/joint_states" to="/yumi/joint_states" />
+	</node>
+	<node name="joint_remapper" pkg="yumi_hw" type="gazebo_joints_remap.py" />
+
+	<!-- Show robot in Rviz   -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/yumi.rviz"/>
+
+</launch>
