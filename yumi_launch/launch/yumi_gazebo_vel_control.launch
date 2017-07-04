@@ -19,11 +19,10 @@
 									 joint_vel_controller_3_l
 									 joint_vel_controller_4_l
 									 joint_vel_controller_5_l
-									 joint_vel_controller_6_l
-									 gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
+									 joint_vel_controller_6_l"/>
     <arg name="gripper_controllers" default="gripper_effort_pos_controller_r gripper_effort_pos_controller_l"/>
-	<node name="arm_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
-	<node name="gripper_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+	<node name="arm_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg arm_controllers)" ns="/yumi"/>
+	<node name="gripper_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg gripper_controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->
     <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
