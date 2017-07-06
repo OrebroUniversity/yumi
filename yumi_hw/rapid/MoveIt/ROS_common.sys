@@ -49,10 +49,8 @@ PERS bool ROS_new_trajectory_right := FALSE;       ! can safely READ, but should
 
 
 ! Variables for handling grippers
-PERS bool ROS_gripper_left_lock := FALSE;
-PERS bool ROS_new_gripper_left := FALSE;       ! can safely READ, but should use lock to WRITE
-PERS bool ROS_gripper_right_lock := FALSE;
-PERS bool ROS_new_gripper_right := FALSE;       ! can safely READ, but should use lock to WRITE
+PERS bool ROS_new_gripper_left := FALSE;       
+PERS bool ROS_new_gripper_right := FALSE;       
 PERS ROS_msg_gripper_target next_grasp_target;
 PERS num current_gripper_left;
 PERS num current_gripper_right;

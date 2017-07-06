@@ -41,22 +41,3 @@ target_link_libraries(test_vel_control ${catkin_LIBRARIES})
 
 add_executable(test_group_vel_control src/test_vel_control.cpp)
 target_link_libraries(test_group_vel_control ${catkin_LIBRARIES})
-
-
-add_executable(test_grippers_control src/test_grippers_control.cpp)
-target_link_libraries(test_grippers_control ${catkin_LIBRARIES})
-
-
-# ## Mark executables and/or libraries for installation
-# install(TARGETS yumi_test_controllers
-#    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-# ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#    FILES_MATCHING PATTERN "*.h"
-# )
-

@@ -278,7 +278,7 @@ bool YumiEGMInterface::initRWS()
 
     // if(!startEGM()) return false;
 
-    ros::NodeHandle nh;
+    // ros::NodeHandle nh;
     //rws_watchdog_timer_ = nh.createTimer(ros::Duration(rws_watchdog_period_), &YumiEGMInterface::rwsWatchdog, this);
 
     return true;
