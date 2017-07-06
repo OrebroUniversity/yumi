@@ -1,0 +1,390 @@
+MODULE TRobEGM(SYSMODULE)
+!======================================================================================================
+! Software License Agreement (BSD License) 
+!
+! Copyright (c) 2015, ABB
+! All rights reserved.
+!
+! Redistribution and use in source and binary forms, with
+! or without modification, are permitted provided that 
+! the following conditions are met:
+!
+!    * Redistributions of source code must retain the 
+!      above copyright notice, this list of conditions 
+!      and the following disclaimer.
+!    * Redistributions in binary form must reproduce the 
+!      above copyright notice, this list of conditions 
+!      and the following disclaimer in the documentation 
+!      and/or other materials provided with the 
+!      distribution.
+!    * Neither the name of ABB nor the names of its 
+!      contributors may be used to endorse or promote 
+!      products derived from this software without 
+!      specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+! SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+! CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!======================================================================================================
+
+
+
+
+    !==================================================================================================
+    ! Data components
+    !==================================================================================================
+    !-------------------------------------------------
+    ! Records
+    !-------------------------------------------------   
+    LOCAL RECORD EGM_RECORD
+        num comm_timeout;         ! Communication timeout [s].
+        
+        string tool_name;         ! Name of a defined tool (e.g. "tool0").
+        string wobj_name;         ! Name of a defined work object (e.g. "wobj0").
+        num cond_min_max;         ! Condition value [deg or mm] for when the EGM correction is considered
+                                  ! to be finished. E.g. for joint mode, then the condition is fulfilled when
+                                  ! the joints are within [-MinMax, MinMax].
+        num lp_filter;            ! Low pass filer bandwidth of the EGM controller [Hz].
+        num max_speed_deviation;  ! Maximum admitted joint speed change [deg/s]:
+                                  !   Note: Should not be set higher than the lowest max speed [deg/s],
+                                  !         out of all the axis max speeds (found in the robot's data sheet).
+                                
+        num cond_time;            ! Condition time [s].
+        num ramp_in_time;         ! Duration for ramp in [s].
+        num pos_corr_gain;        ! Position correction gain of the EGM controller.
+    ENDRECORD
+    
+    !-------------------------------------------------
+    ! Variables and constants
+    !-------------------------------------------------    
+    ! EGM actions.
+    LOCAL CONST num EGM_ACTION_STOP      := 0;
+    LOCAL CONST num EGM_ACTION_RUN_JOINT := 1;
+    LOCAL CONST num EGM_ACTION_RUN_POSE  := 2;
+    LOCAL VAR num current_egm_action;
+
+    ! Interupt numbers.
+    LOCAL VAR intnum interupt_egm_stop;
+    LOCAL VAR intnum interupt_egm_start_joint;
+    LOCAL VAR intnum interupt_egm_start_pose;
+    
+    !-------------------------------------------------
+    ! EGM specific
+    !-------------------------------------------------
+    ! Identifier for the EGM correction.
+    LOCAL VAR egmident egm_id;
+    
+    ! Container for data used in the EGM instructions.
+    LOCAL VAR EGM_RECORD egm_data;
+    
+    ! The currently used tool and work object for the EGM instructions.
+    LOCAL PERS tooldata egm_current_tool := [ TRUE, [ [0, 0, 0], [1, 0, 0 ,0] ], [0.001, [0, 0, 0.001], [1, 0, 0, 0], 0, 0, 0] ];
+    LOCAL PERS wobjdata egm_current_wobj := [ FALSE, TRUE, "", [ [0, 0, 0], [1, 0, 0 ,0] ], [ [0, 0, 0], [1, 0, 0 ,0] ] ];
+    
+    ! ExtConfigName and UCdevice arguments for EGMSetupUC instruction.
+    !
+    ! They are defined at:
+    ! ExtConfigName: Controller tab -> Configuration Editor -> Motion -> External Motion Interface Data
+    ! UCdevice:      Controller tab -> Configuration Editor -> Communication -> Transmission Protocol
+    !
+    ! IMPORTANT: Set correct values for UCdevice's remote address and port.
+    LOCAL VAR string egm_ext_config_name;
+    LOCAL VAR string egm_uc_device;
+    
+    ! Defualt values for the EGM instructions.
+    LOCAL CONST num DEFAULT_COMM_TIMEOUT     := 1; 
+    LOCAL CONST string DEFAULT_TOOL_NAME        := "tool0";
+    LOCAL CONST string DEFAULT_WOBJ_NAME        := "wobj0";
+    LOCAL CONST num DEFAULT_COND_MIN_MAX        := 0.5;
+    LOCAL CONST num DEFAULT_LP_FILTER           := 0;
+    LOCAL CONST num DEFAULT_MAX_SPEED_DEVIATION := 1;
+    LOCAL CONST num DEFAULT_CONDITION_TIME      := 1;
+    LOCAL CONST num DEFAULT_RAMP_IN_TIME        := 0.1;
+    LOCAL CONST num DEFAULT_POSITION_CORR_GAIN  := 1;
+    
+    ! Limits for convergance. For rotations = deg and for linear = mm.
+    LOCAL VAR egm_minmax condition_minmax := [-DEFAULT_COND_MIN_MAX, DEFAULT_COND_MIN_MAX];
+
+    !-------------------------
+    ! For EGM Pose mode
+    !-------------------------
+    LOCAL CONST pose egm_correction_frame := [[0, 0, 0], [1, 0, 0, 0]];
+    LOCAL CONST pose egm_sensor_frame     := [[0, 0, 0], [1, 0, 0, 0]];
+
+
+
+
+    !==================================================================================================
+    ! Primary components
+    !==================================================================================================
+    PROC initializeEGMModule()
+        !-------------------------------------------------   
+        ! Setup interrupt signals:
+        ! * EGM_STOP        - Stops EGM motion.
+        ! * EGM_START_JOINT - Starts EGM Joint motion.
+        ! * EGM_START_POSE  - Starts EGM Pose motion.
+        !
+        ! Add a digital input (DI) signal 
+        ! Controller tab -> Configuration Editor ->
+        ! I/O System -> Signal
+        !-------------------------------------------------   
+        IDelete interupt_egm_stop;
+        CONNECT interupt_egm_stop WITH stopEGMHandler;
+        ISignalDI EGM_STOP, HIGH, interupt_egm_stop; 
+        
+        IDelete interupt_egm_start_joint;
+        CONNECT interupt_egm_start_joint WITH startEGMJointHandler;
+        ISignalDI EGM_START_JOINT, HIGH, interupt_egm_start_joint; 
+        
+        IDelete interupt_egm_start_pose;
+        CONNECT interupt_egm_start_pose WITH startEGMPoseHandler;
+        ISignalDI EGM_START_POSE, HIGH, interupt_egm_start_pose; 
+        
+        ! Try to prepare for syncing (only tried if there are several TCP robots in the system). 
+        IF use_sync THEN
+            CallByVar "prepareSyncList", 0;
+        ENDIF
+        
+        ! Initialize default values for the EGM instructions:
+        initializeEGM;
+        
+    ERROR
+        TRYNEXT;
+    ENDPROC
+    
+    LOCAL PROC initializeEGM()
+        ! Set default mode.
+        current_egm_action := EGM_ACTION_STOP;
+        
+        ! Set some default values for EGM instructions.
+        egm_data.comm_timeout        := DEFAULT_COMM_TIMEOUT;
+        egm_data.tool_name           := DEFAULT_TOOL_NAME;
+        egm_data.wobj_name           := DEFAULT_WOBJ_NAME;
+        egm_data.cond_min_max        := DEFAULT_COND_MIN_MAX;
+        egm_data.lp_filter           := DEFAULT_LP_FILTER;
+        egm_data.max_speed_deviation := DEFAULT_MAX_SPEED_DEVIATION;
+        egm_data.cond_time           := DEFAULT_CONDITION_TIME;
+        egm_data.ramp_in_time        := DEFAULT_RAMP_IN_TIME;
+        egm_data.pos_corr_gain       := DEFAULT_POSITION_CORR_GAIN;
+               
+        ! This example uses the robot's name as the name
+        ! of the configurations for the ExtConfigNames
+        ! and UCdevices.
+        egm_ext_config_name := GetMecUnitName(ROB_ID);
+        egm_uc_device       := GetMecUnitName(ROB_ID);
+    ENDPROC
+       
+    LOCAL PROC prepareEGM()
+        EGMReset egm_id;
+        EGMGetId egm_id;
+        
+        ! Parse the data stored in the egm_data record.
+        parseEGMData;
+        
+        ! Prepare for the chosen mode (e.g. Joint or Pose).
+        TEST current_egm_action
+            CASE EGM_ACTION_RUN_JOINT:
+                EGMSetupUC ROB_ID,
+                           egm_id,
+                           egm_ext_config_name,
+                           egm_uc_device
+                           \Joint
+                           \CommTimeout:=egm_data.comm_timeout;
+                
+                IF using_irb14000 THEN
+                    EGMActJoint egm_id
+                                \Tool:=egm_current_tool,
+                                \WObj:=egm_current_wobj,
+                                \J1:=condition_minmax
+                                \J2:=condition_minmax
+                                \J3:=condition_minmax
+                                \J4:=condition_minmax
+                                \J5:=condition_minmax
+                                \J6:=condition_minmax
+                                \J7:=condition_minmax
+                                \LpFilter:=egm_data.lp_filter
+                                \MaxSpeedDeviation:=egm_data.max_speed_deviation;
+                ELSE
+                    EGMActJoint egm_id
+                                \Tool:=egm_current_tool,
+                                \WObj:=egm_current_wobj,
+                                \J1:=condition_minmax
+                                \J2:=condition_minmax
+                                \J3:=condition_minmax
+                                \J4:=condition_minmax
+                                \J5:=condition_minmax
+                                \J6:=condition_minmax
+                                \LpFilter:=egm_data.lp_filter
+                                \MaxSpeedDeviation:=egm_data.max_speed_deviation;
+                ENDIF  
+
+            CASE EGM_ACTION_RUN_POSE:
+                EGMSetupUC ROB_ID,
+                           egm_id,
+                           egm_ext_config_name,
+                           egm_uc_device
+                           \Pose
+                           \CommTimeout:=egm_data.comm_timeout;
+                
+                EGMActPose egm_id
+                           \Tool:=egm_current_tool,
+                           \WObj:=egm_current_wobj,
+                           egm_correction_frame,
+                           EGM_FRAME_WORLD,
+                           egm_sensor_frame,
+                           EGM_FRAME_WORLD
+                           \X:=condition_minmax
+                           \Y:=condition_minmax
+                           \Z:=condition_minmax
+                           \Rx:=condition_minmax
+                           \Ry:=condition_minmax
+                           \Rz:=condition_minmax
+                           \LpFilter:=egm_data.lp_filter
+                           \MaxSpeedDeviation:=egm_data.max_speed_deviation;
+
+            DEFAULT:
+                ! Do nothing.
+        ENDTEST
+    ENDPROC
+    
+    PROC handleEGMAction()
+        ! Prepare EGM based on the current EGM run action (e.g. Joint or Pose).
+        IF current_egm_action <> EGM_ACTION_STOP THEN
+            ! Try to do sync 0 (only tried if there are several TCP robots in the system).
+            IF use_sync THEN
+                CallByVar "doSync", 0;
+            ENDIF
+            
+            MoveAbsJ CJointT(), v10, fine, tool0;
+            PrepareEGM;
+            
+            ! Try to do sync 1 (only tried if there are several TCP robots in the system).
+            IF use_sync THEN
+                CallByVar "doSync", 1;
+            ENDIF
+        ENDIF
+         
+        ! Perform the chosen EGM action (e.g. Stop, Joint or Pose).  
+        TEST current_egm_action
+            CASE EGM_ACTION_STOP:
+                IF EGMGetState(egm_id) <> EGM_STATE_DISCONNECTED THEN
+                    TPWrite "Action: Stop EGM motion";
+                    EGMStop egm_id, EGM_STOP_HOLD;
+                ENDIF
+
+            CASE EGM_ACTION_RUN_JOINT:
+                TPWrite "Action: Start EGM Joint mode";
+                IF using_irb14000  THEN
+                    EGMRunJoint egm_id, 
+                                EGM_STOP_HOLD
+                                \J1 \J2 \J3 \J4 \J5 \J6 \J7
+                                \CondTime:=egm_data.cond_time
+                                \RampInTime:=egm_data.ramp_in_time
+                                \PosCorrGain:=egm_data.pos_corr_gain;
+                ELSE
+                    EGMRunJoint egm_id,
+                                EGM_STOP_HOLD
+                                \J1 \J2 \J3 \J4 \J5 \J6
+                                \CondTime:=egm_data.cond_time
+                                \RampInTime:=egm_data.ramp_in_time
+                                \PosCorrGain:=egm_data.pos_corr_gain;
+                ENDIF
+                
+            CASE EGM_ACTION_RUN_POSE:
+                IF using_irb14000 THEN
+                    TPWrite "Action: Start EGM Pose mode is not available for IRB14000, i.e. YuMi";
+                ELSE
+                    TPWrite "Action: Start EGM Pose mode";
+                    EGMRunPose egm_id,
+                               EGM_STOP_HOLD,
+                               \X \Y \Z \Rx \Ry \Rz
+                               \CondTime:=egm_data.cond_time
+                               \RampInTime:=egm_data.ramp_in_time
+                               \PosCorrGain:=egm_data.pos_corr_gain;
+                ENDIF
+            
+            DEFAULT:
+                ! Do nothing.
+        ENDTEST
+        
+        TPWrite "    EGM action finished";
+        
+        EGMReset egm_id;
+        current_action := ACTION_IDLE;
+    
+    ERROR
+        TRYNEXT;    
+    ENDPROC
+    
+    !-------------------------------------------------
+    ! Interupt handlers
+    !-------------------------------------------------
+    LOCAL TRAP stopEGMHandler
+        IF current_action = ACTION_EGM THEN
+            current_egm_action := EGM_ACTION_STOP;
+            
+            RAISE NEW_ACTION;
+        ENDIF
+        
+        ERROR (NEW_ACTION)
+            RAISE NEW_ACTION;
+    ENDTRAP
+    
+    LOCAL TRAP startEGMJointHandler
+        IF current_action = ACTION_IDLE THEN
+            current_action := ACTION_EGM;
+            current_egm_action := EGM_ACTION_RUN_JOINT;
+            
+            RAISE NEW_ACTION;
+        ENDIF
+        
+        ERROR (NEW_ACTION)
+            RAISE NEW_ACTION;
+    ENDTRAP
+
+    LOCAL TRAP startEGMPoseHandler
+        IF current_action = ACTION_IDLE THEN
+            current_action := ACTION_EGM;
+            current_egm_action := EGM_ACTION_RUN_POSE;
+            
+            RAISE NEW_ACTION;
+        ENDIF
+        
+        ERROR (NEW_ACTION)
+            RAISE NEW_ACTION;
+    ENDTRAP
+
+
+
+
+    !==================================================================================================
+    ! Auxiliary components
+    !==================================================================================================    
+    !-------------------------------------------------
+    ! Auxiliary procedures
+    !-------------------------------------------------
+    LOCAL PROC parseEGMData()
+        IF egm_data.tool_name = "<your defined tool data name>" THEN
+            !egm_current_tool := <your defined tool data>;
+        ELSE
+            egm_current_tool := tool0;
+        ENDIF
+        
+        IF egm_data.wobj_name = "<your defined work object data name>" THEN
+            !egm_current_wobj := <your defined work object data>;
+        ELSE
+            egm_current_wobj := wobj0;
+        ENDIF
+        
+        condition_minmax.max := Abs(egm_data.cond_min_max);
+        condition_minmax.min := -Abs(egm_data.cond_min_max);
+    ENDPROC
+        
+ENDMODULE

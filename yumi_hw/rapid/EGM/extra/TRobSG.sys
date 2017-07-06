@@ -1,0 +1,220 @@
+MODULE TRobSG(SYSMODULE)
+!======================================================================================================
+! Software License Agreement (BSD License) 
+!
+! Copyright (c) 2015, ABB
+! All rights reserved.
+!
+! Redistribution and use in source and binary forms, with
+! or without modification, are permitted provided that 
+! the following conditions are met:
+!
+!    * Redistributions of source code must retain the 
+!      above copyright notice, this list of conditions 
+!      and the following disclaimer.
+!    * Redistributions in binary form must reproduce the 
+!      above copyright notice, this list of conditions 
+!      and the following disclaimer in the documentation 
+!      and/or other materials provided with the 
+!      distribution.
+!    * Neither the name of ABB nor the names of its 
+!      contributors may be used to endorse or promote 
+!      products derived from this software without 
+!      specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+! SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+! CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!======================================================================================================
+
+
+
+
+    !==================================================================================================
+    ! Data components
+    !==================================================================================================
+    !-------------------------------------------------
+    ! Records
+    !-------------------------------------------------   
+    LOCAL RECORD SG_RECORD
+        num max_speed;       ! Allowed maximum speed [mm/s] for the gripper.
+        num hold_force;      ! Expected force [N] used to hold the object.
+        num physical_limit;  ! The physical limit [mm] if the gripper work in a smaller travel range.
+        
+        num target_position; ! The targeted position that the gripper should move to; 
+    ENDRECORD
+    
+    LOCAL RECORD LIMITS_RECORD
+        num min;
+        num max;
+    ENDRECORD
+    
+    !-------------------------------------------------
+    ! Variables and constants
+    !-------------------------------------------------
+    ! Limits and defualt values that the SmartGripper should adhere to:
+    !   * Speed [mm/s].
+    !   * Force [N].
+    !   * Physical travel range [mm].
+    LOCAL CONST LIMITS_RECORD SPEED_LIMITS    := [0, 25]; 
+    LOCAL CONST LIMITS_RECORD FORCE_LIMITS    := [0, 20];
+    LOCAL CONST LIMITS_RECORD PHYSICAL_LIMITS := [0, 25];
+    
+    LOCAL CONST num DEFAULT_SPEED          := SPEED_LIMITS.max;
+    LOCAL CONST num DEFAULT_FORCE          := FORCE_LIMITS.max/2;
+    LOCAL CONST num DEFAULT_PHYSICAL_LIMIT := PHYSICAL_LIMITS.max;
+    
+    ! Container for data used in the SmartGripper instructions.
+    LOCAL VAR SG_RECORD sg_data;
+    
+    ! Components for externally triggering SmartGripper instructions.
+    LOCAL CONST num NONE       := 0;
+    LOCAL CONST num INITIALIZE := 1;
+    LOCAL CONST num CALIBRATE  := 2;
+    LOCAL CONST num MOVE       := 3;
+    LOCAL CONST num GRIP       := 4;
+    LOCAL VAR num sg_current_command;
+    LOCAL VAR intnum sg_interupt;
+
+
+
+
+    !==================================================================================================
+    ! Primary components
+    !==================================================================================================
+    PROC initializeSGModule0()
+        ! Set some default values for the SmartGripper instructions.
+        sg_data.max_speed       := DEFAULT_SPEED;
+        sg_data.hold_force      := DEFAULT_FORCE;
+        sg_data.physical_limit  := DEFAULT_PHYSICAL_LIMIT;
+        sg_data.target_position := PHYSICAL_LIMITS.min;
+        
+        sg_current_command := NONE;
+         
+        ! Setup a interrupt signal
+        IDelete sg_interupt;
+        CONNECT sg_interupt WITH runSGCommandHandler;
+        ISignalDI RUN_SG_COMMAND, HIGH, sg_interupt;
+    ENDPROC
+    
+    LOCAL PROC initializeSG()
+        Hand_Initialize \maxSpd    := sg_data.max_speed
+                        \holdForce := sg_data.hold_force
+                        \phyLimit  := sg_data.physical_limit;
+    ENDPROC
+    
+    LOCAL PROC calibrateSG()
+        Hand_DoCalibrate \Jog;
+    ENDPROC
+    
+    LOCAL PROC moveSG()
+        IF Hand_IsCalibrated() THEN
+            Hand_MoveTo sg_data.target_position \NoWait;
+        ELSE
+            TPWrite "SmartGripper: Gripper is not calibrated";
+        ENDIF
+    ENDPROC
+    
+    LOCAL PROC gripSG()
+        IF Hand_IsCalibrated() THEN
+            IF sg_data.target_position > Hand_GetActualPos() THEN
+                Hand_GripOutward \holdForce := sg_data.hold_force
+                                 \NoWait;
+            ELSE IF sg_data.target_position < Hand_GetActualPos()
+                Hand_GripInward \holdForce := sg_data.hold_force
+                                \NoWait;              
+            ENDIF
+        ELSE
+            TPWrite "SmartGripper: Gripper is not calibrated";
+        ENDIF
+    ENDPROC
+    
+    !-------------------------------------------------
+    ! Interupt handlers
+    !-------------------------------------------------
+    LOCAL TRAP runSGCommandHandler
+        checkData;
+        runCommand;
+        sg_current_command := NONE;
+    ENDTRAP
+    
+    
+    
+    
+    !==================================================================================================
+    ! Auxiliary components
+    !==================================================================================================    
+    !-------------------------------------------------
+    ! Auxiliary procedures
+    !-------------------------------------------------
+    LOCAL PROC runCommand()
+        TEST sg_current_command
+            CASE INITIALIZE:
+                IF RobOS() THEN
+                    initializeSG;
+                ELSE
+                    TPWrite "SmartGripper: Initialize";
+                ENDIF
+            
+            CASE CALIBRATE:
+                IF RobOS() THEN
+                    calibrateSG;
+                ELSE
+                    TPWrite "SmartGripper: Calibrate";
+                ENDIF
+                
+            CASE MOVE:
+                IF RobOS() THEN
+                    moveSG;
+                ELSE
+                    TPWrite "SmartGripper: Move to " \Num:=sg_data.target_position;
+                ENDIF
+                
+            CASE GRIP:
+                IF RobOS() THEN
+                    gripSG;
+                ELSE
+                    TPWrite "SmartGripper: Grip";
+                ENDIF
+                
+            DEFAULT:
+                ! Do nothing.
+                TPWrite "SmartGripper: Unknown command";
+        ENDTEST
+    ENDPROC
+    
+    LOCAL PROC checkData()
+        ! Check the maximum speed, hold force and physical limits.
+        setWithinLimits sg_data.max_speed,
+                        SPEED_LIMITS,
+                        DEFAULT_SPEED;
+        setWithinLimits sg_data.hold_force,
+                        FORCE_LIMITS,
+                        DEFAULT_FORCE;
+        setWithinLimits sg_data.physical_limit,
+                        PHYSICAL_LIMITS,
+                        DEFAULT_PHYSICAL_LIMIT;
+        
+        ! Check that the targeted position is within the physical limits.
+        IF sg_data.target_position < PHYSICAL_LIMITS.min THEN
+            sg_data.target_position := PHYSICAL_LIMITS.min;
+        ELSEIF sg_data.target_position > PHYSICAL_LIMITS.max THEN
+            sg_data.target_position := PHYSICAL_LIMITS.max;
+        ENDIF
+     ENDPROC
+    
+    LOCAL PROC setWithinLimits(VAR num value, LIMITS_RECORD limits, num default_value)  
+        IF value < limits.Min OR
+           value > limits.Max THEN
+            value := default_value;
+        ENDIF
+    ENDPROC
+     
+ENDMODULE
