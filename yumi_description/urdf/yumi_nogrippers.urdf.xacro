@@ -13,7 +13,7 @@
   <link name="world"/>
 
   <!--yumi-->
-  <xacro:yumi name="yumi" hardware_interface="$(arg prefix)" parent="world">
+  <xacro:yumi name="yumi" hardware_interface="$(arg arm_hwi)" parent="world">
     <origin xyz="0 0 0.1" rpy="0 0 0" />
   </xacro:yumi>
 

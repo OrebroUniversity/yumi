@@ -11,8 +11,9 @@
   <!-- some constants -->
  <!-- <xacro:property name="safety_controller_k_pos" value="100" />
   <xacro:property name="safety_controller_k_vel" value="2" /> -->
-  <xacro:property name="joint_damping" value="0.5" />
-  <xacro:property name="max_effort" value="300"/>
+  <xacro:property name="gripper_joint_damping" value="1.0" />
+  <xacro:property name="max_gripper_effort" value="50"/>
+<xacro:property name="max_gripper_velocity" value="2"/>
  
   <xacro:macro name="yumi_servo_gripper" params="parent name hardware_interface *origin">
 
@@ -55,12 +56,12 @@
       <origin xyz="0 -0.0065 0.0837" rpy="0 0 0"/>
       <axis xyz="-1 0 0"/>
       <limit lower="0" upper="0.025"
-             effort="${max_effort}" velocity="0.02" />
+             effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
       <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
            soft_upper_limit="${168 * M_PI / 180}"
            k_position="${safety_controller_k_pos}"
            k_velocity="${safety_controller_k_vel}"/> -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="${gripper_joint_damping}"/>
     </joint>
 
     <link name="${name}_finger_r">
@@ -86,6 +87,17 @@
         <material name="Grey"/>
       </collision>
     </link>
+  <gazebo reference="${name}_finger_r">
+    <material>Gazebo/Blue</material>
+    <turnGravityOff>false</turnGravityOff>
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>30000.0</mu1>
+    <mu2>30000.0</mu2>
+    <selfCollide>false</selfCollide>
+    <maxContacts>10</maxContacts>
+    <minDepth>0.001</minDepth>
+  </gazebo>
 
    <!-- joint between base and left finger -->
     <joint name="${name}_joint_m" type="prismatic">
@@ -94,12 +106,12 @@
       <origin xyz="0 0.0065 0.0837" rpy="0 0 ${PI}"/>
       <axis xyz="-1 0 0"/>
       <limit lower="0" upper="0.025"
-             effort="${max_effort}" velocity="0.02" />
+             effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
       <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
            soft_upper_limit="${168 * M_PI / 180}"
            k_position="${safety_controller_k_pos}"
            k_velocity="${safety_controller_k_vel}"/> -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="${gripper_joint_damping}"/>
       <mimic joint="${name}_joint"/>
     </joint>
 
@@ -126,7 +138,17 @@
         <material name="Grey"/>
       </collision>
     </link>
-
+  <gazebo reference="${name}_finger_l">
+    <material>Gazebo/Blue</material>
+    <turnGravityOff>false</turnGravityOff>
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>30000.0</mu1>
+    <mu2>30000.0</mu2>
+    <selfCollide>false</selfCollide>
+    <maxContacts>10</maxContacts>
+    <minDepth>0.001</minDepth>
+  </gazebo>
      <!--Extensions -->
     <xacro:yumi_servo_gripper_gazebo name="${name}" />
     <xacro:yumi_servo_gripper_transmission name="${name}" hardware_interface="${hardware_interface}"/>
