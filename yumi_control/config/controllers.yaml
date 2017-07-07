@@ -1,0 +1,57 @@
+# Publish all joint states -----------------------------------
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 500
+
+# Joint Trajectory Position Controller ----------------------------------------
+joint_trajectory_pos_controller:
+  type: "position_controllers/JointTrajectoryController"
+  joints:
+    - yumi_joint_1_l
+    - yumi_joint_2_l
+    - yumi_joint_7_l
+    - yumi_joint_3_l
+    - yumi_joint_4_l
+    - yumi_joint_5_l
+    - yumi_joint_6_l
+    - yumi_joint_1_r
+    - yumi_joint_2_r
+    - yumi_joint_7_r
+    - yumi_joint_3_r
+    - yumi_joint_4_r
+    - yumi_joint_5_r
+    - yumi_joint_6_r
+
+# Joint Trajectory Velocity Controller ----------------------------------------
+joint_trajectory_vel_controller:
+  type: "velocity_controllers/JointTrajectoryController"
+  joints:
+    - yumi_joint_1_l
+    - yumi_joint_2_l
+    - yumi_joint_7_l
+    - yumi_joint_3_l
+    - yumi_joint_4_l
+    - yumi_joint_5_l
+    - yumi_joint_6_l
+    - yumi_joint_1_r
+    - yumi_joint_2_r
+    - yumi_joint_7_r
+    - yumi_joint_3_r
+    - yumi_joint_4_r
+    - yumi_joint_5_r
+    - yumi_joint_6_r
+  gains:
+    yumi_joint_1_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_2_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_7_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_3_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_4_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_5_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_6_l: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_1_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_2_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_7_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_3_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_4_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_5_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}
+    yumi_joint_6_r: {p: 1.5,  d: 0, i: 0.002, i_clamp: 0.1}

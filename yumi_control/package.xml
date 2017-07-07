@@ -4,11 +4,11 @@
   <version>0.0.4</version>
   <description>The yumi_control package</description>
 
-  <maintainer email="yoshua.nava@kth.se">Yoshua Nava</maintainer>
+  <maintainer email="robert.krug@oru.se">Robert Krug</maintainer>
 
   <license>BSD</license>
 
-  <author email="yoshua.nava@kth.se">Yoshua Nava</author>
+  <author email="robert.krug@oru.se">Robert Krug</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>gazebo_ros</build_depend>

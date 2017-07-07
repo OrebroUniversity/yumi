@@ -34,19 +34,16 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 	int mode;
 
     public:
-	bool getJointStates(float (&jnts)[N_YUMI_JOINTS]) 
-	{
+	bool getJointStates(float (&jnts)[N_YUMI_JOINTS]) {
 	    boost::mutex::scoped_lock lock(data_buffer_mutex);
-	    while(!b_joint_state_received) 
-		{
-			joint_state_received.wait(lock);
+	    while(!b_joint_state_received) {
+		joint_state_received.wait(lock);
 	    }
 	    b_joint_state_received = false;
 	    memcpy(&jnts,&joint_positions,sizeof(jnts));
 	}
 
-	bool setJointCommands(float (&jnts)[N_YUMI_JOINTS], int mode_) 
-	{
+	bool setJointCommands(float (&jnts)[N_YUMI_JOINTS], int mode_) {
 	    boost::mutex::scoped_lock lock(data_buffer_mutex);
 	    memcpy(&joint_command,&jnts,sizeof(jnts));
 	    b_joint_commands_set=true;
@@ -76,71 +73,66 @@ class YumiJointStateHandler : public industrial::message_handler::MessageHandler
 
 	    if (!joint_msg.init(in))
 	    {
-			ROS_ERROR("Failed to initialize joint message");
-			return false;
+		ROS_ERROR("Failed to initialize joint message");
+		return false;
 	    }
 
 	    //ROS_INFO("Message parsed");
 	    industrial::shared_types::shared_real joint_value_from_msg;
 
-	    for(int i=0; i<N_YUMI_JOINTS; i++) 
+	    for(int i=0; i<N_YUMI_JOINTS; i++) {
+		//std::cerr<<i<<":";
+		if (joint_msg.getJoints().getJoint(i, joint_value_from_msg))
 		{
-			//std::cerr<<i<<":";
-			if (joint_msg.getJoints().getJoint(i, joint_value_from_msg))
-			{
-				joint_positions[i] = joint_value_from_msg;
-				//std::cerr<<joint_positions[i]<<" ";
-			}
-			else
-			{
-				//std::cerr<<"X";
-				rtn = false;
-			}
+		    joint_positions[i] = joint_value_from_msg;
+		    //std::cerr<<joint_positions[i]<<" ";
+		}
+		else
+		{
+		    //std::cerr<<"X";
+		    rtn = false;
+		}
 	    }
 	    //std::cerr<<"\n";
 
 	    // Reply back to the controller if the sender requested it.
 	    if (industrial::simple_message::CommTypes::SERVICE_REQUEST == joint_msg.getMessageType())
 	    {
-			//ROS_INFO("Reply requested, sending");
-			industrial::simple_message::SimpleMessage reply;
-			joint_msg.toReply(reply, rtn ? industrial::simple_message::ReplyTypes::SUCCESS : industrial::simple_message::ReplyTypes::FAILURE);
-			this->getConnection()->sendMsg(reply);
+		//ROS_INFO("Reply requested, sending");
+		industrial::simple_message::SimpleMessage reply;
+		joint_msg.toReply(reply, rtn ? industrial::simple_message::ReplyTypes::SUCCESS : industrial::simple_message::ReplyTypes::FAILURE);
+		this->getConnection()->sendMsg(reply);
 	    }
 
 	    b_joint_state_received=true;
 	    joint_state_received.notify_all();
 
-	    while(!b_joint_commands_set) 
-		{
-			joint_commands_set.wait(lock);
+	    while(!b_joint_commands_set) {
+		joint_commands_set.wait(lock);
 	    }
 	    b_joint_commands_set = false;
 
 	    //if first call back, then mirror state to command
-	    if(first_iteration) 
-		{
-			ROS_INFO("Mirroring to command");
-			memcpy(&joint_command,&joint_positions,sizeof(joint_command));
-			first_iteration = false;	
+	    if(first_iteration) {
+		ROS_INFO("Mirroring to command");
+		memcpy(&joint_command,&joint_positions,sizeof(joint_command));
+		first_iteration = false;	
 	    }
 	    
 	    //TODO: format trajectory request message
 	    industrial::shared_types::shared_real joint_value_to_msg;
 
-	    for(int i=0; i<N_YUMI_JOINTS; i++) 
+	    for(int i=0; i<N_YUMI_JOINTS; i++) {
+		joint_value_to_msg = joint_command[i];
+//		std::cerr<<joint_command[i]<<" ";
+		if (!joint_msg.getJoints().setJoint(i, joint_value_to_msg))
 		{
-			joint_value_to_msg = joint_command[i];
-	//		std::cerr<<joint_command[i]<<" ";
-			if (!joint_msg.getJoints().setJoint(i, joint_value_to_msg))
-			{
-				rtn = false;
-			}
+		    rtn = false;
+		}
 	    }
-		
 	    if (!joint_msg.getJoints().setJoint(N_YUMI_JOINTS, mode))
 	    {
-			rtn = false;
+		rtn = false;
 	    }
 //	    std::cerr<<"\n";
 
@@ -175,52 +167,43 @@ class YumiRapidInterface {
 
 	virtual void RapidCommThreadCallback()
 	{
-	    while(!stopComm_) 
-		{
-			manager_.spinOnce();
+	    while(!stopComm_) {
+		manager_.spinOnce();
 	    }
 	    return;
 	}
 
     public:
-	YumiRapidInterface() 
-	{ 
+	YumiRapidInterface() { 
 	    this->connection_ = NULL;
 	    stopComm_ = true;
 	}
 
-	~YumiRapidInterface() 
-	{ 
+	~YumiRapidInterface() { 
 	    stopThreads();
 	}
 	
-	void stopThreads() 
-	{
+	void stopThreads() {
 	    stopComm_ = true;
 	    RapidCommThread_.join();
 	}
 
-	void startThreads() 
-	{
-	    if(!stopComm_) 
-		{
-			boost::thread(boost::bind(&YumiRapidInterface::RapidCommThreadCallback,this ));
+	void startThreads() {
+	    if(!stopComm_) {
+		boost::thread(boost::bind(&YumiRapidInterface::RapidCommThreadCallback,this ));
 	    }
 	}
 
-	void getCurrentJointStates(float (&joints)[N_YUMI_JOINTS]) 
-	{
+	void getCurrentJointStates(float (&joints)[N_YUMI_JOINTS]) {
 	    js_handler.getJointStates(joints);	    
 	}
 
-	void setJointTargets(float (&joints)[N_YUMI_JOINTS], int mode) 
-	{
+	void setJointTargets(float (&joints)[N_YUMI_JOINTS], int mode) {
 	    js_handler.setJointCommands(joints, mode);
 	}
 
 
-	bool init(std::string ip = "", int port = industrial::simple_socket::StandardSocketPorts::STATE) 
-	{
+	bool init(std::string ip = "", int port = industrial::simple_socket::StandardSocketPorts::STATE) {
 	    //initialize connection 
 	    char* ip_addr = strdup(ip.c_str());  // connection.init() requires "char*", not "const char*"
 	    ROS_INFO("Robot state connecting to IP address: '%s:%d'", ip_addr, port);
@@ -250,120 +233,106 @@ class YumiHWRapid : public YumiHW
 {
 
 public:
-	YumiHWRapid() : YumiHW() 
-	{
-		isInited = false;
-		isSetup = false;
-		firstRunInPositionMode = true;
-		sampling_rate_ = 0.1;
-	}
+  YumiHWRapid() : YumiHW() {
+      isInited = false;
+      isSetup = false;
+      firstRunInPositionMode = true;
+      sampling_rate_ = 0.1;
+  }
   
-	~YumiHWRapid() { 
-		robot_interface.stopThreads();
-	}
+  ~YumiHWRapid() { 
+      robot_interface.stopThreads();
+  }
 
-	float getSampleTime()
-	{
-		return sampling_rate_;
-	};
+  float getSampleTime(){return sampling_rate_;};
 	
-	void setup(std::string ip_ = "", int port_ = industrial::simple_socket::StandardSocketPorts::STATE) 
-	{
-		ip = ip_;
-		port = port_;
-		isSetup = true;
-	}
+  void setup(std::string ip_ = "", int port_ = industrial::simple_socket::StandardSocketPorts::STATE) {
+      ip = ip_;
+      port = port_;
+      isSetup = true;
+  }
 
   // Init, read, and write, with FRI hooks
-	bool init()
-	{
-		if (isInited)
-		{
-			return false;
-		}
+  bool init()
+  {
+    if (isInited) return false;
+    if(!isSetup) {
+	ROS_ERROR("IP and port of controller are not set up!");
+	return false;
+    }
 
-		if(!isSetup) 
-		{
-			ROS_ERROR("IP and port of controller are not set up!");
-			return false;
-		}
+    robot_interface.init(ip,port);
+    robot_interface.startThreads();
+    isInited = true;
 
-		robot_interface.init(ip,port);
-		robot_interface.startThreads();
-		isInited = true;
-
-		return true;
-	}	
-
+    return true;
+  }
 
   ///copies the last received joint state out to the controller manager
-	void read(ros::Time time, ros::Duration period)
-	{
-		if(!isInited) 
-		{
-			return;
-		}
+  void read(ros::Time time, ros::Duration period)
+  {
+    if(!isInited) return;  
 
-		//ROS_INFO("reading joints");
-		data_buffer_mutex.lock();
-		robot_interface.getCurrentJointStates(readJntPosition);
+    //ROS_INFO("reading joints");
+    data_buffer_mutex.lock();
+    robot_interface.getCurrentJointStates(readJntPosition);
 
-		for (int j = 0; j < n_joints_; j++)
-		{
-			joint_position_prev_[j] = joint_position_[j];
-			joint_position_[j] = readJntPosition[j];
-			//joint_effort_[j] = readJntEffort[j]; //TODO: read effort 
-			joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j]-joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.04); //exponential smoothing
-			if(firstRunInPositionMode) {
-			joint_position_command_[j] = readJntPosition[j];
-			}
-		}
-		firstRunInPositionMode = false;
-		data_buffer_mutex.unlock();
-		//ROS_INFO("read joints");
+    for (int j = 0; j < n_joints_; j++)
+    {
+      joint_position_prev_[j] = joint_position_[j];
+      joint_position_[j] = readJntPosition[j];
+      //joint_effort_[j] = readJntEffort[j]; //TODO: read effort 
+      joint_velocity_[j] = filters::exponentialSmoothing((joint_position_[j]-joint_position_prev_[j])/period.toSec(), joint_velocity_[j], 0.04); //exponential smoothing
+      if(firstRunInPositionMode) {
+	  joint_position_command_[j] = readJntPosition[j];
+      }
+    }
+    firstRunInPositionMode = false;
+    data_buffer_mutex.unlock();
+    //ROS_INFO("read joints");
 
-    	return;
-	}
+    return;
+  }
 
   ///caches the most recent joint commands into the robot interface
-  	void write(ros::Time time, ros::Duration period)
+  void write(ros::Time time, ros::Duration period)
+  {
+    if(!isInited) return;  
+    enforceLimits(period);
+
+    //ROS_INFO("writing joints");
+    data_buffer_mutex.lock();
+    switch (getControlStrategy())
+    {
+      case JOINT_POSITION:
+        for (int j = 0; j < n_joints_; j++)
+        {
+          newJntPosition[j] = joint_position_command_[j];
+        }
+        break;
+      
+      case JOINT_VELOCITY:
+	//std::cerr<<"ASS = ";
+	for (int j = 0; j < n_joints_; j++)
 	{
-		if(!isInited) return;  
-		enforceLimits(period);
-
-		//ROS_INFO("writing joints");
-		data_buffer_mutex.lock();
-		switch (getControlStrategy())
-		{
-			case JOINT_POSITION:
-				for (int j = 0; j < n_joints_; j++)
-				{
-					newJntPosition[j] = joint_position_command_[j];
-				}	
-				break;
-		
-			case JOINT_VELOCITY:
-				//std::cerr<<"ASS = ";
-				for (int j = 0; j < n_joints_; j++)
-				{
-					//std::cerr<<joint_velocity_command_[j]<<"*"<<period.toSec()<<" + "<<joint_position_[j]<<" ::: ";  
-					newJntPosition[j] = joint_velocity_command_[j]; //*period.toSec() + joint_position_[j]; 
-				}
-				//std::cerr<<std::endl;
-				firstRunInPositionMode = true;
-				break;
-				//case JOINT_EFFORT:
-				//break;
-			default: 
-				break;
-		}
-
-		robot_interface.setJointTargets(newJntPosition, getControlStrategy());
-		data_buffer_mutex.unlock();
-		//ROS_INFO("wrote joints");
-
-		return;
+	  //std::cerr<<joint_velocity_command_[j]<<"*"<<period.toSec()<<" + "<<joint_position_[j]<<" ::: ";  
+	  newJntPosition[j] = joint_velocity_command_[j]; //*period.toSec() + joint_position_[j]; 
 	}
+	//std::cerr<<std::endl;
+	firstRunInPositionMode = true;
+	break;
+      //case JOINT_EFFORT:
+      //break;
+      default: 
+	break;
+    }
+
+    robot_interface.setJointTargets(newJntPosition, getControlStrategy());
+    data_buffer_mutex.unlock();
+    //ROS_INFO("wrote joints");
+
+    return;
+  }
 
 private:
 

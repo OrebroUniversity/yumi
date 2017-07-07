@@ -12,11 +12,11 @@
      for interfacing with ABB industrial robot controllers.
    </p>
   </description>
-  <author email="yoshua.nava@kth.se">Yoshua Nava</author>
-  <maintainer email="yoshua.nava@kth.se">Yoshua Nava</maintainer>
+  <author email="todor.stoyanov@oru.se">Todor Stoyanov</author>
+  <maintainer email="todor.stoyanov@oru.se">Todor Stoyanov</maintainer>
   <license>BSD</license>
 
-  <url type="repository">https://github.com/kth-ros-pkg/yumi</url>
+  <url type="repository">https://github.com/rktg/yumi</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
