@@ -1,4 +1,4 @@
-# ROS package for the ABB YuMi (IRB14000) robot
+# ROS packages for the ABB YuMi (IRB14000) robot
 
 
 
