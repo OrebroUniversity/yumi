@@ -10,23 +10,8 @@ joint_state_controller:
     - name: gripper_l_joint
       position: 0.0
 
-      
-
-# Effort gripper position controllers ---------------------------------------
-gripper_effort_pos_controller_r:
-  type: effort_controllers/JointPositionController
-  joint: gripper_r_joint
-  pid: {p: 0.1, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
-
-gripper_effort_pos_controller_l:
-  type: effort_controllers/JointPositionController
-  joint: gripper_l_joint
-  pid: {p: 0.1, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
 
 
-       
-                   
-                   
 joint_vel_controller_1_l:
   type: "velocity_controllers/JointVelocityController"
   joint: yumi_joint_1_l
@@ -94,3 +79,5 @@ joint_group_vel_controller_r:
     - yumi_joint_4_r
     - yumi_joint_5_r
     - yumi_joint_6_r
+
+    

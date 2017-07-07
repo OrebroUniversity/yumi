@@ -5,6 +5,7 @@
 	
 	<!-- Load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find yumi_control)/config/traj_controllers.yaml" command="load" ns="/yumi"/>
+	<rosparam file="$(find yumi_control)/config/gripper_controllers.yaml" command="load" ns="/yumi"/>
 	<arg name="arm_controllers" default="joint_state_controller 
 									 joint_traj_vel_controller_l
 									 joint_traj_vel_controller_r"/>
@@ -19,7 +20,21 @@
 
 	<!-- URDF / SRDF parameters -->
     <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
-	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
+    <arg name="yumi_initial_pos" default="-J yumi_joint_1_l -1.41 
+    									  -J yumi_joint_2_l -2.1
+    									  -J yumi_joint_3_l 0.30
+    									  -J yumi_joint_4_l 0.0
+    									  -J yumi_joint_5_l 0.0
+    									  -J yumi_joint_6_l 0.0
+    									  -J yumi_joint_7_l 0.71
+    									  -J yumi_joint_1_r 1.41 
+    									  -J yumi_joint_2_r -2.1
+    									  -J yumi_joint_3_r 0.30
+    									  -J yumi_joint_4_r 0.0
+    									  -J yumi_joint_5_r 0.0
+    									  -J yumi_joint_6_r 0.0
+    									  -J yumi_joint_7_r -0.71"/>
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi $(arg yumi_initial_pos) -param robot_description -unpause"  respawn="false" output="screen" />
 
 	<!-- Configuration for debug  -->
 	<arg name="debug" default="false"/>
@@ -28,7 +43,7 @@
 
 	<!-- Call Gazebo -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-	    <arg name="paused" value="false"/>
+	    <arg name="paused" value="true"/>
 	    <arg name="use_sim_time" value="true"/>
 	    <arg name="gui" value="false"/>
 	    <arg name="headless" value="false"/>

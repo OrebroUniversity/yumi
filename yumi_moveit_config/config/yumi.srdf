@@ -12,7 +12,7 @@
 
 
     <group name="left_arm">
-        <joint name="world_joint" />
+        <!-- <joint name="world_joint" /> -->
         <joint name="yumi_joint_1_l" />
         <joint name="yumi_joint_2_l" />
         <joint name="yumi_joint_7_l" />
@@ -24,7 +24,7 @@
     </group>
     
     <group name="right_arm">
-        <joint name="world_joint" />
+        <!-- <joint name="world_joint" /> -->
         <joint name="yumi_joint_1_r" />
         <joint name="yumi_joint_2_r" />
         <joint name="yumi_joint_7_r" />
@@ -37,8 +37,11 @@
 
 
     <group name="both_arms">
-    	<group name="left_arm" />
-		<group name="right_arm" />
+        <joint name="yumi_joint_1_l" />
+        <joint name="world_joint" />
+        <joint name="yumi_joint_1_r" />
+        <joint name="yumi_joint_2_r" />
+
     </group>
 
     
