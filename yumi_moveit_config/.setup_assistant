@@ -5,4 +5,6 @@ moveit_setup_assistant_config:
   SRDF:
     relative_path: config/yumi.srdf
   CONFIG:
-    generated_timestamp: 1458234540
+    author_name: Yoshua Nava
+    author_email: yoshua@kth.se
+    generated_timestamp: 1499472100
