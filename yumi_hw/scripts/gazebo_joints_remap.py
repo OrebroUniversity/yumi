@@ -44,7 +44,7 @@ def callback(data):
 
 def listener():
     global right_pub, left_pub
-    rospy.init_node('listener', anonymous=True)
+    rospy.init_node('gazebo_joints_remap', anonymous=False)
     rospy.Subscriber("/yumi/joint_states", JointState, callback)
     left_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)
     right_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)

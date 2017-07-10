@@ -7,4 +7,4 @@ moveit_setup_assistant_config:
   CONFIG:
     author_name: Yoshua Nava
     author_email: yoshua@kth.se
-    generated_timestamp: 1499472100
+    generated_timestamp: 1499678173
