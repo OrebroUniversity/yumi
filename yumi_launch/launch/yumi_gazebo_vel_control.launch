@@ -45,7 +45,7 @@
     									  -J yumi_joint_5_r 0.0
     									  -J yumi_joint_6_r 0.0
     									  -J yumi_joint_7_r -0.71"/>
-	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi $(arg yumi_initial_pos) -param robot_description -unpause"  respawn="false" output="screen" />
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi $(arg yumi_initial_pos) -param robot_description"  respawn="false" output="screen" />
 
 	<!-- Configuration for debug  -->
 	<arg name="debug" default="false"/>
