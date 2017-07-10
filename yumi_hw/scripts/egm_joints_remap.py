@@ -23,7 +23,8 @@ def callback(data):
     print "Right arm joints: ", [data.name[i] for i in right_arm_indices]'''
     if(len(data.name) > 2):
         left_arm_msg = JointState()
-        left_arm_msg.header.stamp = rospy.Time.now()
+        # left_arm_msg.header.stamp = rospy.Time.now()
+        left_arm_msg.header = data.header
         left_arm_msg.header.frame_id = '/world'
         left_arm_msg.name = [data.name[i] for i in left_arm_indices]
         left_arm_msg.position = [data.position[i] for i in left_arm_indices]
@@ -32,7 +33,8 @@ def callback(data):
         left_pub.publish(left_arm_msg)
 
         right_arm_msg = JointState()
-        right_arm_msg.header.stamp = rospy.Time.now()
+        # right_arm_msg.header.stamp = rospy.Time.now()
+        right_arm_msg.header = data.header
         right_arm_msg.header.frame_id = '/world'
         right_arm_msg.name = [data.name[i] for i in right_arm_indices]
         right_arm_msg.position = [data.position[i] for i in right_arm_indices]
@@ -45,7 +47,7 @@ def callback(data):
 
 def listener():
     global right_pub, left_pub
-    rospy.init_node('listener', anonymous=True)
+    rospy.init_node('egm_joints_remap', anonymous=False)
     rospy.Subscriber("/yumi/joint_states", JointState, callback)
     left_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)
     right_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)
