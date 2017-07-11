@@ -56,9 +56,15 @@
         <param name="ip" value="$(arg ip)"/>
     </node>
 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <node name="yumi_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+        <rosparam param="source_list">["/yumi/joint_states", "/yumi/gripper_states"]</rosparam>
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
+
+    <node name="yumi_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <remap from="/joint_states" to="/yumi/joint_states" />
+    </node>
+
     <node name="joint_remapper" pkg="yumi_hw" type="egm_joints_remap.py" />
 
     <!-- Show robot in Rviz   -->

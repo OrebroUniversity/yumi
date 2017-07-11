@@ -10,7 +10,7 @@
   <xacro:property name="joint_damping" value="0.5" />
   <xacro:property name="max_effort" value="300"/>
  
-  <xacro:macro name="yumi" params="name parent hardware_interface *origin">
+  <xacro:macro name="yumi" params="parent name hardware_interface *origin">
 
       
     <xacro:if value="${parent == 'world'}">

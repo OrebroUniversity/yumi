@@ -8,8 +8,8 @@ import threading
 
 
 grippers_indices = [14, 15]
-left_arm_indices = [0, 2, 4, 6, 8, 10, 12, 14]
-right_arm_indices = [1, 3, 5, 7, 9, 11, 13, 15]
+left_arm_indices = [0, 2, 4, 6, 8, 10, 12]
+right_arm_indices = [1, 3, 5, 7, 9, 11, 13]
 right_pub = None
 left_pub = None
 
@@ -48,6 +48,7 @@ def callback(data):
 def listener():
     global right_pub, left_pub
     rospy.init_node('egm_joints_remap', anonymous=False)
+    rospy.sleep(5)
     rospy.Subscriber("/yumi/joint_states", JointState, callback)
     left_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)
     right_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)
