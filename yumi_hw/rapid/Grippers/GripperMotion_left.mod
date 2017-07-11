@@ -31,6 +31,7 @@ MODULE GripperMotion_left
 
 PROC main()
     VAR num grasp_force;
+    VAR num prev_grasp_force;
     
     Hand_JogOutward;
     WaitTime 4;
@@ -40,20 +41,24 @@ PROC main()
     Hand_Initialize \maxSpd:=20, \holdForce:=10;
     Hand_MoveTo(10);
     grasp_force:=0;
-    
+    prev_grasp_force:=0;
     
     WHILE true DO
         ! Check for an updated setpoint. 
         grasp_force := next_grasp_target.left;
         current_gripper_left := Hand_GetActualPos();
 
-        IF(grasp_force > 0 ) THEN
-            TPWrite "Grasping with left";
-            Hand_GripInward \holdForce:=grasp_force;
-        ELSEIF (grasp_force < 0 ) THEN
-            Hand_GripOutward \holdForce:=-grasp_force;
-        ELSE
-            !do nothing
+        IF(grasp_force <> prev_grasp_force) THEN
+            IF(grasp_force > 0 ) THEN
+                ! TPWrite "Grasping with left";
+                Hand_GripInward \holdForce:=grasp_force;
+            ELSEIF (grasp_force < 0 ) THEN
+                Hand_GripOutward \holdForce:=-grasp_force;
+            ELSE
+                Hand_GripInward \holdForce:=0;
+                !do nothing
+            ENDIF
+            prev_grasp_force:=grasp_force;
         ENDIF
         
         WaitTime 0.1;
