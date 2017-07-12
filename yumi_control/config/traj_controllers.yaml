@@ -3,13 +3,6 @@ joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: 500
 
-  # Motivation for the extra joints added to the joint_state_controller: https://github.com/ros-controls/ros_controllers/issues/87
-  # extra_joints:
-  #   - name: gripper_r_joint
-  #     position: 0.0
-  #   - name: gripper_l_joint
-  #     position: 0.0
-
 
 
 

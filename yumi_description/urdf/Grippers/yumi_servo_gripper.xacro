@@ -11,7 +11,7 @@
     <!-- some constants -->
     <xacro:property name="joint_damping" value="0.5" />
     <xacro:property name="gripper_joint_damping" value="1.0" />
-    <xacro:property name="max_gripper_effort" value="50"/>
+    <xacro:property name="max_gripper_effort" value="20"/>
     <xacro:property name="max_gripper_velocity" value="2"/>
  
  

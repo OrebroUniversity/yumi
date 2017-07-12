@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-	<!-- the real hardware interface /-->
-	<node required="true" name="yumi_hw" pkg="yumi_hw" type="yumi_hw_ifce_simple" respawn="false" launch-prefix="xterm -e gdb --args"/>
-
-</launch>

@@ -12,7 +12,7 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
-// LWR sim class
+// YuMi sim class
 #include "yumi_hw/yumi_hw_gazebo.h"
 
 class YumiHWsimPlugin : public gazebo::ModelPlugin
