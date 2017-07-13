@@ -48,7 +48,12 @@ def callback(data):
 def listener():
     global right_arm_pub, left_arm_pub
     rospy.init_node('egm_joints_remap', anonymous=False)
-    rospy.sleep(5)
+    
+    startup_time = rospy.get_param('startup_time', 5)
+    rospy.loginfo("EGM joint remapper will sleep for %s seconds", str(startup_time))
+    rospy.sleep(startup_time)
+    rospy.loginfo("\x1b[6;30;42m" + "EGM joint remapper started. Now you can start planning with MoveIt!" + "\x1b[0m")
+
     rospy.Subscriber("/yumi/joint_states", JointState, callback)
     left_arm_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)
     right_arm_pub = rospy.Publisher("/joint_states", JointState, queue_size=1)

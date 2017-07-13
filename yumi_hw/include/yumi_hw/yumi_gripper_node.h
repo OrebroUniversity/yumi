@@ -224,14 +224,11 @@ class YumiGripperNode
 			left_gripper_cmd = 0;
 			right_gripper_cmd = 15;
 
-
 			gripper_interface.init(ip, port_s);
 			gripper_interface.startThreads();
 
-			std::cout << "creating subscribers" << std::endl;
 			left_gripper_cmd_sub = nh_.subscribe("/yumi/gripper_l_effort_cmd", 100, &YumiGripperNode::leftGripperCmdCallback, this);
 			right_gripper_cmd_sub = nh_.subscribe("/yumi/gripper_r_effort_cmd", 100, &YumiGripperNode::rightGripperCmdCallback, this);
-			std::cout << "subscribers should be ready" << std::endl;
 		}
 
 		virtual ~YumiGripperNode() 
