@@ -15,7 +15,7 @@
 	<node name="gripper_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg gripper_controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->
-	<arg name="yumi_base" default="world"/>
+	<arg name="yumi_base" default="automed"/>
     <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 

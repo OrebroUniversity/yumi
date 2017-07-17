@@ -12,15 +12,6 @@
  
   <xacro:macro name="yumi" params="parent name hardware_interface *origin">
 
-      
-    <xacro:if value="${parent == 'world'}">
-      <!--joint between world and body-->
-      <joint name="world_joint" type="fixed">
-        <xacro:insert_block name="origin"/>
-        <parent link="world"/>
-        <child link="${name}_body"/>
-      </joint>
-    </xacro:if>
 
     <link name="${name}_body">
       <inertial>
@@ -46,6 +37,7 @@
       </collision>
 
     </link>
+
 
    <!--///////////////////////////////////// RIGHT ARM ////////////////////////////////  -->
 
