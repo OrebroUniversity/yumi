@@ -14,8 +14,21 @@
   <!-- Fix to world just for testing -->
   <link name="world"/>
 
+
+  <!-- <xacro:property name="yumi_setup" value="$(arg yumi_base)" /> -->
+
+  <!-- <xacro:if value="${yumi_setup == 'default'}"> -->
+<!--     <joint name="world_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="world"/>
+      <child link="yumi_body"/>
+    </joint>
+    <xacro:property name="yumi_base" value="world" /> -->
+  <!-- </xacro:if> -->
+
+
   <!--yumi-->
-  <xacro:yumi name="yumi" hardware_interface="hardware_interface/$(arg arms_interface)" parent="world">
+  <xacro:yumi name="yumi" hardware_interface="hardware_interface/$(arg arms_interface)" parent="world" >
     <origin xyz="0 0 0.1" rpy="0 0 0" />
   </xacro:yumi>
 
@@ -28,5 +41,42 @@
   <xacro:yumi_servo_gripper name="gripper_l" hardware_interface="hardware_interface/$(arg grippers_interface)" parent="yumi_link_7_l">
     <origin xyz="0 0 0.007" rpy="0 0 ${PI}" />
   </xacro:yumi_servo_gripper>
+
+
+
+
+
+
+<!--   <xacro:if value="${yumi_base == 'automed_pedestal'}">
+    <xacro:property name="pedestal_height" value="0.28" />
+    <xacro:property name="pedestal_offset_x" value="0.32" />
+    <xacro:property name="yumi_offset_x" value="0.06" />
+    <xacro:property name="yumi_height" value="0.25" />
+
+    <joint name="ridgeback_base_to_pedestal" type="fixed">
+      <origin rpy="0 0 ${PI}" xyz="${pedestal_offset_x} 0 ${pedestal_height}" />
+      <parent link="base_link" />
+      <child link="yumi_pedestal" />
+    </joint>
+
+    <link name="yumi_pedestal">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 ${PI}" />
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/accesories/KTH_AutoMed_Aluflex_pedestal.stl"/>
+        </geometry>
+        <material name="Light_Gray" />
+      </visual>
+    </link>
+
+
+    <joint name="pedestal_to_yumi" type="fixed">
+      <origin rpy="0 0 ${PI}" xyz="${yumi_offset_x} 0 ${yumi_height}" />
+      <parent link="yumi_pedestal" />
+      <child link="yumi_body" />
+    </joint>
+  </xacro:if>
+ -->
+
 
 </robot>
