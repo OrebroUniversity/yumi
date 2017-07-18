@@ -31,7 +31,7 @@
 
 
 
-  <xacro:property name="yumi_setup" value="$(arg yumi_base)" />
+  <xacro:property name="yumi_setup" value="$(arg yumi_setup)" />
 
 
   <xacro:if value="${yumi_setup == 'default'}">
@@ -47,7 +47,7 @@
 
 
 
-  <xacro:if value="${yumi_setup == 'automed'}">
+  <xacro:if value="${yumi_setup == 'AUTOMED'}">
     <xacro:property name="pedestal_height" value="0.92" />
     <xacro:property name="pedestal_xrotation_fix" value="${- PI / 2.0}" />
     <xacro:property name="pedestal_zrotation_fix" value="${PI}" />
@@ -89,7 +89,7 @@
 
 
 
-  <xacro:if value="${yumi_setup == 'fact'}">
+  <xacro:if value="${yumi_setup == 'FACT'}">
     <xacro:property name="pedestal_height" value="0.92" />
     <xacro:property name="pedestal_xrotation_fix" value="${- PI / 2.0}" />
     <xacro:property name="pedestal_zrotation_fix" value="${PI}" />

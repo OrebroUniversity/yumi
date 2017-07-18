@@ -15,12 +15,12 @@
 	<node name="gripper_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg gripper_controllers)" ns="/yumi"/>
 
 	<!--  Hardware interfaces for the joints and grippers -->
-	<arg name="yumi_base" default="automed"/>
     <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
 	<!-- URDF / SRDF parameters -->
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface) yumi_base:=$(arg yumi_base)" />
+	<arg name="yumi_setup" default="default"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface) yumi_setup:=$(arg yumi_setup)" />
     <arg name="yumi_initial_pos" default="-J yumi_joint_1_l -1.41 
     									  -J yumi_joint_2_l -2.1
     									  -J yumi_joint_3_l 0.30
