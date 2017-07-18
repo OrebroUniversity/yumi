@@ -145,6 +145,8 @@ left_arm:
     - LazyPRMstarkConfigDefault
     - SPARSkConfigDefault
     - SPARStwokConfigDefault
+  projection_evaluator: joints(yumi_joint_1_l,yumi_joint_2_l)
+  longest_valid_segment_fraction: 0.005
 right_arm:
   planner_configs:
     - SBLkConfigDefault
@@ -170,3 +172,5 @@ right_arm:
     - LazyPRMstarkConfigDefault
     - SPARSkConfigDefault
     - SPARStwokConfigDefault
+  projection_evaluator: joints(yumi_joint_1_r,yumi_joint_2_r)
+  longest_valid_segment_fraction: 0.005

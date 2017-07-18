@@ -10,10 +10,10 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="left_arm">
-        <chain base_link="world" tip_link="yumi_link_7_l" />
+        <chain base_link="yumi_body" tip_link="yumi_link_7_l" />
     </group>
     <group name="right_arm">
-        <chain base_link="world" tip_link="yumi_link_7_r" />
+        <chain base_link="yumi_body" tip_link="yumi_link_7_r" />
     </group>
     <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
     <passive_joint name="gripper_l_joint_m" />

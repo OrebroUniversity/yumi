@@ -39,13 +39,11 @@
       <robotNamespace>/yumi</robotNamespace>
     </plugin>
   </gazebo>
-  <!-- Fix to world just for testing -->
-  <link name="world"/>
-  <!--joint between world and body-->
-  <joint name="world_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.1"/>
-    <parent link="world"/>
+  <link name="yumi_base_link"/>
+  <joint name="yumi_base_link_to_body" type="fixed">
+    <parent link="yumi_base_link"/>
     <child link="yumi_body"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <link name="yumi_body">
     <inertial>
@@ -669,7 +667,7 @@
     <child link="gripper_r_finger_r"/>
     <origin rpy="0 0 0" xyz="0 -0.0065 0.0837"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="50" lower="0" upper="0.025" velocity="2"/>
+    <limit effort="20" lower="0" upper="0.025" velocity="2"/>
     <dynamics damping="1.0"/>
   </joint>
   <link name="gripper_r_finger_r">
@@ -699,7 +697,7 @@
     <child link="gripper_r_finger_l"/>
     <origin rpy="0 0 3.14159265359" xyz="0 0.0065 0.0837"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="50" lower="0" upper="0.025" velocity="2"/>
+    <limit effort="20" lower="0" upper="0.025" velocity="2"/>
     <dynamics damping="1.0"/>
     <mimic joint="gripper_r_joint"/>
   </joint>
@@ -781,7 +779,7 @@
     <child link="gripper_l_finger_r"/>
     <origin rpy="0 0 0" xyz="0 -0.0065 0.0837"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="50" lower="0" upper="0.025" velocity="2"/>
+    <limit effort="20" lower="0" upper="0.025" velocity="2"/>
     <dynamics damping="1.0"/>
   </joint>
   <link name="gripper_l_finger_r">
@@ -811,7 +809,7 @@
     <child link="gripper_l_finger_l"/>
     <origin rpy="0 0 3.14159265359" xyz="0 0.0065 0.0837"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="50" lower="0" upper="0.025" velocity="2"/>
+    <limit effort="20" lower="0" upper="0.025" velocity="2"/>
     <dynamics damping="1.0"/>
     <mimic joint="gripper_l_joint"/>
   </joint>

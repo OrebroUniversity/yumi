@@ -38,9 +38,9 @@
     <xacro:property name="yumi_parent" value="world" />
     <link name="world"/>
     <joint name="world_joint" type="fixed">
-      <origin xyz="0 0 0.1" rpy="0 0 0" />
       <parent link="world"/>
-      <child link="yumi_body"/>
+      <child link="yumi_base_link"/>
+      <origin xyz="0 0 0.1" rpy="0 0 0" />
     </joint>
   </xacro:if>
 
@@ -58,10 +58,11 @@
     <link name="world"/>
 
     <joint name="world_to_pedestal" type="fixed">
-      <origin rpy="0 0 0" xyz="0 0 ${pedestal_height}" />
       <parent link="world" />
       <child link="yumi_pedestal" />
+      <origin rpy="0 0 0" xyz="0 0 ${pedestal_height}" />
     </joint>
+
 
     <link name="yumi_pedestal">
 <!--       <collision>
@@ -81,9 +82,9 @@
     </link>
 
     <joint name="pedestal_to_yumi" type="fixed">
-      <origin rpy="0 0 0" xyz="${yumi_offset_x} 0 ${yumi_height}" />
       <parent link="yumi_pedestal" />
-      <child link="yumi_body" />
+      <child link="yumi_base_link" />
+      <origin rpy="0 0 0" xyz="${yumi_offset_x} 0 ${yumi_height}" />
     </joint>
   </xacro:if>
 
@@ -101,9 +102,9 @@
     <link name="world"/>
 
     <joint name="world_to_pedestal" type="fixed">
-      <origin rpy="0 0 0" xyz="0 0 ${pedestal_height}" />
       <parent link="world" />
       <child link="yumi_pedestal" />
+      <origin rpy="0 0 0" xyz="0 0 ${pedestal_height}" />
     </joint>
 
     <link name="yumi_pedestal">
@@ -117,9 +118,9 @@
     </link>
 
     <joint name="pedestal_to_table" type="fixed">
-      <origin rpy="0 0 0" xyz="0.235 0 ${yumi_height}" />
       <parent link="yumi_pedestal" />
       <child link="table" />
+      <origin rpy="0 0 0" xyz="0.235 0 ${yumi_height}" />
     </joint>
 
     <link name="table">
@@ -133,9 +134,9 @@
     </link>
 
     <joint name="pedestal_to_yumi" type="fixed">
-      <origin rpy="0 0 0" xyz="${yumi_offset_x} 0 ${yumi_height+0.02}" />
       <parent link="yumi_pedestal" />
-      <child link="yumi_body" />
+      <child link="yumi_base_link" />
+      <origin rpy="0 0 0" xyz="${yumi_offset_x} 0 ${yumi_height+0.02}" />
     </joint>
 
     <link name="kinect2">
@@ -180,27 +181,27 @@
     </link>
 
      <joint name="kinect2_to_right_kinect_base" type="fixed">
-      <origin rpy="0 ${-PI/6} 0.17" xyz="0.1 -0.03 0.56" />
-      <parent link="yumi_body" />
+      <parent link="yumi_base_link" />
       <child link="right_kinect_base" />
+      <origin rpy="0 ${-PI/6} 0.17" xyz="0.1 -0.03 0.56" />
     </joint>
 
     <joint name="kinect2_to_left_kinect_base" type="fixed">
-      <origin rpy="0 ${-PI/6} -0.17" xyz="0.1 0.03 0.56" />
-      <parent link="yumi_body" />
+      <parent link="yumi_base_link" />
       <child link="left_kinect_base" />
+      <origin rpy="0 ${-PI/6} -0.17" xyz="0.1 0.03 0.56" />
     </joint>
 
     <joint name="yumi_to_middle_kinect_base" type="fixed">
-      <origin rpy="0 ${-PI/6} 0" xyz="0.05 0 0.56" />
-      <parent link="yumi_body" />
+      <parent link="yumi_base_link" />
       <child link="middle_kinect_base" />
+      <origin rpy="0 ${-PI/6} 0" xyz="0.05 0 0.56" />
     </joint>
 
     <joint name="middle_kinect_base_to_kinect2" type="fixed">
-      <origin rpy="${-PI/2} 0 ${kinect_zrotation_fix}" xyz="0.2 0 0" />
       <parent link="middle_kinect_base" />
       <child link="kinect2" />
+      <origin rpy="${-PI/2} 0 ${kinect_zrotation_fix}" xyz="0.2 0 0" />
     </joint>
 
   </xacro:if>
