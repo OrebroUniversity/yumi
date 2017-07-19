@@ -15,6 +15,10 @@
     <group name="right_arm">
         <chain base_link="yumi_body" tip_link="yumi_link_7_r" />
     </group>
+    <group name="both_arms">
+        <group name="left_arm" />
+        <group name="right_arm" />
+    </group>
     <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
     <passive_joint name="gripper_l_joint_m" />
     <passive_joint name="gripper_r_joint_m" />
