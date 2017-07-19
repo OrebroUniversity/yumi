@@ -858,4 +858,10 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="yumi_base_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.1"/>
+  </joint>
 </robot>

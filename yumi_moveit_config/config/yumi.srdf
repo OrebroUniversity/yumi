@@ -19,6 +19,19 @@
         <group name="left_arm" />
         <group name="right_arm" />
     </group>
+    <group name="left_gripper">
+        <link name="gripper_l_finger_r" />
+        <link name="gripper_l_base" />
+        <link name="gripper_l_finger_l" />
+    </group>
+    <group name="right_gripper">
+        <link name="gripper_r_base" />
+        <link name="gripper_r_finger_r" />
+        <link name="gripper_r_finger_l" />
+    </group>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="left_gripper_ee" parent_link="yumi_link_7_l" group="left_gripper" parent_group="left_arm" />
+    <end_effector name="right_gripper_ee" parent_link="yumi_link_7_r" group="right_gripper" parent_group="right_arm" />
     <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
     <passive_joint name="gripper_l_joint_m" />
     <passive_joint name="gripper_r_joint_m" />

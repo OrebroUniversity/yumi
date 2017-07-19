@@ -33,3 +33,9 @@ controller_list:
       - yumi_joint_4_r
       - yumi_joint_5_r
       - yumi_joint_6_r
+  - name: fake_left_gripper_controller
+    joints:
+      - gripper_l_joint
+  - name: fake_right_gripper_controller
+    joints:
+      - gripper_r_joint
