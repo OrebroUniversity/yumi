@@ -15,7 +15,8 @@
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
     <!-- URDF / SRDF parameters -->
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
+    <arg name="yumi_setup" default="default"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface) yumi_setup:=$(arg yumi_setup)" />
 
     <!-- Network parameters -->
     <arg name="ip" default="192.168.125.1"/> <!--when talking to the real robot controller -->
@@ -39,9 +40,16 @@
         <param name="ip" value="$(arg ip)"/>
     </node-->
 
+
+    <node name="yumi_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+        <rosparam param="source_list">["/yumi/joint_states", "/yumi/gripper_states"]</rosparam>
+        <remap from="/joint_states" to="/yumi/joint_states" />
+    </node>
+
     <node name="yumi_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
+
     <node name="joint_remapper" pkg="yumi_hw" type="egm_joints_remap.py" />
 
     <!-- Show robot in Rviz   -->

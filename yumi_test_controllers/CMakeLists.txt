@@ -37,7 +37,3 @@ target_link_libraries(test_traj_vel_control ${catkin_LIBRARIES})
 
 add_executable(test_vel_control src/test_vel_control.cpp)
 target_link_libraries(test_vel_control ${catkin_LIBRARIES})
-
-
-add_executable(test_group_vel_control src/test_vel_control.cpp)
-target_link_libraries(test_group_vel_control ${catkin_LIBRARIES})

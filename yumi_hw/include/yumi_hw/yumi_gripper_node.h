@@ -224,14 +224,11 @@ class YumiGripperNode
 			left_gripper_cmd = 0;
 			right_gripper_cmd = 15;
 
-
 			gripper_interface.init(ip, port_s);
 			gripper_interface.startThreads();
 
-			std::cout << "creating subscribers" << std::endl;
 			left_gripper_cmd_sub = nh_.subscribe("/yumi/gripper_l_effort_cmd", 100, &YumiGripperNode::leftGripperCmdCallback, this);
 			right_gripper_cmd_sub = nh_.subscribe("/yumi/gripper_r_effort_cmd", 100, &YumiGripperNode::rightGripperCmdCallback, this);
-			std::cout << "subscribers should be ready" << std::endl;
 		}
 
 		virtual ~YumiGripperNode() 
@@ -243,22 +240,6 @@ class YumiGripperNode
 		float right_gripper_cmd;
 
 
-		void leftGripperCmdCallback(const std_msgs::Float64::ConstPtr& msg)
-		{
-			ROS_INFO("Left gripper. I heard: [%f]", msg->data);
-
-			left_gripper_cmd = msg -> data;
-			gripper_interface.setGripperEfforts(left_gripper_cmd, right_gripper_cmd);
-		}
-
-
-		void rightGripperCmdCallback(const std_msgs::Float64::ConstPtr& msg)
-		{
-			ROS_INFO("Right gripper. I heard: [%f]", msg->data);
-
-			right_gripper_cmd = msg -> data;
-			gripper_interface.setGripperEfforts(left_gripper_cmd, right_gripper_cmd);
-		}
 
     private:
 		ros::NodeHandle nh_;
@@ -315,6 +296,24 @@ class YumiGripperNode
 
 			gripper_interface.setGripperEfforts(left,right);
 			return true;
+		}
+
+
+		void leftGripperCmdCallback(const std_msgs::Float64::ConstPtr& msg)
+		{
+			ROS_INFO("Left gripper. I heard: [%f]", msg->data);
+
+			left_gripper_cmd = msg -> data;
+			gripper_interface.setGripperEfforts(left_gripper_cmd, right_gripper_cmd);
+		}
+
+
+		void rightGripperCmdCallback(const std_msgs::Float64::ConstPtr& msg)
+		{
+			ROS_INFO("Right gripper. I heard: [%f]", msg->data);
+
+			right_gripper_cmd = msg -> data;
+			gripper_interface.setGripperEfforts(left_gripper_cmd, right_gripper_cmd);
 		}
 
 

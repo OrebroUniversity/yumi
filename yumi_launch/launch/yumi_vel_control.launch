@@ -5,7 +5,7 @@
 
     <!-- Load joint controller configurations from YAML file to parameter server -->
     <rosparam file="$(find yumi_control)/config/velocity_controllers.yaml" command="load" ns="/yumi"/>
-    <arg name="controllers" default="joint_state_controller 
+    <arg name="arm_controllers" default="joint_state_controller 
                                      joint_vel_controller_1_r
                                      joint_vel_controller_2_r
                                      joint_vel_controller_7_r
@@ -23,14 +23,15 @@
 <!--     <arg name="controllers" default="joint_state_controller 
                                      joint_group_vel_controller_l
                                      joint_group_vel_controller_r"/> -->
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" ns="/yumi"/>
+    <node name="arm_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg arm_controllers)" ns="/yumi"/>
 
-	<!--  Hardware interfaces for the joints and grippers -->    
+	<!--  Hardware interfaces for the joints and  grippers -->    
     <arg name="arms_hardware_interface" default="VelocityJointInterface"/>
     <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
 
     <!-- URDF / SRDF parameters -->
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
+    <arg name="yumi_setup" default="default"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface) yumi_setup:=$(arg yumi_setup)" />
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi -param robot_description"  respawn="false" output="screen" />
 
     <!-- Network parameters -->
@@ -56,9 +57,15 @@
         <param name="ip" value="$(arg ip)"/>
     </node>
 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <node name="yumi_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+        <rosparam param="source_list">["/yumi/joint_states", "/yumi/gripper_states"]</rosparam>
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
+
+    <node name="yumi_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <remap from="/joint_states" to="/yumi/joint_states" />
+    </node>
+
     <node name="joint_remapper" pkg="yumi_hw" type="egm_joints_remap.py" />
 
     <!-- Show robot in Rviz   -->

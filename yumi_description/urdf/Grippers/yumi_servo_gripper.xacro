@@ -11,7 +11,7 @@
     <!-- some constants -->
     <xacro:property name="joint_damping" value="0.5" />
     <xacro:property name="gripper_joint_damping" value="1.0" />
-    <xacro:property name="max_gripper_effort" value="50"/>
+    <xacro:property name="max_gripper_effort" value="20"/>
     <xacro:property name="max_gripper_velocity" value="2"/>
  
  
@@ -19,7 +19,7 @@
 
     <!--joint between {parent} and base-->
     <joint name="${parent}_joint" type="fixed">
-      <insert_block name="origin"/>
+      <xacro:insert_block name="origin"/>
       <parent link="${parent}"/>
       <child link="${name}_base"/>
     </joint>
@@ -57,10 +57,6 @@
       <axis xyz="-1 0 0"/>
       <limit lower="0" upper="0.025"
              effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${gripper_joint_damping}"/>
     </joint>
 
@@ -96,10 +92,6 @@
       <axis xyz="-1 0 0"/>
       <limit lower="0" upper="0.025"
              effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${gripper_joint_damping}"/>
       <mimic joint="${name}_joint"/>
     </joint>
