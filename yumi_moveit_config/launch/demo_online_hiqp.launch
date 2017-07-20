@@ -15,13 +15,7 @@
     <arg name="load_robot_description" value="true"/>
   </include>
 
-  <!-- If needed, broadcast static tf for robot root -->
-  
-  <!-- Given the published joint states, publish tf for the robot links -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen">
-  </node>
-
-  <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
+  <!-- Run the main MoveIt executable with trajectory execution -->
   <include file="$(find yumi_moveit_config)/launch/move_group_online.launch">
     <arg name="allow_trajectory_execution" value="true"/>
     <arg name="fake_execution" value="false"/>

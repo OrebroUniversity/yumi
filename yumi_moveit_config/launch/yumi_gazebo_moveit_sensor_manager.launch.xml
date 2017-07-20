@@ -1,3 +1,8 @@
 <launch>
-
+  <param name="octomap_frame" type="string" value="world" />
+  <param name="octomap_resolution" type="double" value="0.005" />
+  <param name="max_range" type="double" value="1.5" />
+  
+  <!-- sensors used to update the map -->
+  <rosparam command="load" file="$(find yumi_moveit_config)/config/sensors_gazebo.yaml" />
 </launch>
