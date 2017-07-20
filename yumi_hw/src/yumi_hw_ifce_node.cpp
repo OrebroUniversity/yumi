@@ -54,8 +54,6 @@ std::string getURDF(ros::NodeHandle &model_nh_, std::string param_name)
   return urdf_string;
 }
 
-
-
 int main( int argc, char** argv )
 {
   /* Init ROS node */
@@ -126,6 +124,7 @@ int main( int argc, char** argv )
   /* Publisher of the control loop period */
   ros::Publisher control_period_pub;
   control_period_pub = yumi_nh.advertise<std_msgs::Float64>("/yumi/egm_control_period", 1000);
+  
 
   /* Main control loop */
   while( !g_quit )

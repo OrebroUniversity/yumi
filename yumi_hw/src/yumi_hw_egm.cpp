@@ -35,7 +35,6 @@
 #include <ros/ros.h>
 #include <curl/curl.h>
 
-
 using namespace abb::egm_interface;
 using namespace abb::rws_interface;
 
@@ -414,8 +413,13 @@ bool YumiEGMInterface::stopEGM()
 //    }
 //}
 
-YumiHWEGM::YumiHWEGM() : YumiHW(), is_initialized_(false)
+YumiHWEGM::YumiHWEGM() : YumiHW(), is_initialized_(false), max_acc_(3.0)
 {
+  
+    for (int j = 0; j < n_joints_; j++)
+    {
+        joint_vel_targets_[j] = 0;
+    }
 
 }
 
@@ -480,11 +484,22 @@ void YumiHWEGM::write(ros::Time time, ros::Duration period)
     }
 
     enforceLimits(period);
-
+    
     data_buffer_mutex_.lock();
 
+    double dt = period.toSec();
+    ROS_ASSERT(dt > 0);
+
+    //enforce manually acceleration limits 
     for (int j = 0; j < n_joints_; j++)
     {
+	double acceleration = (joint_velocity_command_[j]-joint_vel_targets_[j])/dt;
+	if(acceleration > max_acc_) {
+	    joint_velocity_command_[j] = joint_vel_targets_[j] + dt*max_acc_;
+	}
+	if(acceleration < -max_acc_) {
+	    joint_velocity_command_[j] = joint_vel_targets_[j] - dt*max_acc_;
+	}
         joint_vel_targets_[j] = joint_velocity_command_[j];
     }
 

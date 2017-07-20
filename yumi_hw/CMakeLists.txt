@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   abb_egm_interface
   abb_rws_interface
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -45,6 +46,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  std_srvs
 )
 
 ###################################
@@ -59,7 +61,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message abb_egm_interface abb_rws_interface
+  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message abb_egm_interface abb_rws_interface std_srvs
 #  DEPENDS gazebo
 )
 
@@ -91,16 +93,19 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
 add_executable(yumi_gripper_node src/yumi_gripper_node.cpp)
+add_executable(yumi_gripper_rws_node src/yumi_gripper_rws_node.cpp)
 
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(yumi_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(yumi_gripper_rws_node ${PROJECT_NAME}_generate_messages_cpp)
 
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries( ${PROJECT_NAME} ${catkin_LIBRARIES} )
 target_link_libraries( yumi_hw_ifce_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
 target_link_libraries( yumi_gripper_node ${catkin_LIBRARIES} ${PROJECT_NAME} simple_message)
+target_link_libraries( yumi_gripper_rws_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 

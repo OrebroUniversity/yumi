@@ -267,6 +267,10 @@ private:
     float joint_pos_[N_YUMI_JOINTS];
     float joint_vel_[N_YUMI_JOINTS];
     float joint_acc_[N_YUMI_JOINTS];
+
+    ros::Publisher debug_pub;
+
+    double max_acc_;
 };
 
 

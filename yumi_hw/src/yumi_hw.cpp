@@ -205,6 +205,10 @@ void YumiHW::registerJointLimits(const std::string& joint_name,
 		*upper_limit = limits.max_position;
     }
 
+    //std::cerr<<"limits: "<<limits.has_acceleration_limits<<" "<<limits.max_acceleration<<std::endl;
+    //limits.max_acceleration = 30; //hardcoded for all joints for testing
+    //limits.has_acceleration_limits = true;
+    //std::cerr<<"new limits: "<<limits.has_acceleration_limits<<" "<<limits.max_acceleration<<std::endl;
 
     if (has_soft_limits)
     {
