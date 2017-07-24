@@ -1,24 +1,25 @@
 <?xml version="1.0"?>
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
-  <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.gazebo.xacro" />
-  <!-- Import Transmissions -->
-  <xacro:include filename="$(find yumi_description)/urdf/yumi_servo_gripper.transmission.xacro" />
-  <!-- Include Utilities -->
-  <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
+    <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.gazebo.xacro" />
+    <!-- Import Transmissions -->
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.transmission.xacro" />
 
-  <!-- some constants -->
- <!-- <xacro:property name="safety_controller_k_pos" value="100" />
-  <xacro:property name="safety_controller_k_vel" value="2" /> -->
-  <xacro:property name="joint_damping" value="0.5" />
-  <xacro:property name="max_effort" value="300"/>
+
+
+    <!-- some constants -->
+    <xacro:property name="joint_damping" value="0.5" />
+    <xacro:property name="gripper_joint_damping" value="1.0" />
+    <xacro:property name="max_gripper_effort" value="20"/>
+    <xacro:property name="max_gripper_velocity" value="2"/>
+ 
  
   <xacro:macro name="yumi_servo_gripper" params="parent name hardware_interface *origin">
 
     <!--joint between {parent} and base-->
     <joint name="${parent}_joint" type="fixed">
-      <insert_block name="origin"/>
+      <xacro:insert_block name="origin"/>
       <parent link="${parent}"/>
       <child link="${name}_base"/>
     </joint>
@@ -55,12 +56,8 @@
       <origin xyz="0 -0.0065 0.0837" rpy="0 0 0"/>
       <axis xyz="-1 0 0"/>
       <limit lower="0" upper="0.025"
-             effort="${max_effort}" velocity="0.02" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
-      <dynamics damping="${joint_damping}"/>
+             effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
+      <dynamics damping="${gripper_joint_damping}"/>
     </joint>
 
     <link name="${name}_finger_r">
@@ -75,7 +72,7 @@
         <geometry>
           <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
         </geometry>
-        <material name="Grey"/>
+        <material name="Blue"/>
       </visual>
 
       <collision>
@@ -83,7 +80,7 @@
         <geometry>
           <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
         </geometry>
-        <material name="Grey"/>
+        <material name="Blue"/>
       </collision>
     </link>
 
@@ -94,12 +91,8 @@
       <origin xyz="0 0.0065 0.0837" rpy="0 0 ${PI}"/>
       <axis xyz="-1 0 0"/>
       <limit lower="0" upper="0.025"
-             effort="${max_effort}" velocity="0.02" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
-      <dynamics damping="${joint_damping}"/>
+             effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
+      <dynamics damping="${gripper_joint_damping}"/>
       <mimic joint="${name}_joint"/>
     </joint>
 
@@ -115,7 +108,7 @@
         <geometry>
           <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
         </geometry>
-        <material name="Grey"/>
+        <material name="Blue"/>
       </visual>
 
       <collision>
@@ -123,7 +116,7 @@
         <geometry>
           <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
         </geometry>
-        <material name="Grey"/>
+        <material name="Blue"/>
       </collision>
     </link>
 

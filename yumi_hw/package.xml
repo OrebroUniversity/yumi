@@ -4,6 +4,7 @@
   <version>0.0.4</version>
   <description>Hardware interface for YuMi, for use in roscontrol</description>
 
+  <maintainer email="yoshua.nava@kth.se">Yoshua Nava</maintainer>
   <maintainer email="todor.stoyanov@oru.se">Todor Stoyanov</maintainer>
 
 
@@ -33,6 +34,7 @@
   <build_depend>realtime_tools</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>transmission_interface</build_depend>
   <build_depend>urdf</build_depend>
@@ -54,7 +56,7 @@
   <run_depend>urdf</run_depend>
   <run_depend>simple_message</run_depend>
   <run_depend>message_runtime</run_depend>
-
+  <run_depend>std_srvs</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

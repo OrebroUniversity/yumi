@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<launch> 
+	<arg name="name" default="yumi" doc="The robot name. Ensure this is the same name you give to the arm in the urdf instance."/>
+	
+	<!-- Load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find yumi_control)/config/traj_controllers.yaml" command="load" ns="/yumi"/>
+	<rosparam file="$(find yumi_control)/config/gripper_controllers.yaml" command="load" ns="/yumi"/>
+	<arg name="arm_controllers" default="joint_state_controller
+									     joint_traj_pos_controller_l
+										 joint_traj_pos_controller_r"/>
+	<arg name="gripper_controllers" default="gripper_effort_controller_r
+										     gripper_effort_controller_l"/>
+	<node name="arm_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg arm_controllers)" ns="/yumi"/>
+	<node name="gripper_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg gripper_controllers)" ns="/yumi"/>
+
+	<!--  Hardware interfaces for the joints and grippers -->
+    <arg name="arms_hardware_interface" default="PositionJointInterface"/>
+    <arg name="grippers_hardware_interface" default="EffortJointInterface"/>
+
+	<!-- URDF / SRDF parameters -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' arms_interface:=$(arg arms_hardware_interface) grippers_interface:=$(arg grippers_hardware_interface)" />
+    <arg name="yumi_initial_pos" default="-J yumi_joint_1_l -1.41 
+    									  -J yumi_joint_2_l -2.1
+    									  -J yumi_joint_3_l 0.30
+    									  -J yumi_joint_4_l 0.0
+    									  -J yumi_joint_5_l 0.0
+    									  -J yumi_joint_6_l 0.0
+    									  -J yumi_joint_7_l 0.71
+    									  -J yumi_joint_1_r 1.41 
+    									  -J yumi_joint_2_r -2.1
+    									  -J yumi_joint_3_r 0.30
+    									  -J yumi_joint_4_r 0.0
+    									  -J yumi_joint_5_r 0.0
+    									  -J yumi_joint_6_r 0.0
+    									  -J yumi_joint_7_r -0.71"/>
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model yumi $(arg yumi_initial_pos) -param robot_description -unpause"  respawn="false" output="screen" />
+
+	<!-- Configuration for debug  -->
+	<arg name="debug" default="false"/>
+	<arg unless="$(arg debug)" name="launch_prefix" value="" />
+	<arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+	<!-- Call Gazebo -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+	    <arg name="paused" value="true"/>
+	    <arg name="use_sim_time" value="true"/>
+	    <arg name="gui" value="false"/>
+	    <arg name="headless" value="false"/>
+	    <arg name="debug" value="$(arg debug)" />
+	</include>
+
+	<node name="yumi_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+	    <remap from="/joint_states" to="/yumi/joint_states" />
+	</node>
+	<node name="joint_remapper" pkg="yumi_hw" type="gazebo_joints_remap.py" />
+
+	<!-- Show robot in Rviz   -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/yumi.rviz"/>
+
+</launch>

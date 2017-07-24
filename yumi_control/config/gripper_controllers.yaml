@@ -1,0 +1,28 @@
+
+
+
+# Effort gripper controllers ---------------------------------------
+gripper_effort_controller_r:
+  type: effort_controllers/JointEffortController
+  joint: gripper_r_joint
+  pid: {p: 0.1, i: 0.0, d: 0.0, i_clamp_min: -1, i_clamp_max: 1}
+
+gripper_effort_controller_l:
+  type: effort_controllers/JointEffortController
+  joint: gripper_l_joint
+  pid: {p: 0.1, i: 0.0, d: 0.0, i_clamp_min: -1, i_clamp_max: 1}
+
+
+
+# Effort gripper position controllers ---------------------------------------
+gripper_effort_pos_controller_r:
+  type: effort_controllers/JointPositionController
+  joint: gripper_r_joint
+  pid: {p: 1000.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+
+gripper_effort_pos_controller_l:
+  type: effort_controllers/JointPositionController
+  joint: gripper_l_joint
+  pid: {p: 1000.0, i: 0.01, d: 0.1, i_clamp_min: -1, i_clamp_max: 1}
+
+
