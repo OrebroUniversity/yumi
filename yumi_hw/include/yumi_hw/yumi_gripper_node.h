@@ -189,7 +189,7 @@ class YumiGripperNode
 	    nh_ = ros::NodeHandle("~");
 
 	    //read in parameters
-	    nh_.param<std::string>("joint_state_topic", gripper_state_topic,"joint_states");
+	    nh_.param<std::string>("joint_state_topic", gripper_state_topic,"gripper_states");
 	    nh_.param<std::string>("grasp_request_topic", grasp_request_topic,"do_grasp");
 	    nh_.param<std::string>("grasp_release_topic", grasp_release_topic,"release_grasp");
 	    nh_.param<double>("publish_period", js_rate, 0.1);

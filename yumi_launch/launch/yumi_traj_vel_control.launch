@@ -35,9 +35,9 @@
     </node>
      
     <!-- The grippers hardware interface -->
-    <!--node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> 
+    <node required="true" name="yumi_gripper" pkg="yumi_hw" type="yumi_gripper_node" respawn="false" ns="/yumi" output="screen"> 
         <param name="ip" value="$(arg ip)"/>
-    </node-->
+    </node
 
 
     <node name="yumi_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
