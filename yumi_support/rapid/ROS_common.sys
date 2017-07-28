@@ -47,4 +47,15 @@ PERS ROS_joint_trajectory_pt ROS_trajectory_right{MAX_TRAJ_LENGTH};
 PERS num ROS_trajectory_size_right := 0;
 PERS bool ROS_new_trajectory_right := FALSE;       ! can safely READ, but should use lock to WRITE
 
+
+! Variables for handling grippers
+PERS bool ROS_new_gripper_left := FALSE;       
+PERS bool ROS_new_gripper_right := FALSE;       
+PERS ROS_msg_gripper_target next_grasp_target;
+PERS num current_gripper_left;
+PERS num current_gripper_right;
+
+
+PERS num cycle_time := 0.02;
+
 ENDMODULE

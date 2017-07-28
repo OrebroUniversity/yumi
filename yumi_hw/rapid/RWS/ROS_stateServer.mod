@@ -1,4 +1,4 @@
-MODULE ROS_stateServer_right
+MODULE ROS_stateServer
 
 ! Software License Agreement (BSD License)
 !
@@ -28,8 +28,8 @@ MODULE ROS_stateServer_right
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST num server_port := 12002;
-LOCAL CONST num update_rate := 0.10;  ! broadcast rate (sec)
+LOCAL CONST num server_port := 11002;
+LOCAL CONST num update_rate := 0.010;  ! broadcast rate (sec)
 
 LOCAL VAR socketdev server_socket;
 LOCAL VAR socketdev client_socket;
@@ -42,7 +42,7 @@ PROC main()
     
 	WHILE (TRUE) DO
 		send_joints;
-		WaitTime update_rate;
+		!WaitTime update_rate;
     ENDWHILE
 
 ERROR (ERR_SOCK_TIMEOUT, ERR_SOCK_CLOSED)
@@ -58,21 +58,33 @@ ENDPROC
 
 LOCAL PROC send_joints()
 	VAR ROS_msg_joint_data message;
-	VAR jointtarget joints;
+    VAR ROS_msg_joint_data target;
+	! VAR jointtarget joints;
 	
     ! get current joint position (degrees)
-	joints := CJointT();
+	message.joints_left := CJointT(\TaskName:="T_ROB_L");
+    message.joints_right := CJointT(\TaskName:="T_ROB_R");
     
     ! create message
     message.header := [ROS_MSG_TYPE_JOINT, ROS_COM_TYPE_TOPIC, ROS_REPLY_TYPE_INVALID];
     message.sequence_id := 0;
-    message.joints := joints;
-    
+         
     ! send message to client
     ROS_send_msg_joint_data client_socket, message;
 
+    ! recv message from client
+    ROS_receive_msg_joint_data client_socket, target;
+    WaitTestAndSet ROS_joint_target_left_lock;
+    WaitTestAndSet ROS_joint_target_right_lock;
+    next_joint_target := target;
+
+    ROS_new_joint_target_left := TRUE;
+    ROS_new_joint_target_right := TRUE;
+    ROS_joint_target_right_lock := FALSE; !release lock
+    ROS_joint_target_left_lock := FALSE; !release lock
 ERROR
     RAISE;  ! raise errors to calling code
 ENDPROC
+
 
 ENDMODULE

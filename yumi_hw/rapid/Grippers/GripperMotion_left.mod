@@ -1,4 +1,4 @@
-MODULE ROS_stateServer_right
+MODULE GripperMotion_left
 
 ! Software License Agreement (BSD License)
 !
@@ -28,51 +28,44 @@ MODULE ROS_stateServer_right
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST num server_port := 12002;
-LOCAL CONST num update_rate := 0.10;  ! broadcast rate (sec)
-
-LOCAL VAR socketdev server_socket;
-LOCAL VAR socketdev client_socket;
 
 PROC main()
-
-    TPWrite "StateServer: Waiting for connection.";
-	ROS_init_socket server_socket, server_port;
-    ROS_wait_for_client server_socket, client_socket;
+    VAR num grasp_force;
+    VAR num prev_grasp_force;
     
-	WHILE (TRUE) DO
-		send_joints;
-		WaitTime update_rate;
+    Hand_JogOutward;
+    WaitTime 4;
+    Hand_JogInward;
+    WaitTime 4;
+    Hand_DoCalibrate;
+    Hand_Initialize \maxSpd:=20, \holdForce:=10;
+    Hand_MoveTo(10);
+    grasp_force:=0;
+    prev_grasp_force:=0;
+    
+    WHILE true DO
+        ! Check for an updated setpoint. 
+        grasp_force := next_grasp_target.left;
+        current_gripper_left := Hand_GetActualPos();
+
+        IF(grasp_force <> prev_grasp_force) THEN
+            IF(grasp_force > 0 ) THEN
+                ! TPWrite "Grasping with left";
+                Hand_GripInward \holdForce:=grasp_force;
+            ELSEIF (grasp_force < 0 ) THEN
+                Hand_GripOutward \holdForce:=-grasp_force;
+            ELSE
+                Hand_GripInward \holdForce:=0;
+                !do nothing
+            ENDIF
+            prev_grasp_force:=grasp_force;
+        ENDIF
+        
+        WaitTime 0.1;
     ENDWHILE
-
-ERROR (ERR_SOCK_TIMEOUT, ERR_SOCK_CLOSED)
-	IF (ERRNO=ERR_SOCK_TIMEOUT) OR (ERRNO=ERR_SOCK_CLOSED) THEN
-        SkipWarn;  ! TBD: include this error data in the message logged below?
-        ErrWrite \W, "ROS StateServer disconnect", "Connection lost.  Waiting for new connection.";
-        ExitCycle;  ! restart program
-	ELSE
-		TRYNEXT;
-	ENDIF
-UNDO
-ENDPROC
-
-LOCAL PROC send_joints()
-	VAR ROS_msg_joint_data message;
-	VAR jointtarget joints;
-	
-    ! get current joint position (degrees)
-	joints := CJointT();
-    
-    ! create message
-    message.header := [ROS_MSG_TYPE_JOINT, ROS_COM_TYPE_TOPIC, ROS_REPLY_TYPE_INVALID];
-    message.sequence_id := 0;
-    message.joints := joints;
-    
-    ! send message to client
-    ROS_send_msg_joint_data client_socket, message;
-
 ERROR
-    RAISE;  ! raise errors to calling code
+    ErrWrite \W, "Gripper Motion Error", "Error executing motion.  Aborting trajectory.";
 ENDPROC
+
 
 ENDMODULE

@@ -1,4 +1,4 @@
-MODULE ROS_motionServer_right
+MODULE ROS_motionServer_left
 
 ! Software License Agreement (BSD License)
 !
@@ -28,7 +28,7 @@ MODULE ROS_motionServer_right
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST num server_port := 12000;
+LOCAL CONST num server_port := 11000;
 
 LOCAL VAR socketdev server_socket;
 LOCAL VAR socketdev client_socket;
@@ -108,12 +108,12 @@ LOCAL PROC add_traj_pt(ROS_joint_trajectory_pt point)
 ENDPROC
 
 LOCAL PROC activate_trajectory()
-    WaitTestAndSet ROS_trajectory_lock_right;  ! acquire data-lock
+    WaitTestAndSet ROS_trajectory_lock;  ! acquire data-lock
     TPWrite "Sending " + ValToStr(trajectory_size) + " points to MOTION task";
-    ROS_trajectory_right := trajectory;
-    ROS_trajectory_size_right := trajectory_size;
-    ROS_new_trajectory_right := TRUE;
-    ROS_trajectory_lock_right := FALSE;  ! release data-lock
+    ROS_trajectory := trajectory;
+    ROS_trajectory_size := trajectory_size;
+    ROS_new_trajectory := TRUE;
+    ROS_trajectory_lock := FALSE;  ! release data-lock
 ENDPROC
 	
 ENDMODULE

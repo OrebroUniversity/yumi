@@ -1,4 +1,4 @@
-MODULE ROS_stateServer_right
+MODULE ROS_stateServer_left
 
 ! Software License Agreement (BSD License)
 !
@@ -28,7 +28,7 @@ MODULE ROS_stateServer_right
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST num server_port := 12002;
+LOCAL CONST num server_port := 11002;
 LOCAL CONST num update_rate := 0.10;  ! broadcast rate (sec)
 
 LOCAL VAR socketdev server_socket;

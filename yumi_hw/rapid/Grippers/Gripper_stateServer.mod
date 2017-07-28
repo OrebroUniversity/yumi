@@ -1,4 +1,4 @@
-MODULE ROS_stateServer_right
+MODULE Gripper_stateServer
 
 ! Software License Agreement (BSD License)
 !
@@ -28,7 +28,7 @@ MODULE ROS_stateServer_right
 ! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 ! WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LOCAL CONST num server_port := 12002;
+LOCAL CONST num server_port := 13002;
 LOCAL CONST num update_rate := 0.10;  ! broadcast rate (sec)
 
 LOCAL VAR socketdev server_socket;
@@ -41,7 +41,7 @@ PROC main()
     ROS_wait_for_client server_socket, client_socket;
     
 	WHILE (TRUE) DO
-		send_joints;
+		send_hand_status;
 		WaitTime update_rate;
     ENDWHILE
 
@@ -56,23 +56,23 @@ ERROR (ERR_SOCK_TIMEOUT, ERR_SOCK_CLOSED)
 UNDO
 ENDPROC
 
-LOCAL PROC send_joints()
-	VAR ROS_msg_joint_data message;
-	VAR jointtarget joints;
-	
-    ! get current joint position (degrees)
-	joints := CJointT();
+LOCAL PROC send_hand_status()
+	VAR ROS_msg_gripper_target message;
+    
+    ! get current joint position (centimeters)
+	message.left := current_gripper_left;
+    message.right := current_gripper_right;
     
     ! create message
-    message.header := [ROS_MSG_TYPE_JOINT, ROS_COM_TYPE_TOPIC, ROS_REPLY_TYPE_INVALID];
+    message.header := [ROS_GRIPPER_STATUS, ROS_COM_TYPE_TOPIC, ROS_REPLY_TYPE_INVALID];
     message.sequence_id := 0;
-    message.joints := joints;
-    
+         
     ! send message to client
-    ROS_send_msg_joint_data client_socket, message;
+    ROS_send_msg_gripper_data client_socket, message;
 
 ERROR
     RAISE;  ! raise errors to calling code
 ENDPROC
+
 
 ENDMODULE
