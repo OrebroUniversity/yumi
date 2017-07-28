@@ -49,7 +49,7 @@
         <remap from="/joint_states" to="/yumi/joint_states" />
     </node>
 
-    <node name="joint_remapper" pkg="yumi_hw" type="egm_joints_remap.py" />
+    <node name="joint_remapper" pkg="yumi_hw" type="rws_egm_joints_remap.py" />
 
     <!-- Show robot in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find yumi_description)/yumi.rviz"/>
