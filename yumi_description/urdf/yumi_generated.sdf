@@ -1,107 +1,5 @@
 <sdf version='1.6'>
   <model name='yumi'>
-    <link name='yumi_top_camera_base'>
-      <pose frame=''>0.883 -0.06 0.877 3.12 0.795 0.005</pose>
-      <inertial>
-        <pose frame=''>0 0 0 0 -0 0</pose>
-        <mass>1e-05</mass>
-        <inertia>
-          <ixx>1e-06</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>1e-06</iyy>
-          <iyz>0</iyz>
-          <izz>1e-06</izz>
-        </inertia>
-      </inertial>
-      <collision name='yumi_top_camera_base_collision'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
-        <geometry>
-          <box>
-            <size>0.1 0.1 0.1</size>
-          </box>
-        </geometry>
-        <surface>
-          <contact>
-            <ode/>
-          </contact>
-          <friction>
-            <ode/>
-          </friction>
-        </surface>
-      </collision>
-      <visual name='yumi_top_camera_base_visual'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
-        <geometry>
-          <box>
-            <size>0.1 0.1 0.1</size>
-          </box>
-        </geometry>
-        <material>
-          <script>
-            <name>Gazebo/red</name>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-          </script>
-        </material>
-      </visual>
-      <velocity_decay/>
-      <gravity>1</gravity>
-      <velocity_decay/>
-      <sensor name='camera' type='depth'>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <camera name='__default__'>
-          <horizontal_fov>1.0472</horizontal_fov>
-          <image>
-            <format>R8G8B8</format>
-            <width>640</width>
-            <height>480</height>
-          </image>
-          <clip>
-            <near>0.05</near>
-            <far>8</far>
-          </clip>
-        </camera>
-        <plugin name='kinect1_camera_controller' filename='libgazebo_ros_openni_kinect.so'>
-          <cameraName>kinect1</cameraName>
-          <alwaysOn>true</alwaysOn>
-          <updateRate>30.0</updateRate>
-          <imageTopicName>rgb/image_raw</imageTopicName>
-          <depthImageTopicName>depth/image_raw</depthImageTopicName>
-          <pointCloudTopicName>depth/points</pointCloudTopicName>
-          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
-          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
-          <frameName>yumi_top_camera_base</frameName>
-          <baseline>0.1</baseline>
-          <distortion_k1>0.0</distortion_k1>
-          <distortion_k2>0.0</distortion_k2>
-          <distortion_k3>0.0</distortion_k3>
-          <distortion_t1>0.0</distortion_t1>
-          <distortion_t2>0.0</distortion_t2>
-          <pointCloudCutoff>0.5</pointCloudCutoff>
-          <pointCloudCutoffMax>5.0</pointCloudCutoffMax>
-        </plugin>
-        <visualize>1</visualize>
-      </sensor>
-    </link>
-    <joint name='camera_joint' type='revolute'>
-      <child>yumi_top_camera_base</child>
-      <parent>world</parent>
-      <axis>
-        <limit>
-          <lower>0</lower>
-          <upper>0</upper>
-        </limit>
-        <dynamics>
-          <damping>0</damping>
-          <friction>0</friction>
-          <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-        </dynamics>
-        <use_parent_model_frame>1</use_parent_model_frame>
-        <xyz>0 0 1</xyz>
-      </axis>
-    </joint>
     <link name='yumi_body'>
       <pose frame=''>0 0 0.1 0 -0 0</pose>
       <inertial>
@@ -768,6 +666,14 @@
             <uri>model://yumi_description/meshes/coarse/link_1.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='yumi_link_1_r_visual'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -777,7 +683,29 @@
             <uri>model://yumi_description/meshes/link_1.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='yumi_link_1_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_1_r_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_1_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_1_r</frameName>
+          <bumperTopicName>yumi/link_1_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='yumi_joint_1_r' type='revolute'>
       <child>yumi_link_1_r</child>
@@ -821,6 +749,14 @@
             <uri>model://yumi_description/meshes/coarse/link_2.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='yumi_link_2_r_visual'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -830,7 +766,29 @@
             <uri>model://yumi_description/meshes/link_2.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='yumi_link_2_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_2_r_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_2_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_2_r</frameName>
+          <bumperTopicName>yumi/link_2_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='yumi_joint_2_r' type='revolute'>
       <child>yumi_link_2_r</child>
@@ -874,6 +832,14 @@
             <uri>model://yumi_description/meshes/coarse/link_3.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='yumi_link_3_r_visual'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -883,7 +849,29 @@
             <uri>model://yumi_description/meshes/link_3.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='yumi_link_3_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_3_r_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_3_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_3_r</frameName>
+          <bumperTopicName>yumi/link_3_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='yumi_joint_7_r' type='revolute'>
       <child>yumi_link_3_r</child>
@@ -927,6 +915,14 @@
             <uri>model://yumi_description/meshes/coarse/link_4.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='yumi_link_4_r_visual'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -936,7 +932,29 @@
             <uri>model://yumi_description/meshes/link_4.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='yumi_link_4_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_4_r_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_4_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_4_r</frameName>
+          <bumperTopicName>yumi/link_4_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='yumi_joint_3_r' type='revolute'>
       <child>yumi_link_4_r</child>
@@ -980,6 +998,14 @@
             <uri>model://yumi_description/meshes/coarse/link_5.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='yumi_link_5_r_visual'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -989,7 +1015,29 @@
             <uri>model://yumi_description/meshes/link_5.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='yumi_link_5_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_5_r_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_5_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_5_r</frameName>
+          <bumperTopicName>yumi/link_5_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='yumi_joint_4_r' type='revolute'>
       <child>yumi_link_5_r</child>
@@ -1033,6 +1081,14 @@
             <uri>model://yumi_description/meshes/coarse/link_6.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='yumi_link_6_r_visual'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -1042,7 +1098,29 @@
             <uri>model://yumi_description/meshes/link_6.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <sensor name='yumi_link_6_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_6_r_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_6_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_6_r</frameName>
+          <bumperTopicName>yumi/link_6_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
     </link>
     <joint name='yumi_joint_5_r' type='revolute'>
       <child>yumi_link_6_r</child>
@@ -1078,7 +1156,7 @@
           <izz>0.1001</izz>
         </inertia>
       </inertial>
-      <collision name='yumi_link_7_r_collision'>
+      <collision name='yumi_link_7_r_collision_collision'>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1086,6 +1164,14 @@
             <uri>model://yumi_description/meshes/coarse/link_7.stl</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <collision name='yumi_link_7_r_fixed_joint_lump__gripper_r_base_collision_1'>
         <pose frame=''>0 0 0.007 0 -0 -3.14159</pose>
@@ -1115,6 +1201,12 @@
             <uri>model://yumi_description/meshes/link_7.stl</uri>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
       </visual>
       <visual name='yumi_link_7_r_fixed_joint_lump__gripper_r_base_visual_1'>
         <pose frame=''>0 0 0.007 0 -0 -3.14159</pose>
@@ -1131,6 +1223,21 @@
           </script>
         </material>
       </visual>
+      <velocity_decay/>
+      <sensor name='yumi_link_7_r_bumper' type='contact'>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <contact>
+          <collision>yumi_link_7_l_collision</collision>
+          <topic>__default_topic__</topic>
+        </contact>
+        <plugin name='yumi_link_7_r_plugin' filename='libgazebo_ros_bumper.so'>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+          <frameName>yumi_link_7_r</frameName>
+          <bumperTopicName>yumi/link_7_r/contact</bumperTopicName>
+        </plugin>
+      </sensor>
       <gravity>1</gravity>
       <velocity_decay/>
     </link>

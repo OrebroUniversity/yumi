@@ -11,6 +11,128 @@
       <mu2>0.2</mu2>
     </gazebo>
 
+  <gazebo reference= "${name}_link_1_r">
+    <sensor name="${name}_link_1_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>${name}_link_1_r_collision</collision>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_1_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_1_r</frameName>
+        <bumperTopicName>${name}/link_1_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+    <gazebo reference= "${name}_link_2_r">
+    <sensor name="${name}_link_2_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>${name}_link_2_r_collision</collision>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_2_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_2_r</frameName>
+        <bumperTopicName>${name}/link_2_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+
+    <gazebo reference= "${name}_link_3_r">
+    <sensor name="${name}_link_3_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>${name}_link_3_r_collision</collision>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_3_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_3_r</frameName>
+        <bumperTopicName>${name}/link_3_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+    <gazebo reference= "${name}_link_4_r">
+    <sensor name="${name}_link_4_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>${name}_link_4_r_collision</collision>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_4_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_4_r</frameName>
+        <bumperTopicName>${name}/link_4_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+    <gazebo reference= "${name}_link_5_r">
+    <sensor name="${name}_link_5_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>${name}_link_5_r_collision</collision>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_5_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_5_r</frameName>
+        <bumperTopicName>${name}/link_5_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+    <gazebo reference= "${name}_link_6_r">
+    <sensor name="${name}_link_6_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>${name}_link_6_r_collision</collision>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_6_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_6_r</frameName>
+        <bumperTopicName>${name}/link_6_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+    <gazebo reference= "${name}_link_7_r">
+    <sensor name="${name}_link_7_r_bumper" type="contact">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <contact>
+        <collision>yumi_link_7_l_collision</collision>
+        <topic>/bumper_contact</topic>
+      </contact>
+      <plugin filename="libgazebo_ros_bumper.so" name="${name}_link_7_r_plugin">
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <frameName>${name}_link_7_r</frameName>
+        <bumperTopicName>${name}/link_7_r/contact</bumperTopicName>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+
 
   </xacro:macro>
 

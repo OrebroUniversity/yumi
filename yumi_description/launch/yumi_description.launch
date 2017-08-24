@@ -6,7 +6,16 @@
 
  <!-- Load the URDF with the given hardware interface into the ROS Parameter Server -->
   <param name="robot_description"
-	 command="$(find xacro)/xacro.py '$(find yumi_description)/urdf/yumi.urdf.xacro' prefix:=$(arg hardware_interface)" />
+	 command="$(find xacro)/xacro '$(find yumi_description)/urdf/yumi.urdf.xacro'  --inorder prefix:=$(arg hardware_interface)" />
+
+  <node name="urdf_spawner" 
+        pkg="gazebo_ros" 
+        type="spawn_model" 
+        respawn="false" 
+        output="screen"
+        args="-urdf -model yumi -param robot_description"/>
+
+  <rosparam file="$(find hiqp_demos)/config/yumi.yaml" command="load"/>
 
   <!-- send fake joint values -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">

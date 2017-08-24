@@ -311,7 +311,7 @@
         <geometry>
           <mesh filename="package://yumi_description/meshes/link_7.stl"/>
         </geometry>
-        <material name="Grey"/>
+        <material name="Blue"/>
       </visual>
 
       <collision>
