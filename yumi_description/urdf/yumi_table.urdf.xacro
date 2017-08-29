@@ -5,11 +5,11 @@
   <property name="table_width" value="1.08" />
   <property name="table_depth" value="1.3" />
   <property name="leg_radius" value="0.02" />
-  <property name="table_x" value="0.3" />
+  <property name="table_x" value="0.68" />
   <property name="table_y" value="0.0" />
   <property name="table_z" value="0.0" />
 
-  <property name="table_top_thickness" value="0.05"/>
+  <property name="table_top_thickness" value="0.02"/>
 
   <property name="M_PI" value="3.1415926535897931" />
 
@@ -44,13 +44,18 @@
           <box size="${table_width} ${table_depth} ${table_top_thickness}" />
         </geometry>
       </collision>
+      <inertial>
+        <mass value="10"/>
+        <inertial ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+      </inertial>
     </link>
     <gazebo reference="table_top_link">
-      <material>Gazebo/Wood</material>
+      <material>Gazebo/Grey</material>
       <mu1>50.0</mu1>
       <mu2>50.0</mu2>
       <kp>1000000.0</kp>
       <kd>1.0</kd>
+      <self_collide>1</self_collide>
     </gazebo>
 
 <!--     <joint name="leg1_joint" type="fixed" >
