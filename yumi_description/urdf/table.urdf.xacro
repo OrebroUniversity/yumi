@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="table" xmlns:xacro="http://www.ros.org/wiki/xacro">
+ <!-- Import table  -->
+  <xacro:include filename="$(find yumi_description)/urdf/yumi_table.urdf.xacro"/>
+
+  <!-- Fix to world just for testing -->
+  <link name="world"/>
+
+  <xacro:yumi_table parent="world" table_height="0.1"/>
+</robot>
