@@ -9,10 +9,29 @@
   <property name="table_y" value="0.0" />
   <property name="table_z" value="0.0" />
 
+  <property name="box_x" value="0.3" />
+  <property name="box_y" value="-0.05" />
+  <property name="box_z" value="0" />
+
+  <property name="box_depth" value="0.075" />
+  <property name="box_height" value="0.12" />
+  <property name="box_width" value="0.021" />
+
   <property name="table_top_thickness" value="0.02"/>
 
   <property name="M_PI" value="3.1415926535897931" />
 
+  <material name="blue">
+    <color rgba="0 0 1 1"/>
+  </material>
+
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
 
   <!-- tabletop height is .55+.01+.025=.585 -->
   <xacro:macro name="yumi_table" params="parent table_height">
@@ -37,6 +56,7 @@
         <geometry>
           <box size="${table_width} ${table_depth} ${table_top_thickness}" />
         </geometry>
+        <material name="black"/>
       </visual> 
       <collision>
         <origin xyz="${table_x} ${table_y} ${table_z+table_height-table_top_thickness/2}" />
@@ -50,6 +70,37 @@
       </inertial>
     </link>
     <gazebo reference="table_top_link">
+      <material>Gazebo/Grey</material>
+      <mu1>50.0</mu1>
+      <mu2>50.0</mu2>
+      <kp>1000000.0</kp>
+      <kd>1.0</kd>
+      <self_collide>1</self_collide>
+    </gazebo>
+
+    <joint name="table_box_joint" type="fixed">
+      <origin xyz="0 0 0" />
+      <parent link="${parent}"/>
+      <child link="boxx"/>
+    </joint>
+
+    <link name="boxx">
+      <inertial>
+        <mass value="1.0" />
+        <origin xyz="${box_x} ${box_y} ${box_z+table_z+table_height+table_top_thickness+box_height/2}" />
+        <inertia ixx="1" ixy="0"  ixz="0"
+         iyy="1" iyz="0"
+         izz="1" />
+       </inertial> 
+       <visual>
+        <origin xyz="${box_x} ${box_y} ${table_height+table_top_thickness+box_height/2-0.02}" />
+        <geometry>
+          <box size="${box_depth} ${box_width} ${box_height}" />
+        </geometry>
+        <material name="white"/>
+      </visual> 
+    </link>
+    <gazebo reference="boxx">
       <material>Gazebo/Grey</material>
       <mu1>50.0</mu1>
       <mu2>50.0</mu2>
