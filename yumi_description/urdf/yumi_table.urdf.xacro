@@ -5,7 +5,7 @@
   <property name="table_width" value="1.2" />
   <property name="table_depth" value="1.4" />
   <property name="leg_radius" value="0.02" />
-  <property name="table_x" value="0.68" />
+  <property name="table_x" value="0.74" />
   <property name="table_y" value="0.0" />
   <property name="table_z" value="0.0" />
 
@@ -13,6 +13,12 @@
 
   <property name="M_PI" value="3.1415926535897931" />
 
+  <material name="blue">
+    <color rgba="0 0 1 1"/>
+  </material>
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
 
   <!-- tabletop height is .55+.01+.025=.585 -->
   <xacro:macro name="yumi_table" params="parent table_height">
@@ -37,6 +43,8 @@
         <geometry>
           <box size="${table_width} ${table_depth} ${table_top_thickness}" />
         </geometry>
+        <material name="black"/>
+
       </visual> 
       <collision>
         <origin xyz="${table_x} ${table_y} ${table_z+table_height-table_top_thickness/2}" />
@@ -201,7 +209,7 @@
       <static>true</static>
       <canonicalBody>table_top_link</canonicalBody>
     </gazebo>
- -->  
+  -->  
 </xacro:macro>
 
 
