@@ -17,7 +17,7 @@
   <!-- Fix to world just for testing -->
   <link name="world"/>
 
-  <xacro:yumi_table parent="world" table_height="0.1"/>
+  <xacro:yumi_table parent="world" table_height="0.125"/>
 
   <!--yumi-->
   <xacro:yumi name="yumi" hardware_interface="$(arg prefix)" parent="world">
