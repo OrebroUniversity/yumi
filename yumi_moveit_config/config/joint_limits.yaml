@@ -3,71 +3,99 @@
 # Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
 joint_limits:
   yumi_joint_1_l:
+    min_position: -2.84
+    max_position: 2.84
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_1_r:
+    min_position: -2.84
+    max_position: 2.84
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_2_l:
+    min_position: -2.4
+    max_position: 0.65
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_2_r:
+    min_position: -2.4
+    max_position: 0.65
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_3_l:
+    min_position: -2
+    max_position: 1.29
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_3_r:
+    min_position: -2
+    max_position: 1.29
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_4_l:
+    min_position: -4.9
+    max_position: 4.9
     has_velocity_limits: true
     max_velocity: 6.98131700798
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_4_r:
+    min_position: -4.9
+    max_position: 4.9
     has_velocity_limits: true
     max_velocity: 6.98131700798
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_5_l:
+    min_position: -1.43
+    max_position: 2.3
     has_velocity_limits: true
     max_velocity: 6.98131700798
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_5_r:
+    min_position: -1.43
+    max_position: 2.3
     has_velocity_limits: true
     max_velocity: 6.98131700798
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_6_l:
+    min_position: -3.89
+    max_position: 3.89
     has_velocity_limits: true
     max_velocity: 6.98131700798
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_6_r:
+    min_position: -3.89
+    max_position: 3.89
     has_velocity_limits: true
     max_velocity: 6.98131700798
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_7_l:
+    min_position: -2.84
+    max_position: 2.84
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false
     max_acceleration: 0
   yumi_joint_7_r:
+    min_position: -2.84
+    max_position: 2.84
     has_velocity_limits: true
     max_velocity: 3.14159265359
     has_acceleration_limits: false

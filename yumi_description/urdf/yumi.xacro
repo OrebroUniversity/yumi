@@ -2,26 +2,24 @@
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
-  <xacro:include filename="$(find yumi_description)/urdf/yumi.gazebo.xacro" />
+  <xacro:include filename="$(find yumi_description)/urdf/Gazebo/yumi.gazebo.xacro" />
   <!-- Import Transmissions -->
   <xacro:include filename="$(find yumi_description)/urdf/yumi.transmission.xacro" />
-  <!-- Include Utilities -->
-  <xacro:include filename="$(find yumi_description)/urdf/utilities.xacro" />
 
   <!-- some constants -->
- <!-- <xacro:property name="safety_controller_k_pos" value="100" />
-  <xacro:property name="safety_controller_k_vel" value="2" /> -->
   <xacro:property name="joint_damping" value="0.5" />
   <xacro:property name="max_effort" value="300"/>
  
   <xacro:macro name="yumi" params="parent name hardware_interface *origin">
 
-    <!--joint between {parent} and body-->
-    <joint name="${parent}_joint" type="fixed">
-      <insert_block name="origin"/>
-      <parent link="${parent}"/>
+    <link name="yumi_base_link"></link>
+
+    <joint name="${name}_base_link_to_body" type="fixed">
+      <parent link="yumi_base_link"/>
       <child link="${name}_body"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
+
 
     <link name="${name}_body">
       <inertial>
@@ -48,6 +46,7 @@
 
     </link>
 
+
    <!--///////////////////////////////////// RIGHT ARM ////////////////////////////////  -->
 
    <!-- joint between body and link_1_r -->
@@ -58,10 +57,6 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
@@ -97,14 +92,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-143.5 * PI / 180}" upper="${43.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_2_r">
+    <link name="${name}_link_2_r">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -128,22 +119,18 @@
       </collision>
     </link>
 
-   <!-- joint between link_2_r and link_3_r -->
-    <joint name="${name}_joint_7_r" type="revolute">
-      <parent link="${name}_link_2_r"/>
-      <child link="${name}_link_3_r"/>
-      <origin xyz="-0.03 0.17283 0.0" rpy="${-PI / 2} 0.0 0.0"/>
-      <axis xyz="0 0 1"/>
-      <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
-             effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
-      <dynamics damping="${joint_damping}"/>
-    </joint>
+     <!-- joint between link_2_r and link_3_r -->
+      <joint name="${name}_joint_7_r" type="revolute">
+        <parent link="${name}_link_2_r"/>
+        <child link="${name}_link_3_r"/>
+        <origin xyz="-0.03 0.17283 0.0" rpy="${-PI / 2} 0.0 0.0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
+               effort="${max_effort}" velocity="${180 * PI / 180}" />
+        <dynamics damping="${joint_damping}"/>
+      </joint>
 
-   <link name="${name}_link_3_r">
+    <link name="${name}_link_3_r">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -167,7 +154,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_3_r and link_4_r -->
+    <!-- joint between link_3_r and link_4_r -->
     <joint name="${name}_joint_3_r" type="revolute">
       <parent link="${name}_link_3_r"/>
       <child link="${name}_link_4_r"/>
@@ -175,14 +162,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-123.5 * PI / 180}" upper="${80 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_4_r">
+    <link name="${name}_link_4_r">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -206,7 +189,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_4_r and link_5_r -->
+    <!-- joint between link_4_r and link_5_r -->
     <joint name="${name}_joint_4_r" type="revolute">
       <parent link="${name}_link_4_r"/>
       <child link="${name}_link_5_r"/>
@@ -214,14 +197,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-290 * PI / 180}" upper="${290 * PI / 180}"
              effort="${max_effort}" velocity="${400 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_5_r">
+    <link name="${name}_link_5_r">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -245,7 +224,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_5_r and link_6_r -->
+    <!-- joint between link_5_r and link_6_r -->
     <joint name="${name}_joint_5_r" type="revolute">
       <parent link="${name}_link_5_r"/>
       <child link="${name}_link_6_r"/>
@@ -253,14 +232,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-88 * PI / 180}" upper="${138 * PI / 180}"
              effort="${max_effort}" velocity="${400 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_6_r">
+    <link name="${name}_link_6_r">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -284,7 +259,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_6_r and link_7_r -->
+    <!-- joint between link_6_r and link_7_r -->
     <joint name="${name}_joint_6_r" type="revolute">
       <parent link="${name}_link_6_r"/>
       <child link="${name}_link_7_r"/>
@@ -292,14 +267,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-229 * PI / 180}" upper="${229 * PI / 180}"
              effort="${max_effort}" velocity="${400 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_7_r">
+    <link name="${name}_link_7_r">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -323,9 +294,12 @@
       </collision>
     </link>
 
-   <!--///////////////////////////////////// LEFT ARM ////////////////////////////////  -->
 
-  <!-- joint between body and link_1_l -->
+
+
+    <!--///////////////////////////////////// LEFT ARM ////////////////////////////////  -->
+
+    <!-- joint between body and link_1_l -->
     <joint name="${name}_joint_1_l" type="revolute">
       <parent link="${name}_body"/>
       <child link="${name}_link_1_l"/>
@@ -333,14 +307,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_1_l">
+    <link name="${name}_link_1_l">
       <inertial>
         <origin xyz="0 -0.03 0.12" rpy="0 0 0"/>
         <mass value="2"/>
@@ -364,7 +334,7 @@
       </collision>
     </link>
 
- <!-- joint between link_1_l and link_2_l -->
+    <!-- joint between link_1_l and link_2_l -->
     <joint name="${name}_joint_2_l" type="revolute">
       <parent link="${name}_link_1_l"/>
       <child link="${name}_link_2_l"/>
@@ -372,14 +342,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-143.5 * PI / 180}" upper="${43.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_2_l">
+    <link name="${name}_link_2_l">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -403,7 +369,7 @@
       </collision>
     </link>
 
- <!-- joint between link_2_l and link_3_l -->
+    <!-- joint between link_2_l and link_3_l -->
     <joint name="${name}_joint_7_l" type="revolute">
       <parent link="${name}_link_2_l"/>
       <child link="${name}_link_3_l"/>
@@ -411,14 +377,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_3_l">
+    <link name="${name}_link_3_l">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -442,7 +404,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_3_l and link_4_l -->
+    <!-- joint between link_3_l and link_4_l -->
     <joint name="${name}_joint_3_l" type="revolute">
       <parent link="${name}_link_3_l"/>
       <child link="${name}_link_4_l"/>
@@ -450,14 +412,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-123.5 * PI / 180}" upper="${80 * PI / 180}"
              effort="${max_effort}" velocity="${180 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_4_l">
+    <link name="${name}_link_4_l">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -481,7 +439,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_4_l and link_5_l -->
+    <!-- joint between link_4_l and link_5_l -->
     <joint name="${name}_joint_4_l" type="revolute">
       <parent link="${name}_link_4_l"/>
       <child link="${name}_link_5_l"/>
@@ -489,14 +447,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-290 * PI / 180}" upper="${290 * PI / 180}"
              effort="${max_effort}" velocity="${400 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_5_l">
+    <link name="${name}_link_5_l">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -520,7 +474,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_5_l and link_6_l -->
+    <!-- joint between link_5_l and link_6_l -->
     <joint name="${name}_joint_5_l" type="revolute">
       <parent link="${name}_link_5_l"/>
       <child link="${name}_link_6_l"/>
@@ -528,14 +482,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-88 * PI / 180}" upper="${138 * PI / 180}"
              effort="${max_effort}" velocity="${400 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_6_l">
+    <link name="${name}_link_6_l">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>
@@ -559,7 +509,7 @@
       </collision>
     </link>
 
-   <!-- joint between link_6_l and link_7_l -->
+    <!-- joint between link_6_l and link_7_l -->
     <joint name="${name}_joint_6_l" type="revolute">
       <parent link="${name}_link_6_l"/>
       <child link="${name}_link_7_l"/>
@@ -567,14 +517,10 @@
       <axis xyz="0 0 1"/>
       <limit lower="${-229 * PI / 180}" upper="${229 * PI / 180}"
              effort="${max_effort}" velocity="${400 * PI / 180}" />
-      <!--   <safety_controller soft_lower_limit="${-168 * M_PI / 180}"
-           soft_upper_limit="${168 * M_PI / 180}"
-           k_position="${safety_controller_k_pos}"
-           k_velocity="${safety_controller_k_vel}"/> -->
       <dynamics damping="${joint_damping}"/>
     </joint>
 
-   <link name="${name}_link_7_l">
+    <link name="${name}_link_7_l">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="2"/>

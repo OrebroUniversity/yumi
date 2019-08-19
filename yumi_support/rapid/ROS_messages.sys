@@ -51,6 +51,16 @@ RECORD ROS_msg_joint_data
     jointtarget joints;  ! in DEGREES
 ENDRECORD
 
+
+RECORD ROS_msg_gripper_target
+    ROS_msg_header header;
+    num sequence_id;
+    num left;  ! in Newton
+    num right;
+    num mode;
+ENDRECORD
+
+
 ! Message Type Codes (from simple_message/simple_message.h)
 CONST num ROS_MSG_TYPE_INVALID       := 0;
 CONST num ROS_MSG_TYPE_JOINT         := 10;  ! joint-position feedback
@@ -69,6 +79,58 @@ CONST num ROS_TRAJECTORY_STOP := -4;
 
 ! Other message constants
 CONST num ROS_MSG_MAX_JOINTS := 10;  ! from joint_data.h
+
+
+CONST num ROS_GRIPPER_REQUEST := 8008;
+CONST num ROS_GRIPPER_STATUS := 8009;
+
+
+
+PROC ROS_receive_msg_gripper_data(VAR socketdev client_socket, VAR ROS_msg_gripper_target message)
+    VAR ROS_msg raw_message;
+    
+    ROS_receive_msg client_socket, raw_message;
+        
+    ! Integrity Check: Message Type
+    IF (raw_message.header.msg_type <> ROS_GRIPPER_REQUEST) THEN
+        ErrWrite \W, "ROS Socket Type Mismatch", "Unexpected message type",
+                \RL2:="expected: " + ValToStr(ROS_MSG_TYPE_JOINT),
+                \RL3:="received: " + ValToStr(raw_message.header.msg_type);
+        RAISE ERR_ARGVALERR;  ! TBD: define specific error code
+    ENDIF
+       
+    ! Copy Header data
+    message.header := raw_message.header;
+    
+    ! Unpack data fields
+    !UnpackRawBytes raw_message.data, 1, message.sequence_id, \IntX:=DINT;
+    UnpackRawBytes raw_message.data, 1, message.left, \Float4;
+    UnpackRawBytes raw_message.data, 5, message.right, \Float4;
+    
+ERROR
+    RAISE;  ! raise errors to calling code
+ENDPROC
+
+PROC ROS_send_msg_gripper_data(VAR socketdev client_socket, ROS_msg_gripper_target message)
+    VAR ROS_msg raw_message;
+    
+    ! Force message header to the correct values
+    raw_message.header.msg_type := ROS_GRIPPER_STATUS;
+    raw_message.header.comm_type := ROS_COM_TYPE_TOPIC;
+    raw_message.header.reply_code := ROS_REPLY_TYPE_INVALID;
+
+    ! Pack data into message
+    PackRawBytes message.sequence_id, raw_message.data,  1, \IntX:=DINT;
+    PackRawBytes message.left,    raw_message.data,  5, \Float4;
+    PackRawBytes message.right,    raw_message.data,  9, \Float4;
+    
+    ROS_send_msg client_socket, raw_message;
+
+ERROR
+    RAISE;  ! raise errors to calling code
+ENDPROC
+
+
 
 PROC ROS_receive_msg_joint_traj_pt(VAR socketdev client_socket, VAR ROS_msg_joint_traj_pt message, \num wait_time)
     VAR ROS_msg raw_message;

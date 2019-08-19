@@ -18,8 +18,8 @@
 #define MSG_TYPE_GRIPPER_COMMAND 8008
 #define MSG_TYPE_GRIPPER_STATE 8009
 
-#define DEFAULT_STATE_PORT 12002
-#define DEFAULT_COMMAND_PORT 12000
+#define DEFAULT_STATE_PORT 13002
+#define DEFAULT_COMMAND_PORT 13000
 
 #define LEFT_GRIPPER 1
 #define RIGHT_GRIPPER 2
@@ -53,28 +53,28 @@ class YumiGripperStateHandler : public industrial::message_handler::MessageHandl
 	    boost::mutex::scoped_lock lock(data_buffer_mutex);
 
 	    bool ret;	    
-	    if(in.getMessageType() != MSG_TYPE_GRIPPER_STATE) {
-		ret = false;
+	    if(in.getMessageType() != MSG_TYPE_GRIPPER_STATE) 
+		{
+			ret = false;
 	    }
 	    else 
 	    {		
-		industrial::byte_array::ByteArray data = in.getData();
-		industrial::shared_types::shared_real value_from_msg;
+			industrial::byte_array::ByteArray data = in.getData();
+			industrial::shared_types::shared_real value_from_msg;
 
-		data.unload(value_from_msg);
-		gripper_positions[0] = value_from_msg; 
-		data.unload(value_from_msg);
-		gripper_positions[1] = value_from_msg;
-
+			data.unload(value_from_msg);
+			gripper_positions[0] = value_from_msg; 
+			data.unload(value_from_msg);
+			gripper_positions[1] = value_from_msg;
 	    }
 	    // Reply back to the controller if the sender requested it.
 	    if (industrial::simple_message::CommTypes::SERVICE_REQUEST == in.getCommType())
 	    {
-		ROS_INFO("Reply requested, sending");
-		industrial::simple_message::SimpleMessage reply;
-		reply.init(MSG_TYPE_GRIPPER_STATE, industrial::simple_message::CommTypes::SERVICE_REPLY, 
-			ret ? industrial::simple_message::ReplyTypes::SUCCESS: industrial::simple_message::ReplyTypes::FAILURE) ;
-		this->getConnection()->sendMsg(reply);
+			ROS_INFO("Reply requested, sending");
+			industrial::simple_message::SimpleMessage reply;
+			reply.init(MSG_TYPE_GRIPPER_STATE, industrial::simple_message::CommTypes::SERVICE_REPLY, 
+				ret ? industrial::simple_message::ReplyTypes::SUCCESS: industrial::simple_message::ReplyTypes::FAILURE) ;
+			this->getConnection()->sendMsg(reply);
 	    }
 
 	    return ret;
@@ -189,7 +189,7 @@ class YumiGripperNode
 	    nh_ = ros::NodeHandle("~");
 
 	    //read in parameters
-	    nh_.param<std::string>("joint_state_topic", gripper_state_topic,"joint_states");
+	    nh_.param<std::string>("joint_state_topic", gripper_state_topic,"gripper_states");
 	    nh_.param<std::string>("grasp_request_topic", grasp_request_topic,"do_grasp");
 	    nh_.param<std::string>("grasp_release_topic", grasp_release_topic,"release_grasp");
 	    nh_.param<double>("publish_period", js_rate, 0.1);
@@ -232,11 +232,13 @@ class YumiGripperNode
 		yumi_hw::YumiGrasp::Response &res ) {
 
 	    float left=0, right=0;
-	    if(req.gripper_id == LEFT_GRIPPER) {
-		left = default_force;
+	    if(req.gripper_id == LEFT_GRIPPER) 
+		{
+			left = default_force;
 	    }
-	    if(req.gripper_id == RIGHT_GRIPPER) {
-		right = default_force;
+	    if(req.gripper_id == RIGHT_GRIPPER) 
+		{
+			right = default_force;
 	    }
 	    gripper_interface.setGripperEfforts(left,right);
 	    return true;
@@ -246,11 +248,13 @@ class YumiGripperNode
 		yumi_hw::YumiGrasp::Response &res ) {
 
 	    float left=0, right=0;
-	    if(req.gripper_id == LEFT_GRIPPER) {
-		left = -default_force;
+	    if(req.gripper_id == LEFT_GRIPPER) 
+		{
+			left = -default_force;
 	    }
-	    if(req.gripper_id == RIGHT_GRIPPER) {
-		right = -default_force;
+	    if(req.gripper_id == RIGHT_GRIPPER) 
+		{
+			right = -default_force;
 	    }
 	    gripper_interface.setGripperEfforts(left,right);
 	    return true;

@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
   simple_message
   message_generation
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -43,6 +44,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  std_srvs
 )
 
 ###################################
@@ -57,7 +59,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message
+  CATKIN_DEPENDS cmake_modules control_toolbox controller_interface controller_manager hardware_interface joint_limits_interface kdl_parser realtime_tools roscpp std_msgs tf transmission_interface urdf simple_message std_srvs
 #  DEPENDS gazebo
 )
 
@@ -87,12 +89,10 @@ add_library(${PROJECT_NAME}
 
 ## Declare a C++ executable
 add_executable(yumi_hw_ifce_node src/yumi_hw_ifce_node.cpp)
-
 add_executable(yumi_gripper_node src/yumi_gripper_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(yumi_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(yumi_gripper_node ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against

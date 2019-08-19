@@ -1,4 +1,4 @@
-MODULE ROS_stateServer
+MODULE ROS_stateServer_right
 
 ! Software License Agreement (BSD License)
 !
